@@ -4,13 +4,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Comment } from '@/lib/schemas/comment-schema';
 import { ColumnDef, ColumnFiltersState, FilterFn, SortingState, VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { ArrowUpDown, CheckCircle2Icon, ChevronDownIcon, ColumnsIcon } from 'lucide-react';
+import { ArrowUpDown, CheckCircle2Icon, ChevronDownIcon, ColumnsIcon, FileTextIcon } from 'lucide-react';
 import * as React from 'react';
 
 dayjs.extend(relativeTime);
@@ -65,7 +64,16 @@ const columns: ColumnDef<Comment>[] = [
             <Badge variant="outline" className="text-muted-foreground flex gap-1 px-1.5 [&_svg]:size-3">
                 {row.original.status === 'reject' && <CheckCircle2Icon className="text-red-500 dark:text-red-400" />}
                 {row.original.status === 'heldForReview' && <CheckCircle2Icon className="text-yellow-500 dark:text-yellow-400" />}
-                {row.original.status}
+                {row.original.status === 'draft' && <FileTextIcon className="text-gray-500 dark:text-gray-400" />}
+                {row.original.status === 'database' && <CheckCircle2Icon className="text-green-500 dark:text-green-400" />}
+                {
+                    {
+                        reject: 'Ditolak',
+                        heldForReview: 'Ditahan untuk Review',
+                        draft: 'Draf',
+                        database: 'Ditambahkan ke Database',
+                    }[row.original.status]
+                }
             </Badge>
         ),
     },
@@ -73,7 +81,6 @@ const columns: ColumnDef<Comment>[] = [
 
 export default function DataTableGambling({ data: initialData }: { data: Comment[] }) {
     const [data, setData] = React.useState(() => initialData);
-    const [tabValue, setTabValue] = React.useState('outline');
     const [globalFilter, setGlobalFilter] = React.useState('');
     const [rowSelection, setRowSelection] = React.useState({});
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -113,8 +120,8 @@ export default function DataTableGambling({ data: initialData }: { data: Comment
     });
 
     return (
-        <Tabs value={tabValue} onValueChange={setTabValue} className="flex w-full flex-col justify-start gap-4">
-            <TabsContent value="outline" className="relative flex flex-col gap-4 overflow-auto">
+        <div className="flex w-full flex-col justify-start gap-4">
+            <div className="relative flex flex-col gap-4 overflow-auto">
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                     <div className="flex w-full gap-2 md:order-2 md:justify-end">
                         <div className="flex-1 md:flex-none">
@@ -180,19 +187,11 @@ export default function DataTableGambling({ data: initialData }: { data: Comment
                 </div>
 
                 <div className="flex items-center justify-between px-4">
-                    <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+                    <div className="text-muted-foreground flex flex-1 text-sm">
                         {table.getFilteredSelectedRowModel().rows.length} dari {table.getFilteredRowModel().rows.length} baris dipilih.
                     </div>
                 </div>
-            </TabsContent>
-
-            <TabsContent value="past-performance" className="flex flex-col">
-                <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
-            </TabsContent>
-
-            <TabsContent value="key-personnel" className="flex flex-col">
-                <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
-            </TabsContent>
-        </Tabs>
+            </div>
+        </div>
     );
 }

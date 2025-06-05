@@ -11,7 +11,7 @@
             "user_id": "UCU0x0w6K46fXKZDPxJe1BxA",
             "profile_url": "https://yt3.ggpht.com/ytc/AIdro_m-GAtBTfKMU7OlYimBZ4mlLdY659FGj2O6KxRK0Kg=s48-c-k-c0x00ffffff-no-rj"
         },
-        "status": "awaiting"
+        "status": "database"
     },
     {
         "comment_id": "UgyZ-47CgO5J_b1ovMt4AaABAg",
@@ -25,7 +25,7 @@
             "user_id": "UCJBOcH2LlHkabBERvyEgVpw",
             "profile_url": "https://yt3.ggpht.com/ytc/AIdro_nJUV-7cBJ8h6vHd9ru9wCaCRZSjvqNawwKhGQLFrY=s48-c-k-c0x00ffffff-no-rj"
         },
-        "status": "awaiting"
+        "status": "draft"
     },
     {
         "comment_id": "Ugy2ZGIQN8Y72frY0EN4AaABAg",
@@ -39,7 +39,7 @@
             "user_id": "UCE9qh9gA4_VTlrRbVka4h9A",
             "profile_url": "https://yt3.ggpht.com/FsIS7JLBuci8vaiWjouaGXmcAV2yyhSQeUvvpOhxz8pQGDh7we_uoO80okntgPmtS9ZjiRHbwYI=s48-c-k-c0x00ffffff-no-rj"
         },
-        "status": "awaiting"
+        "status": "draft"
     },
     {
         "comment_id": "UgyZv-wHyBDYUZRw9d14AaABAg",
@@ -53,7 +53,7 @@
             "user_id": "UCrWnN56nOFqzMxyxhxSh9zg",
             "profile_url": "https://yt3.ggpht.com/ytc/AIdro_nUACqVL_gQIyWKOiGr9utlfejtz8ZcS5v0bGG9OsTm4JRB=s48-c-k-c0x00ffffff-no-rj"
         },
-        "status": "awaiting"
+        "status": "draft"
     },
     {
         "comment_id": "UgyZv-wHyBDYUZRw9d14AaABAg.AGjGdrDEOveAGjJQEpdI1Q",
@@ -68,7 +68,7 @@
             "user_id": "UCfZiZXWNUJpuVSu-gkJZM7Q",
             "profile_url": "https://yt3.ggpht.com/TfQlv0Upl_v1xZlGJDoHJ-0A5X-JBN2DHrkRfEatnhUMA2XFfTTAi-h_sGnFmCfjMbyQMY24rA=s48-c-k-c0x00ffffff-no-rj"
         },
-        "status": "awaiting"
+        "status": "draft"
     },
     {
         "comment_id": "UgyZv-wHyBDYUZRw9d14AaABAg.AGjGdrDEOveAGjJqtSsxzq",
@@ -83,7 +83,7 @@
             "user_id": "UCL2Inav2sxojQTJpXD6N_xw",
             "profile_url": "https://yt3.ggpht.com/5357ohkTVG-CoevBwyoENlPKftVbg1lkxAwgF2AeetqcnVSlUasq3db0-r3VvsdS2QJw71lD=s48-c-k-c0x00ffffff-no-rj"
         },
-        "status": "awaiting"
+        "status": "draft"
     },
     {
         "comment_id": "UgyZv-wHyBDYUZRw9d14AaABAg.AGjGdrDEOveAGjL1HZMUsI",
@@ -98,7 +98,7 @@
             "user_id": "UCNMXG8TO-b_5PECxsFSn1NQ",
             "profile_url": "https://yt3.ggpht.com/ytc/AIdro_mJAQy039bNi9ZU4xMgKDCIJu5zXv6anIgN2JzpBjsOOt0=s48-c-k-c0x00ffffff-no-rj"
         },
-        "status": "awaiting"
+        "status": "draft"
     },
     {
         "comment_id": "UgyZv-wHyBDYUZRw9d14AaABAg.AGjGdrDEOveAGjMWRAc5fB",
@@ -113,6 +113,6 @@
             "user_id": "UCj1V8XBvskSp3D24oYFM5gA",
             "profile_url": "https://yt3.ggpht.com/ctYB-v1mz0HDau0nRfJVBt4g8a0AdELn1s05ewCfvQqbaKntQMf5WAmHS-c4yg15J2CZ4aYZkQ=s48-c-k-c0x00ffffff-no-rj"
         },
-        "status": "awaiting"
+        "status": "draft"
     }
 ]

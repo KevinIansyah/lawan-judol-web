@@ -121,7 +121,7 @@ export function DataTable({ data: initialData }: { data: Analysis[] }) {
         <Tabs value={tabValue} onValueChange={setTabValue} className="flex w-full flex-col justify-start gap-4">
             <TabsContent value="outline" className="relative flex flex-col gap-4 overflow-auto">
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-                    <div className="flex w-full gap-2 md:order-2 md:justify-end">
+                    <div className="flex w-full justify-center gap-2 md:order-2 md:justify-end">
                         <div className="flex-1 md:flex-none">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>

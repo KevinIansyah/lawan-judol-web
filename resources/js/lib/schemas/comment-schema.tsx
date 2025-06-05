@@ -12,7 +12,7 @@ export const CommentSchema = z.object({
         user_id: z.string(),
         profile_url: z.string(),
     }),
-    status: z.enum(['heldForReview', 'reject', 'draft']),
+    status: z.enum(['heldForReview', 'reject', 'draft', 'database']),
     parent_id: z.string().optional(),
 });
 

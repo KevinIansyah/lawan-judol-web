@@ -1,10 +1,10 @@
 // import { ClasificationChart } from '@/components/clasification-chart';
-import Keyword1 from '@/components/keyword';
+import { KeywordActions } from '@/components/keyword/keyword-action';
+import { KeywordList } from '@/components/keyword/keyword-list';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { Comment } from '@/lib/schemas/comment-schema';
-import { Keyword } from '@/lib/schemas/keyword-schema';
-import { type BreadcrumbItem } from '@/types';
+import { Keyword, type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import DataTableGambling from '../../components/data-table-gambling';
 import DataTableNonGambling from '../../components/data-table-non-gambling';
@@ -62,7 +62,17 @@ export default function Dashboard() {
                         <DataTableNonGambling data={dataNonGambling as Comment[]} />
                     </TabsContent>
                     <TabsContent value="keyword">
-                        <Keyword1 data={dataKeyword as Keyword[]} />
+                        <KeywordList
+                            data={dataKeyword as Keyword[]}
+                            ActionButtons={({ onCopy, onReset, onSave, onUpload }) => (
+                                <KeywordActions
+                                    onCopy={onCopy}
+                                    onReset={onReset}
+                                    onSave={onSave}
+                                    onUpload={onUpload}
+                                />
+                            )}
+                        />
                     </TabsContent>
                 </Tabs>
             </div>

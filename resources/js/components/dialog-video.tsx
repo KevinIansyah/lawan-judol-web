@@ -157,7 +157,7 @@ export function DialogVideo() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" onClick={handleModalOpen}>
+                <Button variant="outline" onClick={handleModalOpen} className="w-full">
                     <PlusIcon />
                     <span className="hidden lg:inline">Tambah Analisis</span>
                     <span className="lg:hidden">Analisis</span>
@@ -199,7 +199,7 @@ export function DialogVideo() {
                         </div>
                     ) : (
                         <div className="overflow-y-auto pr-2" style={{ maxHeight: 'calc(80vh - 200px)' }}>
-                            <div className="grid auto-rows-min gap-4 md:grid-cols-4">
+                            <div className="grid auto-rows-min gap-4 md:grid-cols-3 lg:grid-cols-4">
                                 {videos.map((video) => (
                                     <div key={video.video_id} className="relative h-full cursor-pointer rounded-xl" onClick={() => handleVideoSelect(video)}>
                                         <img src={video.thumbnail} alt={video.title} className="h-40 w-full rounded object-cover" />

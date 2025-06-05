@@ -67,3 +67,33 @@ export interface ApiResponse {
     from_cache: boolean;
     message?: string;
 }
+
+export interface Analysis {
+    id: number;
+    title: string;
+    status: 'queued' | 'in_process' | 'failed' | 'done';
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Comment {
+    comment_id: string;
+    text: string;
+    label: 0 | 1;
+    source: string;
+    timestamp: string;
+    is_reply: boolean;
+    user_metadata: {
+        username: string;
+        user_id: string;
+        profile_url: string;
+    };
+    status: 'heldForReview' | 'reject' | 'draft' | 'database';
+    parent_id?: string;
+}
+
+export interface Keyword {
+    id: number;
+    keyword: string;
+    label: 0 | 1;
+}
