@@ -1,5 +1,13 @@
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { ApiResponse, Video } from '@/types';
 import { router } from '@inertiajs/react';
 import { Check, Loader2, Play, PlusIcon, RefreshCw } from 'lucide-react';
@@ -32,7 +40,9 @@ export function DialogVideo() {
                 params.append('refresh', 'true');
             }
 
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const csrfToken = document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute('content');
 
             const response = await fetch(`/api/videos/all?${params.toString()}`, {
                 method: 'GET',
@@ -69,7 +79,8 @@ export function DialogVideo() {
                 setError(data.message || 'Failed to fetch videos');
             }
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Network error. Please try again.';
+            const errorMessage =
+                err instanceof Error ? err.message : 'Network error. Please try again.';
             setError(errorMessage);
             // console.error('Error fetching videos:', err);
         } finally {
@@ -170,7 +181,8 @@ export function DialogVideo() {
                         {/* {getCacheStatusText() && <span className={`text-sm font-normal ${fromCache ? 'text-blue-600' : 'text-green-600'}`}>{getCacheStatusText()}</span>} */}
                     </DialogTitle>
                     <DialogDescription>
-                        Pilih salah satu video YouTube Anda yang ingin dianalisis. Kami akan mendeteksi dan menandai komentar promosi judi online secara otomatis.
+                        Pilih salah satu video YouTube Anda yang ingin dianalisis. Kami akan
+                        mendeteksi dan menandai komentar promosi judi online secara otomatis.
                         {/* {fromCache && <span className="mt-1 block text-xs text-blue-600">Cache akan diperbarui otomatis setelah 24 jam, atau klik tombol Perbarui untuk data terbaru.</span>} */}
                     </DialogDescription>
                 </DialogHeader>
@@ -180,7 +192,9 @@ export function DialogVideo() {
                         <div className="flex flex-col items-center justify-center py-12">
                             <Loader2 className="mb-4 h-8 w-8 animate-spin text-blue-500" />
                             <p className="font-medium">Mengambil video dari YouTube...</p>
-                            <p className="text-muted-foreground mt-1 text-sm">Mohon tunggu, ini mungkin memakan waktu beberapa saat</p>
+                            <p className="text-muted-foreground mt-1 text-sm">
+                                Mohon tunggu, ini mungkin memakan waktu beberapa saat
+                            </p>
                         </div>
                     ) : error ? (
                         <div className="flex flex-col items-center justify-center py-12">
@@ -188,21 +202,38 @@ export function DialogVideo() {
                                 <p className="font-medium">Gagal mengambil video</p>
                                 <p className="mt-1 text-sm">{error}</p>
                             </div>
-                            <Button variant="outline" className="mt-4" onClick={() => fetchVideos()}>
+                            <Button
+                                variant="outline"
+                                className="mt-4"
+                                onClick={() => fetchVideos()}
+                            >
                                 Coba Lagi
                             </Button>
                         </div>
                     ) : videos.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12">
                             <p className="font-medium">Tidak ada video ditemukan</p>
-                            <p className="text-muted-foreground mt-1 text-sm">Pastikan Anda memiliki video di channel YouTube</p>
+                            <p className="text-muted-foreground mt-1 text-sm">
+                                Pastikan Anda memiliki video di channel YouTube
+                            </p>
                         </div>
                     ) : (
-                        <div className="overflow-y-auto pr-2" style={{ maxHeight: 'calc(80vh - 200px)' }}>
+                        <div
+                            className="overflow-y-auto pr-2"
+                            style={{ maxHeight: 'calc(80vh - 200px)' }}
+                        >
                             <div className="grid auto-rows-min gap-4 md:grid-cols-3 lg:grid-cols-4">
                                 {videos.map((video) => (
-                                    <div key={video.video_id} className="relative h-full cursor-pointer rounded-xl" onClick={() => handleVideoSelect(video)}>
-                                        <img src={video.thumbnail} alt={video.title} className="h-40 w-full rounded object-cover" />
+                                    <div
+                                        key={video.video_id}
+                                        className="relative h-full cursor-pointer rounded-xl"
+                                        onClick={() => handleVideoSelect(video)}
+                                    >
+                                        <img
+                                            src={video.thumbnail}
+                                            alt={video.title}
+                                            className="h-40 w-full rounded object-cover"
+                                        />
 
                                         {selectedVideo?.video_id === video.video_id && (
                                             <div className="absolute inset-0 flex h-40 items-center justify-center rounded bg-black/80 text-white">
@@ -212,8 +243,12 @@ export function DialogVideo() {
 
                                         <div className="mt-2 flex items-start gap-2">
                                             <div>
-                                                <p className="line-clamp-2 text-sm font-medium">{video.title}</p>
-                                                <span className="text-muted-foreground text-xs">{formatDate(video.published_at)}</span>
+                                                <p className="line-clamp-2 text-sm font-medium">
+                                                    {video.title}
+                                                </p>
+                                                <span className="text-muted-foreground text-xs">
+                                                    {formatDate(video.published_at)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -225,12 +260,21 @@ export function DialogVideo() {
 
                 <DialogFooter className="border-t pt-4">
                     <div className="flex w-full justify-between">
-                        <Button variant="outline" onClick={handleRefresh} disabled={refreshing || loading} className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={handleRefresh}
+                            disabled={refreshing || loading}
+                            className="flex items-center gap-2"
+                        >
                             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
                             {refreshing ? 'Memperbarui...' : 'Perbarui'}
                         </Button>
 
-                        <Button onClick={handleProceed} disabled={!selectedVideo || loading || refreshing} className="flex items-center gap-2">
+                        <Button
+                            onClick={handleProceed}
+                            disabled={!selectedVideo || loading || refreshing}
+                            className="flex items-center gap-2"
+                        >
                             <Play className="h-4 w-4" />
                             Analisis Video
                         </Button>

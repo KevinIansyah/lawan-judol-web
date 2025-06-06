@@ -1,4 +1,4 @@
-import { ArrowUpFromLine, Copy, RotateCcw, Save } from 'lucide-react';
+import { ArrowUpFromLine, Copy, Filter, RotateCcw, Save } from 'lucide-react';
 import { Button } from '../ui/button';
 
 type KeywordActionsProps = {
@@ -6,9 +6,16 @@ type KeywordActionsProps = {
     onReset?: () => void;
     onSave?: () => void;
     onUpload?: () => void;
+    onFilter?: () => void;
 };
 
-export function KeywordActions({ onCopy, onReset, onSave, onUpload }: KeywordActionsProps) {
+export function KeywordActions({
+    onCopy,
+    onReset,
+    onSave,
+    onUpload,
+    onFilter,
+}: KeywordActionsProps) {
     return (
         <div className="mb-4 flex flex-wrap gap-2">
             {onCopy && (
@@ -33,6 +40,12 @@ export function KeywordActions({ onCopy, onReset, onSave, onUpload }: KeywordAct
                 <Button variant="outline" onClick={onUpload}>
                     Unggah
                     <ArrowUpFromLine className="ml-1 size-4" />
+                </Button>
+            )}
+            {onFilter && (
+                <Button variant="outline" onClick={onUpload}>
+                    Filter
+                    <Filter className="ml-1 size-4" />
                 </Button>
             )}
         </div>

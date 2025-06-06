@@ -1,3 +1,4 @@
+import Heading from '@/components/heading';
 import AppLayout from '@/layouts/app-layout';
 import { Analysis } from '@/lib/schemas/analysis-schema';
 import { type BreadcrumbItem } from '@/types';
@@ -16,7 +17,11 @@ export default function Dashboard() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Public Video" />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col rounded-xl p-4">
+                <Heading
+                    title="Analisis Video Publik"
+                    description="Lihat riwayat analisis video dan mulai analisis baru kapan saja."
+                />
                 <DataTable data={data as Analysis[]} />
             </div>
         </AppLayout>

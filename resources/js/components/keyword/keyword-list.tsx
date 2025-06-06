@@ -10,6 +10,7 @@ type KeywordListProps = {
         onReset: () => void;
         onSave: () => void;
         onUpload: () => void;
+        onFilter: () => void;
     }) => React.ReactNode;
 };
 
@@ -52,6 +53,10 @@ export function KeywordList({ data: initialData, ActionButtons }: KeywordListPro
         // setData(originalData);
     };
 
+    const handleFilter = () => {
+        // setData(originalData);
+    };
+
     return (
         <div className="rounded-xl border p-4">
             <div className="mb-4 flex flex-wrap gap-2">
@@ -60,6 +65,7 @@ export function KeywordList({ data: initialData, ActionButtons }: KeywordListPro
                     onReset: handleReset,
                     onSave: handleSave,
                     onUpload: handleUpload,
+                    onFilter: handleFilter,
                 })}
             </div>
 

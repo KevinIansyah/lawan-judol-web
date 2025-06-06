@@ -1,6 +1,10 @@
+import Heading from '@/components/heading';
+import { KeywordActions } from '@/components/keyword/keyword-action';
+import { KeywordList } from '@/components/keyword/keyword-list';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { Keyword, type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+import dataKeyword from './analysis/data-keyword.json';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -13,7 +17,32 @@ export default function Dashboard() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Keyword" />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4"></div>
+            <div className="flex h-full flex-1 flex-col rounded-xl p-4">
+                <Heading
+                    title="Kamus Kata Kunci"
+                    description={
+                        <>
+                            Filter komentar promosi judi online dengan kata kunci. Pelajari caranya {' '}
+                            <a
+                                href="https://support.google.com/youtube/answer/100178"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary underline"
+                            >
+                                disini!
+                            </a>
+                            .
+                        </>
+                    }
+                />
+
+                <KeywordList
+                    data={dataKeyword as Keyword[]}
+                    ActionButtons={({ onCopy, onReset, onFilter }) => (
+                        <KeywordActions onCopy={onCopy} onReset={onReset} onFilter={onFilter} />
+                    )}
+                />
+            </div>
         </AppLayout>
     );
 }
