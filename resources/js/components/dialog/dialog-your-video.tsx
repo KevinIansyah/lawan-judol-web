@@ -8,12 +8,12 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { ApiResponse, Video } from '@/types';
+import { ApiResponseAllVideos, Video } from '@/types';
 import { router } from '@inertiajs/react';
 import { Check, Loader2, Play, PlusIcon, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
-export function DialogVideo() {
+export function DialogYourVideo() {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [videos, setVideos] = useState<Video[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -44,7 +44,7 @@ export function DialogVideo() {
                 .querySelector('meta[name="csrf-token"]')
                 ?.getAttribute('content');
 
-            const response = await fetch(`/api/videos/all?${params.toString()}`, {
+            const response = await fetch(`/video/all?${params.toString()}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ export function DialogVideo() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data: ApiResponse = await response.json();
+            const data: ApiResponseAllVideos = await response.json();
 
             if (data.success) {
                 setVideos(data.videos);
@@ -82,7 +82,7 @@ export function DialogVideo() {
             const errorMessage =
                 err instanceof Error ? err.message : 'Network error. Please try again.';
             setError(errorMessage);
-            // console.error('Error fetching videos:', err);
+            console.error('Error fetching videos:', err);
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -177,12 +177,11 @@ export function DialogVideo() {
             <DialogContent className="flex max-h-[80vh] flex-col overflow-hidden sm:max-w-[calc(100vw-32px)] xl:max-w-6xl">
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-between">
-                        <span>Pilih Video</span>
+                        <span>Analisis Video</span>
                         {/* {getCacheStatusText() && <span className={`text-sm font-normal ${fromCache ? 'text-blue-600' : 'text-green-600'}`}>{getCacheStatusText()}</span>} */}
                     </DialogTitle>
                     <DialogDescription>
-                        Pilih salah satu video YouTube Anda yang ingin dianalisis. Kami akan
-                        mendeteksi dan menandai komentar promosi judi online secara otomatis.
+                        Pilih video YouTube Anda yang ingin dianalisis.
                         {/* {fromCache && <span className="mt-1 block text-xs text-blue-600">Cache akan diperbarui otomatis setelah 24 jam, atau klik tombol Perbarui untuk data terbaru.</span>} */}
                     </DialogDescription>
                 </DialogHeader>

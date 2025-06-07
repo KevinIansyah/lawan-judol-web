@@ -17,6 +17,48 @@ class VideoController extends Controller
     }
 
     /**
+     * Get video (JSON response)
+     */
+    public function getVideo(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user->google_token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Google belum terhubung. Silakan login ulang.',
+                'video' => [],
+                'total' => 0,
+            ], 401);
+        }
+
+        $videoId = $request->video_id;
+
+        try {
+            $result = $this->youtubeService->getVideoById(
+                $user->id,
+                $user->google_token,
+                $videoId
+            );
+
+            if ($result['success']) {
+                Log::info("Successfully returned video: {$result['video']['title']} for user: {$user->id}");
+            }
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            Log::error("Error in getVideo for user {$user->id}: " . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil video. Silakan coba lagi.',
+                'video' => [],
+                'total' => 0,
+            ], 500);
+        }
+    }
+
+    /**
      * Get all user videos (JSON response)
      */
     public function getAllVideos(Request $request)
@@ -98,7 +140,7 @@ class VideoController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Cache cleared successfully'
+           'message' => 'Cache berhasil dibersihkan'
         ]);
     }
 

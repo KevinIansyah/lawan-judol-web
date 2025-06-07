@@ -114,5 +114,9 @@
         },
         "jsx": "react-jsx"
     },
-    "include": ["resources/js/**/*.ts", "resources/js/**/*.tsx", "resources/js/components/dialog-video.tsx"]
+    "include": [
+        "resources/js/**/*.ts",
+        "resources/js/**/*.tsx",
+        "resources/js/components/dialog/dialog-your-video.tsx"
+    ]
 }

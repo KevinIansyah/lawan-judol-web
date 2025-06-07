@@ -13,6 +13,72 @@ class YouTubeService
   private $cacheHours = 24;
 
   /**
+   * Get video by id
+   */
+  public function getVideoById($userId, $accessToken, $videoId)
+  {
+    try {
+      $response = Http::withHeaders([
+        'Authorization' => 'Bearer ' . $accessToken,
+      ])->get($this->baseUrl . '/videos', [
+        'part' => 'id,snippet,contentDetails,statistics',
+        'id' => $videoId,
+      ]);
+
+      if (!$response->successful()) {
+        return [
+          'success' => false,
+          'message' => 'Gagal mengambil data video.',
+          'video' => [],
+          'total' => 0,
+        ];
+      }
+
+      $items = $response['items'];
+
+      if (empty($items)) {
+        return [
+          'success' => false,
+          'message' => 'Video tidak ditemukan.',
+          'video' => [],
+          'total' => 0,
+        ];
+      }
+
+      $video = $items[0];
+      $snippet = $video['snippet'];
+
+      $result = [
+        'success' => true,
+        'message' => 'Video berhasil diambil.',
+        'video' => [
+          'video_id' => $video['id'],
+          'title' => $snippet['title'],
+          'description' => $snippet['description'],
+          'thumbnail' => $snippet['thumbnails']['medium']['url'] ?? $snippet['thumbnails']['default']['url'],
+          'published_at' => $snippet['publishedAt'],
+          'channel_title' => $snippet['channelTitle'],
+          'youtube_url' => 'https://www.youtube.com/watch?v=' . $video['id'],
+        ],
+        'total' => 1,
+      ];
+
+      Log::info("Fetched video: {$result['video']['title']} from channel: {$result['video']['channel_title']}");
+
+      return $result;
+    } catch (\Exception $e) {
+      Log::error("Error fetching video: " . $e->getMessage());
+
+      return [
+        'success' => false,
+        'message' => 'Terjadi kesalahan saat mengambil video: ' . $e->getMessage(),
+        'video' => [],
+        'total' => 0,
+      ];
+    }
+  }
+
+  /**
    * Get user's channel info
    */
   public function getUserChannel($accessToken)
@@ -52,7 +118,7 @@ class YouTubeService
       if (!$channelData || empty($channelData['items'])) {
         return [
           'success' => false,
-          'message' => 'Channel not found or no access',
+          'message' => 'Channel tidak ditemukan atau tidak memiliki akses.',
           'videos' => [],
           'total' => 0,
           'from_cache' => false
@@ -118,7 +184,7 @@ class YouTubeService
 
       $result = [
         'success' => true,
-        'message' => 'Videos fetched successfully',
+        'message' => 'Data video berhasil diambil',
         'videos' => $allVideos,
         'total' => count($allVideos),
         'channel_info' => [
@@ -144,7 +210,7 @@ class YouTubeService
 
       return [
         'success' => false,
-        'message' => 'Error fetching videos: ' . $e->getMessage(),
+        'message' => 'Terjadi kesalahan saat mengambil video: ' . $e->getMessage(),
         'videos' => [],
         'total' => 0,
         'from_cache' => false

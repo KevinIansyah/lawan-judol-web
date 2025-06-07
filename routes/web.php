@@ -41,11 +41,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         })->name('your-video.detail');
     });
 
-    // API endpoint untuk video
-    Route::get('/api/videos/all', [VideoController::class, 'getAllVideos'])->name('api.videos.all');
-    Route::post('/api/videos/clear-cache', [VideoController::class, 'clearCache'])->name('api.videos.clear-cache');
+    Route::prefix('video')->group(function () {
+        Route::get('/', [VideoController::class, 'getVideo'])->name('video');
+        Route::get('/all', [VideoController::class, 'getAllVideos'])->name('video.all');
+        Route::post('/clear-cache', [VideoController::class, 'clearCache'])->name('video.clear-cache');
+    });
 
-    // Route untuk halaman analisis (setelah pilih video)
     Route::get('/analysis/{videoId}', [AnalysisController::class, 'show'])->name('analysis.show');
 });
 

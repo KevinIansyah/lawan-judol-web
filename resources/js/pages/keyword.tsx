@@ -29,7 +29,7 @@ export default function Dashboard() {
                                 rel="noopener noreferrer"
                                 className="text-primary underline"
                             >
-                                disini!
+                                di sini!
                             </a>
                             .
                         </>

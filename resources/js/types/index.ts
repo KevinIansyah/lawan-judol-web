@@ -60,11 +60,17 @@ export interface ChannelInfo {
     video_count: number;
 }
 
-export interface ApiResponse {
+export interface ApiResponseAllVideos {
     success: boolean;
     videos: Video[];
     channel_info: ChannelInfo;
     from_cache: boolean;
+    message?: string;
+}
+
+export interface ApiResponseVideo {
+    success: boolean;
+    videos: Video[];
     message?: string;
 }
 

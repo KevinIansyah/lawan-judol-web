@@ -55,7 +55,8 @@ import {
     MoreVerticalIcon,
 } from 'lucide-react';
 import { useState } from 'react';
-import { DialogVideo } from './dialog-video';
+import { DialogPublicVideo } from './dialog/dialog-public-video';
+import { DialogYourVideo } from './dialog/dialog-your-video';
 
 const columns: ColumnDef<Analysis>[] = [
     {
@@ -214,7 +215,8 @@ export function DataTable({ data: initialData }: { data: Analysis[] }) {
                         </div>
 
                         <div className="flex-1 md:flex-none">
-                            {url === '/analysis/your-video' && <DialogVideo />}
+                            {url.startsWith('/analysis/your-video') && <DialogYourVideo />}
+                            {url.startsWith('/analysis/public-video') && <DialogPublicVideo />}
                         </div>
                     </div>
 
