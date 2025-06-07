@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -11,21 +12,68 @@ class YouTubeService
 {
   private $baseUrl = 'https://www.googleapis.com/youtube/v3';
   private $cacheHours = 24;
+  protected $googleService;
+
+  public function __construct(GoogleService $googleService)
+  {
+    $this->googleService = $googleService;
+  }
+
+  /**
+   * Fetch video
+   */
+  private function fetchVideo(string $accessToken, string $videoId)
+  {
+    return Http::withHeaders([
+      'Authorization' => 'Bearer ' . $accessToken,
+    ])->get($this->baseUrl . '/videos', [
+      'part' => 'id,snippet,contentDetails,statistics',
+      'id' => $videoId,
+    ]);
+  }
 
   /**
    * Get video by id
    */
-  public function getVideoById($userId, $accessToken, $videoId)
+  public function getVideoById(User $user, $videoId)
   {
     try {
-      $response = Http::withHeaders([
-        'Authorization' => 'Bearer ' . $accessToken,
-      ])->get($this->baseUrl . '/videos', [
-        'part' => 'id,snippet,contentDetails,statistics',
-        'id' => $videoId,
-      ]);
+      $response = $this->fetchVideo($user->google_token, $videoId);
 
-      if (!$response->successful()) {
+      if ($response->status() === 401) {
+        Log::warning("Access token expired or unauthorized. Attempting to refresh token for user ID {$user->id}.");
+
+        $refreshResult = $this->googleService->refreshAccessToken($user->google_refresh_token, $user);
+
+        if (!$refreshResult['success']) {
+          Log::error("Failed to refresh access token for user ID {$user->id}.");
+
+          return [
+            'success' => false,
+            'message' => 'Token sudah tidak valid, silakan login ulang.',
+            'video' => [],
+            'total' => 0,
+          ];
+        }
+
+        $newGoogleToken = $refreshResult['google_token'];
+        Log::info("Successfully refreshed access token for user ID {$user->id}. Retrying video fetch.");
+
+        $response = $this->fetchVideo($newGoogleToken, $videoId);
+
+        if (!$response->successful()) {
+          Log::error("Failed to fetch video after token refresh for user ID {$user->id}.");
+
+          return [
+            'success' => false,
+            'message' => 'Gagal mengambil data video setelah refresh token, silahkan login ulang.',
+            'video' => [],
+            'total' => 0,
+          ];
+        }
+      } elseif (!$response->successful()) {
+        Log::error("Video fetch failed with status {$response->status()} for user ID {$user->id}.");
+
         return [
           'success' => false,
           'message' => 'Gagal mengambil data video.',

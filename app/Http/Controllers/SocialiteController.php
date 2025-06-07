@@ -3,14 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\GoogleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialiteController extends Controller
 {
+    protected $googleService;
+
+    public function __construct(GoogleService $googleService)
+    {
+        $this->googleService = $googleService;
+    }
+
     public function redirect()
     {
         return Socialite::driver('google')
@@ -18,6 +27,9 @@ class SocialiteController extends Controller
                 'email',
                 'profile',
                 'https://www.googleapis.com/auth/youtube.force-ssl'
+            ])->with([
+                'access_type' => 'offline',
+                'prompt' => 'consent', // wajib agar refresh_token dikirim ulang
             ])
             ->redirect();
     }
@@ -26,29 +38,7 @@ class SocialiteController extends Controller
     {
         $googleUser = Socialite::driver('google')->user();
 
-        $user = User::where('google_id', $googleUser->id)
-            ->orWhere('email', $googleUser->email)
-            ->first();
-
-        if ($user) {
-            $user->update([
-                'google_id' => $googleUser->id,
-                'google_token' => $googleUser->token,
-                'google_refresh_token' => $googleUser->refreshToken,
-                'avatar' => $googleUser->avatar,
-            ]);
-        } else {
-            $user = User::create([
-                'name' => $googleUser->name,
-                'email' => $googleUser->email,
-                'google_id' => $googleUser->id,
-                'google_token' => $googleUser->token,
-                'google_refresh_token' => $googleUser->refreshToken,
-                'avatar' => $googleUser->avatar,
-                'role' => 'user',
-                // 'password' => Hash::make(Str::random(16))
-            ]);
-        }
+        $user = $this->googleService->findOrCreateUser($googleUser);
 
         Auth::login($user);
 

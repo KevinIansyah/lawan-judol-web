@@ -16,11 +16,12 @@ import { useState } from 'react';
 
 export function DialogPublicVideo() {
     const [videoId, setVideoId] = useState<string>('');
-    const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [loadingVideoCheck, setLoadingVideoCheck] = useState(false);
+    // const [loadingComments, setLoadingComments] = useState(false);
 
     const handleProceed = (): void => {
-        setLoading(true);
+        setLoadingVideoCheck(true);
         fetchVideo();
     };
 
@@ -53,6 +54,7 @@ export function DialogPublicVideo() {
                 console.log(data);
             } else {
                 setError(data.message || 'Failed to fetch videos');
+                console.log(error);
             }
         } catch (err) {
             const errorMessage =
@@ -60,7 +62,7 @@ export function DialogPublicVideo() {
             setError(errorMessage);
             console.error('Error fetching videos:', err);
         } finally {
-            setLoading(false);
+            setLoadingVideoCheck(false);
         }
     };
 
@@ -93,7 +95,7 @@ export function DialogPublicVideo() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4">
-                        {loading ? (
+                        {loadingVideoCheck ? (
                             <div className="flex flex-col items-center justify-center py-12">
                                 <Loader2 className="mb-4 h-8 w-8 animate-spin text-blue-500" />
 
@@ -107,14 +109,14 @@ export function DialogPublicVideo() {
                         ) : error ? (
                             <div className="flex flex-col items-center justify-center py-12">
                                 <div className="text-center text-red-500">
-                                    <p className="font-medium">Gagal mengambil video</p>
+                                    <p className="font-medium">Terjadi kesalahan</p>
                                     <p className="mt-1 text-sm">{error}</p>
                                 </div>
                                 <Button
                                     variant="outline"
                                     className="mt-4"
                                     onClick={() => {
-                                        setLoading(false);
+                                        setLoadingVideoCheck(false);
                                         setError(null);
                                         setVideoId('');
                                     }}
@@ -138,7 +140,7 @@ export function DialogPublicVideo() {
                     <DialogFooter>
                         <Button
                             onClick={handleProceed}
-                            disabled={!videoId.trim() || loading || !!error}
+                            disabled={!videoId.trim() || loadingVideoCheck || !!error}
                             className="flex items-center gap-2"
                         >
                             <Play className="h-4 w-4" />

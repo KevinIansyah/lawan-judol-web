@@ -36,8 +36,7 @@ class VideoController extends Controller
 
         try {
             $result = $this->youtubeService->getVideoById(
-                $user->id,
-                $user->google_token,
+                $user,
                 $videoId
             );
 
@@ -140,7 +139,7 @@ class VideoController extends Controller
 
         return response()->json([
             'success' => true,
-           'message' => 'Cache berhasil dibersihkan'
+            'message' => 'Cache berhasil dibersihkan'
         ]);
     }
 

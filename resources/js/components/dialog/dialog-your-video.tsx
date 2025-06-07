@@ -190,15 +190,17 @@ export function DialogYourVideo() {
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-12">
                             <Loader2 className="mb-4 h-8 w-8 animate-spin text-blue-500" />
-                            <p className="font-medium">Mengambil video dari YouTube...</p>
-                            <p className="text-muted-foreground mt-1 text-sm">
+                            <p className="text-center font-medium">
+                                Mengambil video dari YouTube...
+                            </p>
+                            <p className="text-muted-foreground mt-1 text-center text-sm">
                                 Mohon tunggu, ini mungkin memakan waktu beberapa saat
                             </p>
                         </div>
                     ) : error ? (
                         <div className="flex flex-col items-center justify-center py-12">
                             <div className="text-center text-red-500">
-                                <p className="font-medium">Gagal mengambil video</p>
+                                <p className="font-medium">Terjadi kesalahan</p>
                                 <p className="mt-1 text-sm">{error}</p>
                             </div>
                             <Button
