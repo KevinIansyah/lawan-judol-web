@@ -25,7 +25,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Analysis } from '@/lib/schemas/analysis-schema';
+import { Analysis } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
@@ -58,6 +58,15 @@ import { useState } from 'react';
 import { DialogPublicVideo } from './dialog/dialog-public-video';
 import { DialogYourVideo } from './dialog/dialog-your-video';
 
+const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+};
+
 const columns: ColumnDef<Analysis>[] = [
     {
         accessorKey: 'title',
@@ -68,6 +77,35 @@ const columns: ColumnDef<Analysis>[] = [
         enableHiding: false,
     },
     {
+        accessorKey: 'channel',
+        header: 'Channel',
+        cell: ({ row }) => {
+            return (
+                <div className="text-foreground text-left">{row.original.video.channel_title}</div>
+            );
+        },
+    },
+    {
+        accessorKey: 'komentar utama',
+        header: 'Komentar Utama',
+        cell: ({ row }) => {
+            return (
+                <div className="text-foreground text-left">{row.original.video.comments_total}</div>
+            );
+        },
+    },
+    {
+        accessorKey: 'tanggal analisis',
+        header: 'Tanggal Analisis',
+        cell: ({ row }) => {
+            return (
+                <div className="text-foreground text-left">
+                    {formatDate(row.original.created_at)}
+                </div>
+            );
+        },
+    },
+    {
         accessorKey: 'status',
         header: 'Status',
         cell: ({ row }) => (
@@ -75,36 +113,29 @@ const columns: ColumnDef<Analysis>[] = [
                 variant="outline"
                 className="text-muted-foreground flex gap-1 px-1.5 [&_svg]:size-3"
             >
-                {row.original.status === 'done' && (
+                {row.original.status === 'success' && (
                     <CheckCircle2Icon className="text-green-500 dark:text-green-400" />
                 )}
-                {row.original.status === 'in_process' && (
+                {row.original.status === 'on_process' && (
                     <LoaderIcon className="animate-spin text-yellow-500 dark:text-yellow-400" />
                 )}
                 {row.original.status === 'failed' && (
                     <CircleX className="text-red-500 dark:text-red-400" />
                 )}
-                {row.original.status === 'queued' && (
+                {row.original.status === 'queue' && (
                     <LoaderIcon className="text-muted-foreground" />
                 )}
                 {
                     {
-                        done: 'Selesai',
-                        in_process: 'Sedang Diproses',
+                        success: 'Selesai',
+                        on_process: 'Sedang Diproses',
                         failed: 'Gagal',
-                        queued: 'Antrian',
+                        queue: 'Antrian',
                     }[row.original.status]
                 }
             </Badge>
         ),
     },
-    // {
-    //     accessorKey: 'reviewer',
-    //     header: 'Peninjau',
-    //     cell: ({ row }) => {
-    //         return <div className="text-foreground text-left">{row.original.reviewer}</div>;
-    //     },
-    // },
     {
         id: 'actions',
         cell: () => (
@@ -132,8 +163,15 @@ const columns: ColumnDef<Analysis>[] = [
     },
 ];
 
-export function DataTable({ data: initialData }: { data: Analysis[] }) {
-    const [data, setData] = useState(() => initialData);
+type DataTableProps = {
+    data: Analysis[];
+    pageIndex?: number;
+    setPageIndex?: React.Dispatch<React.SetStateAction<number>>;
+    totalPages?: number;
+};
+
+export function DataTable({ data, pageIndex, setPageIndex, totalPages }: DataTableProps) {
+    // const [data, setData] = useState(() => initialData);
     const [globalFilter, setGlobalFilter] = useState('');
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -143,14 +181,16 @@ export function DataTable({ data: initialData }: { data: Analysis[] }) {
         pageSize: 10,
     });
     const { url } = usePage();
-    const multiColumnFilter: FilterFn<Analysis> = (row, columnId, value) => {
+    const multiColumnFilter: FilterFn<Analysis> = (row, _columnId, value) => {
         const search = String(value).toLowerCase();
-        return ['header', 'status'].some((key) =>
-            String(row.getValue(key) || '')
-                .toLowerCase()
-                .includes(search),
-        );
+
+        const title = row.original.video.title?.toLowerCase() || '';
+        const channel = row.original.video.channel_title?.toLowerCase() || '';
+        const status = row.original.status?.toLowerCase() || '';
+
+        return title.includes(search) || channel.includes(search) || status.includes(search);
     };
+
     const table = useReactTable({
         data,
         columns,
@@ -221,7 +261,7 @@ export function DataTable({ data: initialData }: { data: Analysis[] }) {
                     </div>
 
                     <Input
-                        placeholder="Cari header atau status..."
+                        placeholder="Cari judul, channel, atau status..."
                         value={globalFilter}
                         onChange={(event) => setGlobalFilter(event.target.value)}
                         className="max-w-sm md:order-1"

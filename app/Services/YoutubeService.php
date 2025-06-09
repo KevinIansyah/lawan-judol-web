@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class YouTubeService
 {
@@ -19,22 +20,16 @@ class YouTubeService
     $this->googleService = $googleService;
   }
 
-  /**
-   * Fetch video
-   */
-  private function fetchVideo(string $accessToken, string $videoId)
+  private function fetchVideo(string $googleToken, string $videoId)
   {
     return Http::withHeaders([
-      'Authorization' => 'Bearer ' . $accessToken,
+      'Authorization' => 'Bearer ' . $googleToken,
     ])->get($this->baseUrl . '/videos', [
       'part' => 'id,snippet,contentDetails,statistics',
       'id' => $videoId,
     ]);
   }
 
-  /**
-   * Get video by id
-   */
   public function getVideoById(User $user, $videoId)
   {
     try {
@@ -43,7 +38,7 @@ class YouTubeService
       if ($response->status() === 401) {
         Log::warning("Access token expired or unauthorized. Attempting to refresh token for user ID {$user->id}.");
 
-        $refreshResult = $this->googleService->refreshAccessToken($user->google_refresh_token, $user);
+        $refreshResult = $this->googleService->refreshGoogleToken($user->google_refresh_token, $user);
 
         if (!$refreshResult['success']) {
           Log::error("Failed to refresh access token for user ID {$user->id}.");
@@ -51,7 +46,7 @@ class YouTubeService
           return [
             'success' => false,
             'message' => 'Token sudah tidak valid, silakan login ulang.',
-            'video' => [],
+            'video' => null,
             'total' => 0,
           ];
         }
@@ -67,7 +62,7 @@ class YouTubeService
           return [
             'success' => false,
             'message' => 'Gagal mengambil data video setelah refresh token, silahkan login ulang.',
-            'video' => [],
+            'video' => null,
             'total' => 0,
           ];
         }
@@ -77,7 +72,7 @@ class YouTubeService
         return [
           'success' => false,
           'message' => 'Gagal mengambil data video.',
-          'video' => [],
+          'video' => null,
           'total' => 0,
         ];
       }
@@ -88,24 +83,24 @@ class YouTubeService
         return [
           'success' => false,
           'message' => 'Video tidak ditemukan.',
-          'video' => [],
+          'video' => null,
           'total' => 0,
         ];
       }
 
       $video = $items[0];
-      $snippet = $video['snippet'];
+      Log::info('Video item detail: ' . json_encode($video));
 
       $result = [
         'success' => true,
         'message' => 'Video berhasil diambil.',
         'video' => [
           'video_id' => $video['id'],
-          'title' => $snippet['title'],
-          'description' => $snippet['description'],
-          'thumbnail' => $snippet['thumbnails']['medium']['url'] ?? $snippet['thumbnails']['default']['url'],
-          'published_at' => $snippet['publishedAt'],
-          'channel_title' => $snippet['channelTitle'],
+          'title' => $video['snippet']['title'],
+          'description' => $video['snippet']['description'] ?? '',
+          'thumbnail' => $video['snippet']['thumbnails']['medium']['url'] ?? $video['snippet']['thumbnails']['default']['url'],
+          'published_at' => $video['snippet']['publishedAt'],
+          'channel_title' => $video['snippet']['channelTitle'],
           'youtube_url' => 'https://www.youtube.com/watch?v=' . $video['id'],
         ],
         'total' => 1,
@@ -120,19 +115,16 @@ class YouTubeService
       return [
         'success' => false,
         'message' => 'Terjadi kesalahan saat mengambil video: ' . $e->getMessage(),
-        'video' => [],
+        'video' => null,
         'total' => 0,
       ];
     }
   }
 
-  /**
-   * Get user's channel info
-   */
-  public function getUserChannel($accessToken)
+  public function getUserChannel(User $user)
   {
     $response = Http::withHeaders([
-      'Authorization' => 'Bearer ' . $accessToken,
+      'Authorization' => 'Bearer ' . $user->google_token,
     ])->get($this->baseUrl . '/channels', [
       'part' => 'id,snippet,contentDetails,statistics',
       'mine' => 'true'
@@ -141,27 +133,38 @@ class YouTubeService
     return $response->successful() ? $response->json() : null;
   }
 
-  /**
-   * Get ALL user's videos with caching (24 hours)
-   */
-  public function getAllUserVideos($userId, $accessToken, $forceRefresh = false)
+  private function fetchUserVideos(string $googleToken, string $uploadsPlaylistId, ?string $nextPageToken = null)
   {
-    $cacheKey = "user_videos_{$userId}";
+    $params = [
+      'part' => 'snippet,contentDetails',
+      'playlistId' => $uploadsPlaylistId,
+      'maxResults' => 50,
+    ];
 
-    // Check cache first (unless force refresh)
+    if ($nextPageToken) {
+      $params['pageToken'] = $nextPageToken;
+    }
+
+    return Http::withHeaders([
+      'Authorization' => 'Bearer ' . $googleToken,
+    ])->timeout(30)->get($this->baseUrl . '/playlistItems', $params);
+  }
+
+  public function getUserVideos(User $user, $forceRefresh = false)
+  {
+    $cacheKey = "user_videos_{$user->id}";
+
     if (!$forceRefresh && Cache::has($cacheKey)) {
       $cachedData = Cache::get($cacheKey);
-      Log::info("Returning cached videos for user: {$userId}");
+      Log::info("Returning cached videos for user: {$user->id}");
 
-      // Add flag to indicate data is from cache
       $cachedData['from_cache'] = true;
 
       return $cachedData;
     }
 
     try {
-      // Get channel info first
-      $channelData = $this->getUserChannel($accessToken);
+      $channelData = $this->getUserChannel($user);
 
       if (!$channelData || empty($channelData['items'])) {
         return [
@@ -169,6 +172,7 @@ class YouTubeService
           'message' => 'Channel tidak ditemukan atau tidak memiliki akses.',
           'videos' => [],
           'total' => 0,
+          'channel_info' => null,
           'from_cache' => false
         ];
       }
@@ -176,44 +180,35 @@ class YouTubeService
       $channel = $channelData['items'][0];
       $uploadsPlaylistId = $channel['contentDetails']['relatedPlaylists']['uploads'];
 
-      // Get all videos with pagination
       $allVideos = [];
       $nextPageToken = null;
       $requestCount = 0;
-      $maxRequests = 20; // Safety limit to prevent infinite loop
+      $videoCount = 0;
+      $maxRequests = 20;
 
-      Log::info("Starting to fetch all videos from YouTube API for user: {$userId}");
+      Log::info("Starting to fetch all videos from YouTube API for user: {$user->id}");
 
       do {
-        $params = [
-          'part' => 'snippet,contentDetails',
-          'playlistId' => $uploadsPlaylistId,
-          'maxResults' => 50,
-        ];
-
-        if ($nextPageToken) {
-          $params['pageToken'] = $nextPageToken;
-        }
-
-        $response = Http::withHeaders([
-          'Authorization' => 'Bearer ' . $accessToken,
-        ])->timeout(30)->get($this->baseUrl . '/playlistItems', $params);
+        $response = $this->fetchUserVideos($user->google_token, $uploadsPlaylistId, $nextPageToken);
 
         if ($response->successful()) {
           $data = $response->json();
           $videos = $data['items'] ?? [];
 
-          // Process and clean video data
           foreach ($videos as $video) {
+            $snippet = $video['snippet'] ?? [];
+
             $allVideos[] = [
-              'video_id' => $video['snippet']['resourceId']['videoId'],
-              'title' => $video['snippet']['title'],
-              'description' => $video['snippet']['description'],
-              'thumbnail' => $video['snippet']['thumbnails']['medium']['url'] ?? $video['snippet']['thumbnails']['default']['url'],
-              'published_at' => $video['snippet']['publishedAt'],
-              'channel_title' => $video['snippet']['channelTitle'],
-              'youtube_url' => 'https://www.youtube.com/watch?v=' . $video['snippet']['resourceId']['videoId']
+              'video_id' => $snippet['resourceId']['videoId'],
+              'title' => $snippet['title'],
+              'description' => $snippet['description'] ?? '',
+              'thumbnail' => $snippet['thumbnails']['medium']['url'] ?? $snippet['thumbnails']['default']['url'],
+              'published_at' => $snippet['publishedAt'],
+              'channel_title' => $snippet['channelTitle'],
+              'youtube_url' => 'https://www.youtube.com/watch?v=' . $snippet['resourceId']['videoId']
             ];
+
+            $videoCount++;
           }
 
           $nextPageToken = $data['nextPageToken'] ?? null;
@@ -221,36 +216,36 @@ class YouTubeService
 
           Log::info("Fetched batch {$requestCount}, got " . count($videos) . " videos");
 
-          // Small delay to avoid rate limiting
-          usleep(100000); // 0.1 second
-
+          usleep(100000);
         } else {
           Log::error("YouTube API error: " . $response->body());
           break;
         }
       } while ($nextPageToken && $requestCount < $maxRequests);
 
+      $snippet = $channel['snippet'] ?? [];
+      $statistics = $channel['statistics'] ?? [];
+
       $result = [
         'success' => true,
         'message' => 'Data video berhasil diambil',
         'videos' => $allVideos,
-        'total' => count($allVideos),
+        'total' => $videoCount,
         'channel_info' => [
-          'title' => $channel['snippet']['title'],
-          'description' => $channel['snippet']['description'],
-          'subscriber_count' => $channel['statistics']['subscriberCount'] ?? 0,
-          'video_count' => $channel['statistics']['videoCount'] ?? 0,
-          'view_count' => $channel['statistics']['viewCount'] ?? 0
+          'title' => $snippet['title'],
+          'description' => $snippet['description'] ?? '',
+          'subscriber_count' => $statistics['subscriberCount'] ?? 0,
+          'video_count' => $statistics['videoCount'] ?? 0,
+          'view_count' => $statistics['viewCount'] ?? 0
         ],
         'cached_at' => now()->toISOString(),
         'requests_made' => $requestCount,
         'from_cache' => false
       ];
 
-      // Cache for 24 hours
       Cache::put($cacheKey, $result, now()->addHours($this->cacheHours));
 
-      Log::info("Successfully fetched and cached {$result['total']} videos for user: {$userId} for {$this->cacheHours} hours");
+      Log::info("Successfully fetched and cached {$result['total']} videos for user: {$user->id} for {$this->cacheHours} hours");
 
       return $result;
     } catch (\Exception $e) {
@@ -261,7 +256,102 @@ class YouTubeService
         'message' => 'Terjadi kesalahan saat mengambil video: ' . $e->getMessage(),
         'videos' => [],
         'total' => 0,
+        'channel_info' => null,
         'from_cache' => false
+      ];
+    }
+  }
+
+  private function fetchComments(string $googleToken, string $videoId, ?string $nextPageToken = null)
+  {
+    $params = [
+      'part' => 'snippet',
+      'videoId' => $videoId,
+      'maxResults' => 100,
+    ];
+
+    if ($nextPageToken) {
+      $params['pageToken'] = $nextPageToken;
+    }
+
+    return Http::withHeaders([
+      'Authorization' => 'Bearer ' . $googleToken,
+    ])->timeout(30)->get($this->baseUrl . '/commentThreads', $params);
+  }
+
+  public function getCommentsByVideoId(User $user, $videoId)
+  {
+    try {
+      $allComments = [];
+      $nextPageToken = null;
+      $requestCount = 0;
+      $commentCount = 0;
+
+      Log::info("Starting to fetch all comments from YouTube API for video: {$videoId} for user: {$user->id}");
+
+      do {
+        $response = $this->fetchComments($user->google_token, $videoId, $nextPageToken);
+
+        if ($response->successful()) {
+          $data = $response->json();
+          $comments = $data['items'] ?? [];
+
+          foreach ($comments as $comment) {
+            $topLevelComment = $comment['snippet']['topLevelComment'] ?? [];
+            $snippet = $topLevelComment['snippet'] ?? [];
+
+            $allComments[] = [
+              'comment_id' => $topLevelComment['id'],
+              'text' => $snippet['textDisplay'],
+              'label' => 0,
+              'source' => "Video: {$videoId}",
+              'timestamp' => $snippet['publishedAt'],
+              'user_metadata' => [
+                'username' => $snippet['authorDisplayName'],
+                'user_id' => $snippet['authorChannelId']['value'],
+                'profile_url' => $snippet['authorProfileImageUrl'],
+              ],
+              'status' => 'draft',
+            ];
+
+            $commentCount++;
+          }
+
+          $nextPageToken = $data['nextPageToken'] ?? null;
+          $requestCount++;
+
+          Log::info("Fetched batch {$requestCount}, got " . $commentCount . " comments");
+
+          usleep(100000);
+        } else {
+          Log::error("YouTube API error: " . $response->body());
+          break;
+        }
+      } while ($nextPageToken);
+
+      $timestamp = Carbon::now()->format('Ymd_His');
+      $filename = "comments/{$user->id}_{$videoId}_{$timestamp}.json";
+      Storage::disk('public')->put($filename, json_encode($allComments, JSON_PRETTY_PRINT));
+
+      $result = [
+        'success' => true,
+        'message' => 'Data komentar berhasil diambil',
+        'comments' => $filename,
+        'total' => $commentCount,
+        'requests_made' => $requestCount,
+      ];
+
+      Log::info("Successfully fetched {$result['total']} comments for video: {$videoId} and for user: {$user->id}");
+
+      return $result;
+    } catch (\Exception $e) {
+      Log::error("Error fetching comment " . $e->getMessage());
+
+      return [
+        'success' => false,
+        'message' => 'Terjadi kesalahan saat mengambil komentar: ' . $e->getMessage(),
+        'comments' => '',
+        'total' => 0,
       ];
     }
   }
@@ -269,12 +359,12 @@ class YouTubeService
   /**
    * Clear user videos cache
    */
-  public function clearUserVideosCache($userId)
+  public function clearUserVideosCache(User $user)
   {
-    $cacheKey = "user_videos_{$userId}";
+    $cacheKey = "user_videos_{$user->id}";
     Cache::forget($cacheKey);
 
-    Log::info("Cleared video cache for user: {$userId}");
+    Log::info("Cleared video cache for user: {$user->id}");
 
     return true;
   }
@@ -282,18 +372,18 @@ class YouTubeService
   /**
    * Check if user videos are cached and still valid
    */
-  public function isVideosCached($userId)
+  public function isVideosCached(User $user)
   {
-    $cacheKey = "user_videos_{$userId}";
+    $cacheKey = "user_videos_{$user->id}";
     return Cache::has($cacheKey);
   }
 
   /**
    * Get cache expiry time for user videos
    */
-  public function getCacheExpiry($userId)
+  public function getCacheExpiry(User $user)
   {
-    $cacheKey = "user_videos_{$userId}";
+    $cacheKey = "user_videos_{$user->id}";
 
     if (!Cache::has($cacheKey)) {
       return null;
@@ -319,9 +409,9 @@ class YouTubeService
   /**
    * Check if cache has expired (for debugging)
    */
-  public function isCacheExpired($userId)
+  public function isCacheExpired(User $user)
   {
-    $cacheInfo = $this->getCacheExpiry($userId);
+    $cacheInfo = $this->getCacheExpiry($user->id);
 
     if (!$cacheInfo) {
       return true; // No cache means expired

@@ -43,7 +43,7 @@ class GoogleService
   /**
    * Refresh the Google API access token using the refresh token.
    */
-  public function refreshAccessToken(string $refreshToken, User $user)
+  public function refreshGoogleToken(string $refreshToken, User $user)
   {
     $clientId = config('services.google.client_id');
     $clientSecret = config('services.google.client_secret');

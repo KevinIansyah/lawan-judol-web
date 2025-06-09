@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PublicVideoController;
 use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -24,9 +26,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::prefix('analysis')->group(function () {
-        Route::get('/public-video', function () {
-            return Inertia::render('analysis/public-video');
-        })->name('public-video');
+        Route::resource('public-video', PublicVideoController::class);
+        // Route::get('/public-video', function () {
+        //     return Inertia::render('analysis/public-video');
+        // })->name('public-video');
 
         Route::get('/public-video/detail', function () {
             return Inertia::render('analysis/detail');
@@ -43,11 +46,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('video')->group(function () {
         Route::get('/', [VideoController::class, 'getVideo'])->name('video');
-        Route::get('/all', [VideoController::class, 'getAllVideos'])->name('video.all');
+        Route::get('/all', [VideoController::class, 'getVideos'])->name('video.all');
+        Route::get('/comment', [VideoController::class, 'getComments'])->name('video.all');
         Route::post('/clear-cache', [VideoController::class, 'clearCache'])->name('video.clear-cache');
     });
 
-    Route::get('/analysis/{videoId}', [AnalysisController::class, 'show'])->name('analysis.show');
+    Route::resource('analysis', AnalysisController::class);
 });
 
 

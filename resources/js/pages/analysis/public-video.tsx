@@ -1,10 +1,10 @@
 import Heading from '@/components/heading';
 import AppLayout from '@/layouts/app-layout';
-import { Analysis } from '@/lib/schemas/analysis-schema';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+
+import { Analysis, Paginator, type BreadcrumbItem } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import { DataTable } from '../../components/data-table-analysis';
-import data from './data-analysis.json';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -13,7 +13,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Dashboard() {
+export default function PublicVideo() {
+    const { props } = usePage<{ analyses: Paginator<Analysis> }>();
+    const { data, current_page, last_page } = props.analyses;
+    const [pageIndex, setPageIndex] = useState(current_page - 1);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Public Video" />
@@ -22,7 +26,12 @@ export default function Dashboard() {
                     title="Analisis Video Publik"
                     description="Lihat riwayat analisis video dan mulai analisis baru kapan saja."
                 />
-                <DataTable data={data as Analysis[]} />
+                <DataTable
+                    data={data}
+                    pageIndex={pageIndex}
+                    setPageIndex={setPageIndex}
+                    totalPages={last_page}
+                />
             </div>
         </AppLayout>
     );

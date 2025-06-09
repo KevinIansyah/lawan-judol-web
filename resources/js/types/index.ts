@@ -46,13 +46,26 @@ export interface Payment {
     email: string;
 }
 
+export interface Keyword {
+    id: number;
+    keyword: string;
+    label: 0 | 1;
+}
+
 export interface Video {
     video_id: string;
     title: string;
-    channel_title: string;
-    description: string | null;
+    description: string;
     thumbnail: string;
     published_at: string;
+    channel_title: string;
+    youtube_url: string;
+}
+
+export interface ApiResponseVideo {
+    success: boolean;
+    video: Video | null;
+    message?: string;
 }
 
 export interface ChannelInfo {
@@ -60,26 +73,12 @@ export interface ChannelInfo {
     video_count: number;
 }
 
-export interface ApiResponseAllVideos {
+export interface ApiResponseVideos {
     success: boolean;
     videos: Video[];
-    channel_info: ChannelInfo;
+    channel_info: ChannelInfo | null;
     from_cache: boolean;
     message?: string;
-}
-
-export interface ApiResponseVideo {
-    success: boolean;
-    videos: Video[];
-    message?: string;
-}
-
-export interface Analysis {
-    id: number;
-    title: string;
-    status: 'queued' | 'in_process' | 'failed' | 'done';
-    created_at: string;
-    updated_at: string;
 }
 
 export interface Comment {
@@ -88,18 +87,63 @@ export interface Comment {
     label: 0 | 1;
     source: string;
     timestamp: string;
-    is_reply: boolean;
     user_metadata: {
         username: string;
         user_id: string;
         profile_url: string;
     };
     status: 'heldForReview' | 'reject' | 'draft' | 'database';
-    parent_id?: string;
 }
 
-export interface Keyword {
+export interface ApiResponseComment {
+    success: boolean;
+    comments: string;
+    message?: string;
+    total: number;
+}
+
+export interface MergedVideoData {
+    video_id: string;
+    title: string;
+    description: string;
+    published_at: string;
+    thumbnail: string;
+    channel_title: string;
+    youtube_url: string;
+    comments_path: string;
+    comments_total: number;
+}
+
+export interface Analysis {
     id: number;
-    keyword: string;
-    label: 0 | 1;
+    user_id: number;
+    video: MergedVideoData;
+    status: 'queue' | 'on_process' | 'failed' | 'success';
+    type: 'public' | 'your';
+    gambling_file_path: string | null;
+    nongambling_file_path: string | null;
+    keyword_file_path: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ApiResponseAnalysis {
+    success: boolean;
+    analysis: Analysis;
+    message: string;
+}
+
+export interface Paginator<T> {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    prev_page_url: string | null;
+    next_page_url: string | null;
+    path: string;
+    first_page_url: string;
+    last_page_url: string;
 }

@@ -8,7 +8,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { ApiResponseAllVideos, Video } from '@/types';
+import { ApiResponseVideos, Video } from '@/types';
 import { router } from '@inertiajs/react';
 import { Check, Loader2, Play, PlusIcon, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
@@ -24,7 +24,6 @@ export function DialogYourVideo() {
     // const [fromCache, setFromCache] = useState<boolean>(false);
     const [hasInitialLoad, setHasInitialLoad] = useState<boolean>(false);
 
-    // Fetch videos when modal opens
     const fetchVideos = async (forceRefresh: boolean = false): Promise<void> => {
         if (forceRefresh) {
             setRefreshing(true);
@@ -58,7 +57,7 @@ export function DialogYourVideo() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data: ApiResponseAllVideos = await response.json();
+            const data: ApiResponseVideos = await response.json();
 
             if (data.success) {
                 setVideos(data.videos);
@@ -89,11 +88,9 @@ export function DialogYourVideo() {
         }
     };
 
-    // Handle modal open
     const handleModalOpen = (): void => {
         setIsOpen(true);
 
-        // Always fetch on first open, or if we don't have videos yet
         if (!hasInitialLoad || videos.length === 0) {
             console.log('First time opening dialog or no videos cached, fetching from API...');
             fetchVideos();
@@ -102,15 +99,13 @@ export function DialogYourVideo() {
         }
     };
 
-    // Handle video selection
     const handleVideoSelect = (video: Video): void => {
         setSelectedVideo(video);
+        console.log(selectedVideo);
     };
 
-    // Handle proceed with selected video
     const handleProceed = (): void => {
         if (selectedVideo) {
-            // Navigate to analysis page with selected video
             router.visit(`/analysis/${selectedVideo.video_id}`, {
                 method: 'get',
                 data: {
@@ -125,13 +120,11 @@ export function DialogYourVideo() {
         }
     };
 
-    // Handle refresh button click
     const handleRefresh = (): void => {
         console.log('Manual refresh requested, fetching fresh data from YouTube API...');
         fetchVideos(true);
     };
 
-    // Format date
     const formatDate = (dateString: string): string => {
         return new Date(dateString).toLocaleDateString('id-ID', {
             year: 'numeric',
@@ -140,7 +133,6 @@ export function DialogYourVideo() {
         });
     };
 
-    // Format numbers
     // const formatNumber = (num: number | undefined): string => {
     //     if (!num) return '0';
 
@@ -153,7 +145,6 @@ export function DialogYourVideo() {
     //     return num.toString();
     // };
 
-    // Get cache status text
     // const getCacheStatusText = (): string => {
     //     if (loading || refreshing) return '';
     //     if (!hasInitialLoad) return '';
