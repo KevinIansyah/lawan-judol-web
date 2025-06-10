@@ -261,7 +261,7 @@ export function DialogPublicVideo() {
                         <div className="flex flex-1 items-center overflow-hidden">
                             <div className="flex w-full flex-col items-center justify-center">
                                 <div className="text-center text-red-500">
-                                    <p className="font-medium">Terjadi kesalahan</p>
+                                    <p className="font-semibold">Terjadi kesalahan</p>
                                     <p className="mt-1 text-sm">{error}</p>
                                 </div>
                                 <Button

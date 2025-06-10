@@ -52,6 +52,56 @@ export interface Keyword {
     label: 0 | 1;
 }
 
+// export interface Video {
+//     video_id: string;
+//     title: string;
+//     description: string;
+//     thumbnail: string;
+//     published_at: string;
+//     channel_title: string;
+//     youtube_url: string;
+// }
+
+// export interface ApiResponseVideo {
+//     success: boolean;
+//     video: Video | null;
+//     message?: string;
+// }
+
+// export interface ChannelInfo {
+//     subscriber_count: number;
+//     video_count: number;
+// }
+
+// export interface ApiResponseVideos {
+//     success: boolean;
+//     videos: Video[];
+//     channel_info: ChannelInfo | null;
+//     from_cache: boolean;
+//     message?: string;
+// }
+
+// export interface Comment {
+//     comment_id: string;
+//     text: string;
+//     label: 0 | 1;
+//     source: string;
+//     timestamp: string;
+//     user_metadata: {
+//         username: string;
+//         user_id: string;
+//         profile_url: string;
+//     };
+//     status: 'heldForReview' | 'reject' | 'draft' | 'database';
+// }
+
+// export interface ApiResponseComment {
+//     success: boolean;
+//     comments: string;
+//     message?: string;
+//     total: number;
+// }
+
 export interface Video {
     video_id: string;
     title: string;
@@ -62,21 +112,30 @@ export interface Video {
     youtube_url: string;
 }
 
+// ✅ DIPERBAIKI: Tambahkan total field
 export interface ApiResponseVideo {
     success: boolean;
     video: Video | null;
+    total: number; // ← TAMBAHKAN INI
     message?: string;
 }
 
 export interface ChannelInfo {
+    title: string; // ← TAMBAHKAN INI (dari PHP response)
+    description: string; // ← TAMBAHKAN INI
     subscriber_count: number;
     video_count: number;
+    view_count: number; // ← TAMBAHKAN INI
 }
 
+// ✅ DIPERBAIKI: Tambahkan total field
 export interface ApiResponseVideos {
     success: boolean;
     videos: Video[];
+    total: number; // ← TAMBAHKAN INI
     channel_info: ChannelInfo | null;
+    cached_at?: string; // ← TAMBAHKAN INI (optional)
+    requests_made?: number; // ← TAMBAHKAN INI (optional)
     from_cache: boolean;
     message?: string;
 }
@@ -89,17 +148,19 @@ export interface Comment {
     timestamp: string;
     user_metadata: {
         username: string;
-        user_id: string;
+        user_id: string | null; // ← UBAH ke nullable (dari PHP bisa null)
         profile_url: string;
     };
     status: 'heldForReview' | 'reject' | 'draft' | 'database';
 }
 
+// ✅ SUDAH ADA total field - tidak perlu diubah
 export interface ApiResponseComment {
     success: boolean;
     comments: string;
-    message?: string;
     total: number;
+    requests_made?: number; // ← TAMBAHKAN INI (optional)
+    message?: string;
 }
 
 export interface MergedVideoData {

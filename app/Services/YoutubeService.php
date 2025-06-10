@@ -20,6 +20,91 @@ class YouTubeService
     $this->googleService = $googleService;
   }
 
+  private function handleTokenRefresh(User $user, $initialResponse, callable $retryCallback)
+  {
+    if ($initialResponse->status() === 401) {
+      Log::warning("Google token expired or unauthorized. Attempting to refresh token for user ID {$user->id}.");
+
+      if (empty($user->google_refresh_token)) {
+        Log::error("No refresh token available for user ID {$user->id}.");
+        return [
+          'success' => false,
+          'response' => null,
+          'message' => 'Refresh token tidak tersedia, silakan login ulang.'
+        ];
+      }
+
+      $refreshResult = $this->googleService->refreshGoogleToken($user->google_refresh_token, $user);
+
+      if (!$refreshResult['success']) {
+        Log::error("Failed to refresh google token for user ID {$user->id}.");
+        return [
+          'success' => false,
+          'response' => null,
+          'message' => 'Token sudah tidak valid, silakan login ulang.'
+        ];
+      }
+
+      $user->google_token = $refreshResult['google_token'];
+      Log::info("Successfully refreshed google token for user ID {$user->id}. Retrying request.");
+
+      $retryResponse = $retryCallback($user->google_token);
+
+      if (!$retryResponse->successful()) {
+        Log::error("Failed to fetch data after token refresh for user ID {$user->id}.");
+        return [
+          'success' => false,
+          'response' => null,
+          'message' => 'Gagal mengambil data setelah refresh token, silahkan login ulang.'
+        ];
+      }
+
+      return [
+        'success' => true,
+        'response' => $retryResponse,
+        'message' => 'Request berhasil setelah refresh token.'
+      ];
+    }
+
+    return [
+      'success' => $initialResponse->successful(),
+      'response' => $initialResponse,
+      'message' => $initialResponse->successful() ? 'Request berhasil.' : 'Request gagal.'
+    ];
+  }
+
+  private function videoErrorResponse(string $message)
+  {
+    return [
+      'success' => false,
+      'message' => $message,
+      'video' => null,
+      'total' => 0,
+    ];
+  }
+
+  private function userVideosErrorResponse(string $message)
+  {
+    return [
+      'success' => false,
+      'message' => $message,
+      'videos' => [],
+      'total' => 0,
+      'channel_info' => null,
+      'from_cache' => false,
+    ];
+  }
+
+  private function commentsErrorResponse(string $message): array
+  {
+    return [
+      'success' => false,
+      'message' => $message,
+      'comments' => '',
+      'total' => 0,
+    ];
+  }
+
   private function fetchVideo(string $googleToken, string $videoId)
   {
     return Http::withHeaders([
@@ -30,66 +115,87 @@ class YouTubeService
     ]);
   }
 
+  private function fetchUserChannel(string $googleToken)
+  {
+    return Http::withHeaders([
+      'Authorization' => 'Bearer ' . $googleToken,
+    ])->get($this->baseUrl . '/channels', [
+      'part' => 'id,snippet,contentDetails,statistics',
+      'mine' => 'true'
+    ]);
+  }
+
+  private function fetchUserVideos(string $googleToken, string $uploadsPlaylistId, ?string $nextPageToken = null)
+  {
+    $params = [
+      'part' => 'snippet,contentDetails',
+      'playlistId' => $uploadsPlaylistId,
+      'maxResults' => 50,
+    ];
+
+    if ($nextPageToken) {
+      $params['pageToken'] = $nextPageToken;
+    }
+
+    return Http::withHeaders([
+      'Authorization' => 'Bearer ' . $googleToken,
+    ])->timeout(30)->get($this->baseUrl . '/playlistItems', $params);
+  }
+
+  private function fetchComments(string $googleToken, string $videoId, ?string $nextPageToken = null)
+  {
+    $params = [
+      'part' => 'snippet',
+      'videoId' => $videoId,
+      'maxResults' => 100,
+    ];
+
+    if ($nextPageToken) {
+      $params['pageToken'] = $nextPageToken;
+    }
+
+    return Http::withHeaders([
+      'Authorization' => 'Bearer ' . $googleToken,
+    ])->timeout(30)->get($this->baseUrl . '/commentThreads', $params);
+  }
+
   public function getVideoById(User $user, $videoId)
   {
     try {
-      $response = $this->fetchVideo($user->google_token, $videoId);
+      $initialResponse = $this->fetchVideo($user->google_token, $videoId);
 
-      if ($response->status() === 401) {
-        Log::warning("Access token expired or unauthorized. Attempting to refresh token for user ID {$user->id}.");
+      $tokenResult = $this->handleTokenRefresh($user, $initialResponse, function ($token) use ($videoId) {
+        return $this->fetchVideo($token, $videoId);
+      });
 
-        $refreshResult = $this->googleService->refreshGoogleToken($user->google_refresh_token, $user);
+      if (!$tokenResult['success']) {
+        return $this->videoErrorResponse($tokenResult['message']);
+      }
 
-        if (!$refreshResult['success']) {
-          Log::error("Failed to refresh access token for user ID {$user->id}.");
+      $response = $tokenResult['response'];
 
-          return [
-            'success' => false,
-            'message' => 'Token sudah tidak valid, silakan login ulang.',
-            'video' => null,
-            'total' => 0,
-          ];
+      if (!$response->successful()) {
+        $errorBody = $response->json();
+        $reason = $errorBody['error']['errors'][0]['reason'] ?? null;
+
+        if ($reason === 'quotaExceeded') {
+          Log::critical("YouTube API quota exceeded for user ID {$user->id}. Cannot continue.");
+
+          return $this->videoErrorResponse('Kuota YouTube API telah habis. Silakan coba lagi besok.');
         }
 
-        $newGoogleToken = $refreshResult['google_token'];
-        Log::info("Successfully refreshed access token for user ID {$user->id}. Retrying video fetch.");
-
-        $response = $this->fetchVideo($newGoogleToken, $videoId);
-
-        if (!$response->successful()) {
-          Log::error("Failed to fetch video after token refresh for user ID {$user->id}.");
-
-          return [
-            'success' => false,
-            'message' => 'Gagal mengambil data video setelah refresh token, silahkan login ulang.',
-            'video' => null,
-            'total' => 0,
-          ];
-        }
-      } elseif (!$response->successful()) {
         Log::error("Video fetch failed with status {$response->status()} for user ID {$user->id}.");
 
-        return [
-          'success' => false,
-          'message' => 'Gagal mengambil data video.',
-          'video' => null,
-          'total' => 0,
-        ];
+        return $this->videoErrorResponse('Gagal mengambil data video.');
       }
 
       $items = $response['items'];
 
       if (empty($items)) {
-        return [
-          'success' => false,
-          'message' => 'Video tidak ditemukan.',
-          'video' => null,
-          'total' => 0,
-        ];
+        return $this->videoErrorResponse('Video tidak ditemukan.');
       }
 
       $video = $items[0];
-      Log::info('Video item detail: ' . json_encode($video));
 
       $result = [
         'success' => true,
@@ -112,42 +218,23 @@ class YouTubeService
     } catch (\Exception $e) {
       Log::error("Error fetching video: " . $e->getMessage());
 
-      return [
-        'success' => false,
-        'message' => 'Terjadi kesalahan saat mengambil video: ' . $e->getMessage(),
-        'video' => null,
-        'total' => 0,
-      ];
+      return $this->videoErrorResponse('Terjadi kesalahan saat mengambil video: ' . $e->getMessage());
     }
   }
 
   public function getUserChannel(User $user)
   {
-    $response = Http::withHeaders([
-      'Authorization' => 'Bearer ' . $user->google_token,
-    ])->get($this->baseUrl . '/channels', [
-      'part' => 'id,snippet,contentDetails,statistics',
-      'mine' => 'true'
-    ]);
+    $initialResponse = $this->fetchUserChannel($user->google_token);
 
-    return $response->successful() ? $response->json() : null;
-  }
+    $tokenResult = $this->handleTokenRefresh($user, $initialResponse, function ($token) {
+      return $this->fetchUserChannel($token);
+    });
 
-  private function fetchUserVideos(string $googleToken, string $uploadsPlaylistId, ?string $nextPageToken = null)
-  {
-    $params = [
-      'part' => 'snippet,contentDetails',
-      'playlistId' => $uploadsPlaylistId,
-      'maxResults' => 50,
-    ];
-
-    if ($nextPageToken) {
-      $params['pageToken'] = $nextPageToken;
+    if (!$tokenResult['success']) {
+      return null;
     }
 
-    return Http::withHeaders([
-      'Authorization' => 'Bearer ' . $googleToken,
-    ])->timeout(30)->get($this->baseUrl . '/playlistItems', $params);
+    return $tokenResult['response']->json();
   }
 
   public function getUserVideos(User $user, $forceRefresh = false)
@@ -166,15 +253,15 @@ class YouTubeService
     try {
       $channelData = $this->getUserChannel($user);
 
+      $reason = $channelData['error']['errors'][0]['reason'] ?? null;
+      if ($reason === 'quotaExceeded') {
+        Log::critical("YouTube API quota exceeded for user ID {$user->id}. Cannot continue.");
+
+        return $this->userVideosErrorResponse('Kuota YouTube API telah habis. Silakan coba lagi besok.');
+      }
+
       if (!$channelData || empty($channelData['items'])) {
-        return [
-          'success' => false,
-          'message' => 'Channel tidak ditemukan atau tidak memiliki akses.',
-          'videos' => [],
-          'total' => 0,
-          'channel_info' => null,
-          'from_cache' => false
-        ];
+        return $this->userVideosErrorResponse('Channel tidak ditemukan atau tidak memiliki akses.');
       }
 
       $channel = $channelData['items'][0];
@@ -185,11 +272,28 @@ class YouTubeService
       $requestCount = 0;
       $videoCount = 0;
       $maxRequests = 20;
+      $tokenRefreshed = false;
 
       Log::info("Starting to fetch all videos from YouTube API for user: {$user->id}");
 
       do {
-        $response = $this->fetchUserVideos($user->google_token, $uploadsPlaylistId, $nextPageToken);
+        $initialResponse = $this->fetchUserVideos($user->google_token, $uploadsPlaylistId, $nextPageToken);
+
+        if (!$tokenRefreshed && $initialResponse->status() === 401) {
+          $tokenResult = $this->handleTokenRefresh($user, $initialResponse, function ($token) use ($uploadsPlaylistId, $nextPageToken) {
+            return $this->fetchUserVideos($token, $uploadsPlaylistId, $nextPageToken);
+          });
+
+          if (!$tokenResult['success']) {
+            Log::error("Failed to refresh token while fetching comments for user ID {$user->id}.");
+            return $this->commentsErrorResponse($tokenResult['message']);
+          }
+
+          $response = $tokenResult['response'];
+          $tokenRefreshed = true;
+        } else {
+          $response = $initialResponse;
+        }
 
         if ($response->successful()) {
           $data = $response->json();
@@ -218,8 +322,14 @@ class YouTubeService
 
           usleep(100000);
         } else {
-          Log::error("YouTube API error: " . $response->body());
-          break;
+          $errorBody = $response->json();
+          $reason = $errorBody['error']['errors'][0]['reason'] ?? '';
+
+          if ($reason === 'quotaExceeded') {
+            Log::critical("YouTube API quota exceeded for user ID {$user->id}. Cannot continue.");
+
+            return $this->userVideosErrorResponse('Kuota YouTube API telah habis. Silakan coba lagi besok.');
+          }
         }
       } while ($nextPageToken && $requestCount < $maxRequests);
 
@@ -251,32 +361,8 @@ class YouTubeService
     } catch (\Exception $e) {
       Log::error("Error fetching user videos: " . $e->getMessage());
 
-      return [
-        'success' => false,
-        'message' => 'Terjadi kesalahan saat mengambil video: ' . $e->getMessage(),
-        'videos' => [],
-        'total' => 0,
-        'channel_info' => null,
-        'from_cache' => false
-      ];
+      return $this->userVideosErrorResponse('Terjadi kesalahan saat mengambil video: ' . $e->getMessage());
     }
-  }
-
-  private function fetchComments(string $googleToken, string $videoId, ?string $nextPageToken = null)
-  {
-    $params = [
-      'part' => 'snippet',
-      'videoId' => $videoId,
-      'maxResults' => 100,
-    ];
-
-    if ($nextPageToken) {
-      $params['pageToken'] = $nextPageToken;
-    }
-
-    return Http::withHeaders([
-      'Authorization' => 'Bearer ' . $googleToken,
-    ])->timeout(30)->get($this->baseUrl . '/commentThreads', $params);
   }
 
   public function getCommentsByVideoId(User $user, $videoId)
@@ -286,15 +372,39 @@ class YouTubeService
       $nextPageToken = null;
       $requestCount = 0;
       $commentCount = 0;
+      $tokenRefreshed = false;
 
       Log::info("Starting to fetch all comments from YouTube API for video: {$videoId} for user: {$user->id}");
 
       do {
-        $response = $this->fetchComments($user->google_token, $videoId, $nextPageToken);
+        $initialResponse = $this->fetchComments($user->google_token, $videoId, $nextPageToken);
+
+        if (!$tokenRefreshed && $initialResponse->status() === 401) {
+          $tokenResult = $this->handleTokenRefresh($user, $initialResponse, function ($token) use ($videoId, $nextPageToken) {
+            return $this->fetchComments($token, $videoId, $nextPageToken);
+          });
+
+          if (!$tokenResult['success']) {
+            Log::error("Failed to refresh token while fetching comments for user ID {$user->id}.");
+
+            return $this->commentsErrorResponse($tokenResult['message']);
+          }
+
+          $response = $tokenResult['response'];
+          $tokenRefreshed = true;
+        } else {
+          $response = $initialResponse;
+        }
 
         if ($response->successful()) {
           $data = $response->json();
           $comments = $data['items'] ?? [];
+
+          if (empty($comments) && $requestCount === 0) {
+            Log::info("Video ID {$videoId} has no comments for user ID {$user->id}.");
+
+            return $this->commentsErrorResponse('Video tidak memiliki komentar.');
+          }
 
           foreach ($comments as $comment) {
             $topLevelComment = $comment['snippet']['topLevelComment'] ?? [];
@@ -308,7 +418,7 @@ class YouTubeService
               'timestamp' => $snippet['publishedAt'],
               'user_metadata' => [
                 'username' => $snippet['authorDisplayName'],
-                'user_id' => $snippet['authorChannelId']['value'],
+                'user_id' => $snippet['authorChannelId']['value'] ?? null,
                 'profile_url' => $snippet['authorProfileImageUrl'],
               ],
               'status' => 'draft',
@@ -320,12 +430,28 @@ class YouTubeService
           $nextPageToken = $data['nextPageToken'] ?? null;
           $requestCount++;
 
-          Log::info("Fetched batch {$requestCount}, got " . $commentCount . " comments");
+          Log::info("Fetched batch {$requestCount}, got " . count($comments) . " comments");
 
           usleep(100000);
         } else {
+          $errorBody = $response->json();
+          $reason = $errorBody['error']['errors'][0]['reason'] ?? null;
+
+          if ($reason === 'quotaExceeded') {
+            Log::critical("YouTube API quota exceeded for user ID {$user->id}. Cannot continue.");
+
+            return $this->commentsErrorResponse('Kuota YouTube API telah habis. Silakan coba lagi besok.');
+          }
+
+          if ($reason === 'commentsDisabled') {
+            Log::warning("Comments are disabled for video ID {$videoId} by user ID {$user->id}.");
+
+            return $this->commentsErrorResponse('Komentar dinonaktifkan pada video ini.');
+          }
+
           Log::error("YouTube API error: " . $response->body());
-          break;
+
+          return $this->commentsErrorResponse('Terjadi kesalahan saat mengambil komentar.');
         }
       } while ($nextPageToken);
 
@@ -347,12 +473,7 @@ class YouTubeService
     } catch (\Exception $e) {
       Log::error("Error fetching comment " . $e->getMessage());
 
-      return [
-        'success' => false,
-        'message' => 'Terjadi kesalahan saat mengambil komentar: ' . $e->getMessage(),
-        'comments' => '',
-        'total' => 0,
-      ];
+      return $this->commentsErrorResponse('Terjadi kesalahan saat mengambil komentar: ' . $e->getMessage());
     }
   }
 
