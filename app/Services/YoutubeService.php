@@ -286,7 +286,7 @@ class YouTubeService
 
           if (!$tokenResult['success']) {
             Log::error("Failed to refresh token while fetching comments for user ID {$user->id}.");
-            return $this->commentsErrorResponse($tokenResult['message']);
+            return $this->videoErrorResponse($tokenResult['message']);
           }
 
           $response = $tokenResult['response'];

@@ -112,30 +112,28 @@ export interface Video {
     youtube_url: string;
 }
 
-// ✅ DIPERBAIKI: Tambahkan total field
 export interface ApiResponseVideo {
     success: boolean;
     video: Video | null;
-    total: number; // ← TAMBAHKAN INI
+    total: number;
     message?: string;
 }
 
 export interface ChannelInfo {
-    title: string; // ← TAMBAHKAN INI (dari PHP response)
-    description: string; // ← TAMBAHKAN INI
+    title: string;
+    description: string;
     subscriber_count: number;
     video_count: number;
-    view_count: number; // ← TAMBAHKAN INI
+    view_count: number;
 }
 
-// ✅ DIPERBAIKI: Tambahkan total field
 export interface ApiResponseVideos {
     success: boolean;
     videos: Video[];
-    total: number; // ← TAMBAHKAN INI
+    total: number;
     channel_info: ChannelInfo | null;
-    cached_at?: string; // ← TAMBAHKAN INI (optional)
-    requests_made?: number; // ← TAMBAHKAN INI (optional)
+    cached_at?: string;
+    requests_made?: number;
     from_cache: boolean;
     message?: string;
 }
@@ -148,18 +146,17 @@ export interface Comment {
     timestamp: string;
     user_metadata: {
         username: string;
-        user_id: string | null; // ← UBAH ke nullable (dari PHP bisa null)
+        user_id: string | null;
         profile_url: string;
     };
     status: 'heldForReview' | 'reject' | 'draft' | 'database';
 }
 
-// ✅ SUDAH ADA total field - tidak perlu diubah
 export interface ApiResponseComment {
     success: boolean;
     comments: string;
     total: number;
-    requests_made?: number; // ← TAMBAHKAN INI (optional)
+    requests_made?: number;
     message?: string;
 }
 

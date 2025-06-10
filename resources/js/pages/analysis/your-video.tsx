@@ -1,10 +1,9 @@
 import Heading from '@/components/heading';
 import AppLayout from '@/layouts/app-layout';
-import { Analysis } from '@/lib/schemas/analysis-schema';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Analysis, Paginator, type BreadcrumbItem } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import { DataTable } from '../../components/data-table-analysis';
-import data from './data-analysis.json';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -13,17 +12,32 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Dashboard() {
+export default function YourVideo() {
+    const { props } = usePage<{ analyses: Paginator<Analysis> }>();
+    const { data, current_page, last_page, per_page, total } = props.analyses;
+    const [pageIndex, setPageIndex] = useState(current_page - 1);
+
+    useEffect(() => {
+        setPageIndex(current_page - 1);
+    }, [current_page]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Your Video" />
 
-            <div className="flex h-full flex-1 flex-col rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
                 <Heading
                     title="Analisis Video Saya"
                     description="Lihat riwayat analisis video dan mulai analisis baru kapan saja."
                 />
-                <DataTable data={data as Analysis[]} />
+                <DataTable
+                    data={data}
+                    pageIndex={pageIndex}
+                    setPageIndex={setPageIndex}
+                    totalPages={last_page}
+                    totalItems={total}
+                    perPage={per_page}
+                />
             </div>
         </AppLayout>
     );

@@ -31,7 +31,7 @@ export default function Detail() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Public Video" />
-            <div className="flex h-full flex-1 flex-col rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
                 <Heading
                     title="Detail Analisis"
                     description="Detail hasil analisis komentar pada video yang dipilih."

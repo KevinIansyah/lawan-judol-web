@@ -8,15 +8,25 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { ApiResponseVideos, Video } from '@/types';
+import { formatDate } from '@/lib/utils';
+import {
+    ApiResponseAnalysis,
+    ApiResponseComment,
+    ApiResponseVideos,
+    MergedVideoData,
+    Video,
+} from '@/types';
 import { router } from '@inertiajs/react';
 import { Check, Loader2, Play, PlusIcon, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export function DialogYourVideo() {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [videos, setVideos] = useState<Video[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [loadingVideo, setLoadingVideo] = useState<boolean>(false);
+    const [loadingComments, setLoadingComments] = useState<boolean>(false);
+    const [loadingAnalysis, setLoadingAnalysis] = useState<boolean>(false);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -24,11 +34,46 @@ export function DialogYourVideo() {
     // const [fromCache, setFromCache] = useState<boolean>(false);
     const [hasInitialLoad, setHasInitialLoad] = useState<boolean>(false);
 
+    const handleModalOpen = (): void => {
+        setIsOpen(true);
+
+        if (!hasInitialLoad || videos.length === 0) {
+            console.log('First time opening dialog or no videos cached, fetching from API...');
+            fetchVideos();
+        } else {
+            console.log('Dialog reopened, using existing data (cached or previously loaded)');
+        }
+    };
+
+    const handleVideoSelect = (video: Video): void => {
+        setSelectedVideo(video);
+    };
+
+    const handleProceed = (): void => {
+        if (selectedVideo) {
+            setLoadingComments(true);
+            fetchComments(selectedVideo);
+        }
+    };
+
+    const handleRefresh = (): void => {
+        console.log('Manual refresh requested, fetching fresh data from YouTube API...');
+        fetchVideos(true);
+    };
+
+    const resetForm = () => {
+        setSelectedVideo(null);
+        setError(null);
+        setLoadingVideo(false);
+        setLoadingComments(false);
+        setLoadingAnalysis(false);
+    };
+
     const fetchVideos = async (forceRefresh: boolean = false): Promise<void> => {
         if (forceRefresh) {
             setRefreshing(true);
         } else {
-            setLoading(true);
+            setLoadingVideo(true);
         }
 
         setError(null);
@@ -83,54 +128,112 @@ export function DialogYourVideo() {
             setError(errorMessage);
             console.error('Error fetching videos:', err);
         } finally {
-            setLoading(false);
+            setLoadingVideo(false);
             setRefreshing(false);
         }
     };
 
-    const handleModalOpen = (): void => {
-        setIsOpen(true);
+    const fetchComments = async (selectedVideo: Video): Promise<void> => {
+        try {
+            const videoId = selectedVideo.video_id;
+            const params = new URLSearchParams();
+            params.append('video_id', videoId);
 
-        if (!hasInitialLoad || videos.length === 0) {
-            console.log('First time opening dialog or no videos cached, fetching from API...');
-            fetchVideos();
-        } else {
-            console.log('Dialog reopened, using existing data (cached or previously loaded)');
-        }
-    };
+            const csrfToken = document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute('content');
 
-    const handleVideoSelect = (video: Video): void => {
-        setSelectedVideo(video);
-        console.log(selectedVideo);
-    };
-
-    const handleProceed = (): void => {
-        if (selectedVideo) {
-            router.visit(`/analysis/${selectedVideo.video_id}`, {
-                method: 'get',
-                data: {
-                    title: selectedVideo.title,
-                    thumbnail: selectedVideo.thumbnail,
+            const response = await fetch(`/video/comment?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...(csrfToken && { 'X-CSRF-TOKEN': csrfToken }),
                 },
-                // Preserve current state to avoid refetching
-                preserveState: true,
-                preserveScroll: true,
+                credentials: 'same-origin',
             });
-            setIsOpen(false);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const commentData: ApiResponseComment = await response.json();
+
+            if (commentData.success) {
+                const mergedData = {
+                    video_id: selectedVideo.video_id,
+                    title: selectedVideo.title,
+                    description: selectedVideo.description,
+                    published_at: selectedVideo.published_at,
+                    thumbnail: selectedVideo.thumbnail,
+                    channel_title: selectedVideo.channel_title,
+                    youtube_url: selectedVideo.youtube_url,
+                    comments_path: commentData.comments,
+                    comments_total: commentData.total,
+                };
+
+                setLoadingAnalysis(true);
+                fetchAnalysis(mergedData);
+            } else {
+                setError(commentData.message || 'Failed to fetch comments');
+            }
+        } catch (err) {
+            const errorMessage =
+                err instanceof Error ? err.message : 'Network error. Please try again.';
+            setError(errorMessage);
+            console.error('Error fetching comments:', err);
+        } finally {
+            setLoadingComments(false);
         }
     };
 
-    const handleRefresh = (): void => {
-        console.log('Manual refresh requested, fetching fresh data from YouTube API...');
-        fetchVideos(true);
-    };
+    const fetchAnalysis = async (mergedData: MergedVideoData): Promise<void> => {
+        try {
+            const csrfToken = document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute('content');
 
-    const formatDate = (dateString: string): string => {
-        return new Date(dateString).toLocaleDateString('id-ID', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
+            const response = await fetch(`/analysis`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...(csrfToken && { 'X-CSRF-TOKEN': csrfToken }),
+                },
+                body: JSON.stringify({
+                    data: {
+                        mergedData,
+                        type: 'your',
+                    },
+                }),
+                credentials: 'same-origin',
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const analysisData: ApiResponseAnalysis = await response.json();
+
+            if (analysisData.success) {
+                setIsOpen(false);
+
+                router.reload();
+
+                toast('Analisis berhasil ditambahkan!', {
+                    description: 'Video telah masuk ke antrean analisis dan akan diproses segera.',
+                });
+            } else {
+                setError(analysisData.message || 'Failed to fetch analysis');
+            }
+        } catch (err) {
+            const errorMessage =
+                err instanceof Error ? err.message : 'Network error. Please try again.';
+            setError(errorMessage);
+            console.error('Error fetching analysis:', err);
+        } finally {
+            setLoadingAnalysis(false);
+        }
     };
 
     // const formatNumber = (num: number | undefined): string => {
@@ -157,7 +260,15 @@ export function DialogYourVideo() {
     // };
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog
+            open={isOpen}
+            onOpenChange={(open) => {
+                setIsOpen(open);
+                if (!open) {
+                    resetForm();
+                }
+            }}
+        >
             <DialogTrigger asChild>
                 <Button variant="outline" onClick={handleModalOpen} className="w-full">
                     <PlusIcon />
@@ -178,26 +289,49 @@ export function DialogYourVideo() {
                 </DialogHeader>
 
                 <div className="flex-1 overflow-hidden">
-                    {loading ? (
+                    {loadingVideo ? (
                         <div className="flex flex-col items-center justify-center py-12">
                             <Loader2 className="mb-4 h-8 w-8 animate-spin text-blue-500" />
                             <p className="text-center font-medium">
-                                Mengambil video dari YouTube...
+                                Memeriksa ketersediaan video...
                             </p>
                             <p className="text-muted-foreground mt-1 text-center text-sm">
-                                Mohon tunggu, ini mungkin memakan waktu beberapa saat
+                                Mohon tunggu, proses ini mungkin memerlukan beberapa saat.
+                            </p>
+                        </div>
+                    ) : loadingComments ? (
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <Loader2 className="mb-4 h-8 w-8 animate-spin text-blue-500" />
+                            <p className="text-center font-medium">
+                                Mengambil data komentar dari YouTube...
+                            </p>
+                            <p className="text-muted-foreground mt-1 text-center text-sm">
+                                Mohon tunggu, sistem sedang memuat komentar.
+                            </p>
+                        </div>
+                    ) : loadingAnalysis ? (
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <Loader2 className="mb-4 h-8 w-8 animate-spin text-blue-500" />
+                            <p className="text-center font-medium">
+                                Menambahkan analisis ke dalam antrean...
+                            </p>
+                            <p className="text-muted-foreground mt-1 text-center text-sm">
+                                Mohon tunggu, permintaan Anda sedang diproses.
                             </p>
                         </div>
                     ) : error ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <div className="text-center text-red-500">
+                            <div className="text-center">
                                 <p className="font-medium">Terjadi kesalahan</p>
-                                <p className="mt-1 text-sm">{error}</p>
+                                <p className="text-muted-foreground mt-1 text-sm">{error}</p>
                             </div>
                             <Button
                                 variant="outline"
                                 className="mt-4"
-                                onClick={() => fetchVideos()}
+                                onClick={() => {
+                                    resetForm();
+                                    fetchVideos();
+                                }}
                             >
                                 Coba Lagi
                             </Button>
@@ -235,10 +369,10 @@ export function DialogYourVideo() {
 
                                         <div className="mt-2 flex items-start gap-2">
                                             <div>
-                                                <p className="line-clamp-2 text-sm font-medium">
+                                                <p className="line-clamp-2 text-sm font-semibold">
                                                     {video.title}
                                                 </p>
-                                                <span className="text-muted-foreground text-xs">
+                                                <span className="text-muted-foreground text-sm">
                                                     {formatDate(video.published_at)}
                                                 </span>
                                             </div>
@@ -255,7 +389,13 @@ export function DialogYourVideo() {
                         <Button
                             variant="outline"
                             onClick={handleRefresh}
-                            disabled={refreshing || loading}
+                            disabled={
+                                refreshing ||
+                                loadingVideo ||
+                                loadingComments ||
+                                loadingComments ||
+                                !!error
+                            }
                             className="flex items-center gap-2"
                         >
                             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -264,7 +404,14 @@ export function DialogYourVideo() {
 
                         <Button
                             onClick={handleProceed}
-                            disabled={!selectedVideo || loading || refreshing}
+                            disabled={
+                                !selectedVideo ||
+                                loadingVideo ||
+                                loadingComments ||
+                                loadingComments ||
+                                refreshing ||
+                                !!error
+                            }
                             className="flex items-center gap-2"
                         >
                             <Play className="h-4 w-4" />

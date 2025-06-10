@@ -17,7 +17,7 @@ export default function Dashboard() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 {/* <Heading
                     title="Dasbor"
                     description="Ringkasan data dan aktivitas sistem LawanJudol.ID."

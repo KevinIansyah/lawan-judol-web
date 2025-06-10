@@ -17,7 +17,7 @@ export default function Dashboard() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Keyword" />
-            <div className="flex h-full flex-1 flex-col rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
                 <Heading
                     title="Kamus Kata Kunci"
                     description={

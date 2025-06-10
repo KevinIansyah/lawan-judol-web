@@ -4,6 +4,7 @@ use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicVideoController;
 use App\Http\Controllers\VideoController;
+use App\Http\Controllers\YourVideoController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -27,21 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('analysis')->group(function () {
         Route::resource('public-video', PublicVideoController::class);
-        // Route::get('/public-video', function () {
-        //     return Inertia::render('analysis/public-video');
-        // })->name('public-video');
-
-        // Route::get('/detail', function () {
-        //     return Inertia::render('analysis/detail');
-        // })->name('detail');
-
-        // Route::get('/your-video', function () {
-        //     return Inertia::render('analysis/your-video');
-        // })->name('your-video');
-
-        // Route::get('/your-video/detail', function () {
-        //     return Inertia::render('analysis/detail');
-        // })->name('your-video.detail');
+        Route::resource('your-video', YourVideoController::class);
     });
 
     Route::prefix('video')->group(function () {
