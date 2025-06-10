@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 
 import { Analysis, Paginator, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DataTable } from '../../components/data-table-analysis';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -15,8 +15,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function PublicVideo() {
     const { props } = usePage<{ analyses: Paginator<Analysis> }>();
-    const { data, current_page, last_page } = props.analyses;
+    const { data, current_page, last_page, per_page, total } = props.analyses;
     const [pageIndex, setPageIndex] = useState(current_page - 1);
+
+    useEffect(() => {
+        setPageIndex(current_page - 1);
+    }, [current_page]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -31,6 +35,8 @@ export default function PublicVideo() {
                     pageIndex={pageIndex}
                     setPageIndex={setPageIndex}
                     totalPages={last_page}
+                    totalItems={total}
+                    perPage={per_page}
                 />
             </div>
         </AppLayout>

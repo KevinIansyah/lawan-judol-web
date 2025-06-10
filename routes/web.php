@@ -31,17 +31,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         //     return Inertia::render('analysis/public-video');
         // })->name('public-video');
 
-        Route::get('/public-video/detail', function () {
-            return Inertia::render('analysis/detail');
-        })->name('public-video.detail');
+        // Route::get('/detail', function () {
+        //     return Inertia::render('analysis/detail');
+        // })->name('detail');
 
-        Route::get('/your-video', function () {
-            return Inertia::render('analysis/your-video');
-        })->name('your-video');
+        // Route::get('/your-video', function () {
+        //     return Inertia::render('analysis/your-video');
+        // })->name('your-video');
 
-        Route::get('/your-video/detail', function () {
-            return Inertia::render('analysis/detail');
-        })->name('your-video.detail');
+        // Route::get('/your-video/detail', function () {
+        //     return Inertia::render('analysis/detail');
+        // })->name('your-video.detail');
     });
 
     Route::prefix('video')->group(function () {

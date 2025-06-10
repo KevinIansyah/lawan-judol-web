@@ -26,7 +26,7 @@ export function TableCellViewer({ item }: { item: Analysis }) {
                     {videoData.title}
                 </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="flex flex-col">
+            <SheetContent side="right" className="flex flex-col [&>button.absolute]:hidden">
                 <SheetHeader>
                     <SheetTitle>{videoData.title}</SheetTitle>
                     <SheetDescription>Video Status Overview</SheetDescription>

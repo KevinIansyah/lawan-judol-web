@@ -12,39 +12,58 @@ class PublicVideoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
-        $analyses = Analysis::where('type', 'public')->where('user_id', $user->id)->latest()->paginate(10);
+        $perPage = $request->get('per_page', 10);
+        $perPage = in_array($perPage, [10, 20, 30, 40, 50]) ? $perPage : 10;
+
+        $search = $request->get('search');
+
+        $query = Analysis::where('type', 'public')
+            ->where('user_id', $user->id);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('status', 'like', '%' . $search . '%')
+                    ->orWhere('video->title', 'like', '%' . $search . '%')
+                    ->orWhere('video->channel_title', 'like', '%' . $search . '%');
+            });
+        }
+
+        $analyses = $query->latest()->paginate($perPage);
+
+        $analyses->appends($request->query());
 
         return Inertia::render('analysis/public-video', [
             'analyses' => $analyses,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        //
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        //
-    }
+    public function store(Request $request) {}
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        //
+        $analysis = Analysis::findOrFail($id);
+
+        return Inertia::render('analysis/detail', [
+            'analysis' => $analysis,
+        ]);
     }
 
     /**

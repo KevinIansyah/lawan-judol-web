@@ -25,12 +25,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { formatDate } from '@/lib/utils';
 import { Analysis } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
     ColumnFiltersState,
+    FilterFn,
     SortingState,
     VisibilityState,
     flexRender,
@@ -53,10 +53,18 @@ import {
     LoaderIcon,
     MoreVerticalIcon,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useDebouncedCallback } from 'use-debounce';
+import { useState } from 'react';
 import { DialogPublicVideo } from './dialog/dialog-public-video';
 import { DialogYourVideo } from './dialog/dialog-your-video';
+
+const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+};
 
 const columns: ColumnDef<Analysis>[] = [
     {
@@ -129,7 +137,7 @@ const columns: ColumnDef<Analysis>[] = [
     },
     {
         id: 'actions',
-        cell: ({ row }) => (
+        cell: () => (
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
@@ -143,7 +151,7 @@ const columns: ColumnDef<Analysis>[] = [
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-32">
                     <DropdownMenuItem asChild>
-                        <Link href={`/analysis/public-video/${row.original.id}`}>Detail</Link>
+                        <Link href={`/analysis/public-video/detail`}>Detail</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>Batalkan</DropdownMenuItem>
                     <DropdownMenuItem>Hapus</DropdownMenuItem>
@@ -160,9 +168,6 @@ type DataTableProps = {
     totalPages: number;
     totalItems: number;
     perPage: number;
-    initialFilters?: {
-        search?: string;
-    };
 };
 
 export function DataTable({
@@ -172,15 +177,39 @@ export function DataTable({
     totalPages,
     totalItems,
     perPage,
-    initialFilters = {},
 }: DataTableProps) {
-    const [searchValue, setSearchValue] = useState(initialFilters.search || '');
+    const [globalFilter, setGlobalFilter] = useState('');
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = useState<SortingState>([]);
     const { url } = usePage();
 
-    const buildUrlWithParams = (params: Record<string, string | number | undefined>) => {
+    const multiColumnFilter: FilterFn<Analysis> = (row, _columnId, value) => {
+        const search = String(value).toLowerCase();
+
+        const title = row.original.video.title?.toLowerCase() || '';
+        const channel = row.original.video.channel_title?.toLowerCase() || '';
+        const status = row.original.status?.toLowerCase() || '';
+
+        return title.includes(search) || channel.includes(search) || status.includes(search);
+    };
+
+    // const goToPage = (page: number) => {
+    //     const newPage = Math.max(0, Math.min(page, totalPages - 1));
+    //     setPageIndex(newPage);
+
+    //     router.get(
+    //         window.location.pathname,
+    //         { page: newPage + 1 },
+    //         {
+    //             preserveState: true,
+    //             preserveScroll: true,
+    //             only: ['analyses'],
+    //         },
+    //     );
+    // };
+
+    const buildUrlWithParams = (params: Record<string, string | number>) => {
         const currentUrl = new URL(window.location.href);
 
         Object.entries(params).forEach(([key, value]) => {
@@ -194,27 +223,11 @@ export function DataTable({
         return currentUrl.toString();
     };
 
-    const debouncedSearch = useDebouncedCallback((searchTerm: string) => {
-        const url = buildUrlWithParams({
-            search: searchTerm || undefined,
-            page: 1,
-        });
-
-        router.visit(url, {
-            preserveState: true,
-            preserveScroll: true,
-            only: ['analyses'],
-        });
-    }, 500);
-
     const goToPage = (page: number) => {
         const newPage = Math.max(0, Math.min(page, totalPages - 1));
         setPageIndex(newPage);
 
-        const url = buildUrlWithParams({
-            page: newPage + 1,
-            search: searchValue || undefined,
-        });
+        const url = buildUrlWithParams({ page: newPage + 1 });
         router.visit(url, {
             preserveState: true,
             preserveScroll: true,
@@ -222,36 +235,37 @@ export function DataTable({
         });
     };
 
-    const changePageSize = (newPerPage: number) => {
-        const url = buildUrlWithParams({
-            per_page: newPerPage,
-            page: 1,
-            search: searchValue || undefined,
-        });
+    // const changePageSize = (newPerPage: number) => {
+    //     const url = buildUrlWithParams({
+    //         per_page: newPerPage,
+    //         page: 1,
+    //     });
 
-        router.visit(url, {
-            preserveState: true,
-            preserveScroll: true,
-            only: ['analyses'],
-        });
-    };
+    //     router.visit(url, {
+    //         preserveState: true,
+    //         preserveScroll: true,
+    //         only: ['analyses'],
+    //     });
+    // };
 
-    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value;
-        setSearchValue(value);
-        debouncedSearch(value);
-    };
+    // const handleSearch = useDebouncedCallback((searchTerm: string) => {
+    //     const url = buildUrlWithParams({
+    //         search: searchTerm || undefined,
+    //         page: 1,
+    //     });
 
-    useEffect(() => {
-        if (initialFilters.search !== searchValue) {
-            setSearchValue(initialFilters.search || '');
-        }
-    }, [initialFilters.search]);
+    //     router.visit(url, {
+    //         preserveState: true,
+    //         preserveScroll: true,
+    //         only: ['analyses'],
+    //     });
+    // }, 500);
 
     const table = useReactTable({
         data,
         columns,
         state: {
+            globalFilter,
             sorting,
             columnVisibility,
             columnFilters,
@@ -265,6 +279,8 @@ export function DataTable({
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
         onColumnVisibilityChange: setColumnVisibility,
+        onGlobalFilterChange: setGlobalFilter,
+        globalFilterFn: multiColumnFilter,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -322,8 +338,8 @@ export function DataTable({
 
                     <Input
                         placeholder="Cari judul, channel, atau status..."
-                        value={searchValue}
-                        onChange={handleSearchChange}
+                        value={globalFilter}
+                        onChange={(event) => setGlobalFilter(event.target.value)}
                         className="max-w-sm md:order-1"
                     />
                 </div>
@@ -368,9 +384,7 @@ export function DataTable({
                                         colSpan={columns.length}
                                         className="h-24 text-center"
                                     >
-                                        {searchValue
-                                            ? 'Tidak ada hasil yang ditemukan.'
-                                            : 'Tidak ada data.'}
+                                        Tidak ada hasil.
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -382,7 +396,6 @@ export function DataTable({
                     <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
                         Menampilkan {Math.min(pageIndex * perPage + 1, totalItems)} sampai{' '}
                         {Math.min((pageIndex + 1) * perPage, totalItems)} dari {totalItems} hasil
-                        {searchValue && <span className="ml-1">untuk "{searchValue}"</span>}
                     </div>
                     <div className="flex w-full items-center gap-8 lg:w-fit">
                         <div className="hidden items-center gap-2 lg:flex">
@@ -391,7 +404,17 @@ export function DataTable({
                             </Label>
                             <Select
                                 value={`${perPage}`}
-                                onValueChange={(value) => changePageSize(Number(value))}
+                                onValueChange={(value) => {
+                                    router.get(
+                                        window.location.pathname,
+                                        { per_page: Number(value), page: 1 },
+                                        {
+                                            preserveState: true,
+                                            preserveScroll: true,
+                                            only: ['analyses'],
+                                        },
+                                    );
+                                }}
                             >
                                 <SelectTrigger className="w-20" id="rows-per-page">
                                     <SelectValue placeholder={perPage} />
