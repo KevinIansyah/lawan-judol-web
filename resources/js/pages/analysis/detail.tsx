@@ -13,8 +13,6 @@ import { Head, usePage } from '@inertiajs/react';
 import { CheckCircle2Icon, CircleX, LoaderIcon, Youtube } from 'lucide-react';
 import DataTableGambling from '../../components/data-table-gambling';
 import DataTableNonGambling from '../../components/data-table-non-gambling';
-import dataGambling from './data-comment-gambling.json';
-import dataNonGambling from './data-comment-non-gambling.json';
 import dataKeyword from './data-keyword.json';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -24,9 +22,16 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+interface DetailProps {
+    analysis: Analysis;
+    gamblingComments: Comment[];
+    nonGamblingComments: Comment[];
+    [key: string]: unknown;
+}
+
 export default function Detail() {
-    const { props } = usePage<{ analysis: Analysis }>();
-    const analysis = props.analysis;
+    const { props } = usePage<DetailProps>();
+    const { analysis, gamblingComments, nonGamblingComments } = props;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -47,7 +52,6 @@ export default function Detail() {
                     <TabsContent value="summary">
                         <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                             <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border px-4 py-2">
-                                {/* <ClasificationChart /> */}
                                 <Table>
                                     <TableBody>
                                         <TableRow className="border-none hover:bg-transparent">
@@ -154,10 +158,10 @@ export default function Detail() {
                         </div>
                     </TabsContent>
                     <TabsContent value="gambling">
-                        <DataTableGambling data={dataGambling as Comment[]} />
+                        <DataTableGambling data={gamblingComments} />
                     </TabsContent>
                     <TabsContent value="non-gambling">
-                        <DataTableNonGambling data={dataNonGambling as Comment[]} />
+                        <DataTableNonGambling data={nonGamblingComments} />
                     </TabsContent>
                     <TabsContent value="keyword">
                         <KeywordList

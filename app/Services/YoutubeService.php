@@ -457,7 +457,7 @@ class YouTubeService
 
       $timestamp = Carbon::now()->format('Ymd_His');
       $filename = "comments/{$user->id}_{$videoId}_{$timestamp}.json";
-      Storage::disk('public')->put($filename, json_encode($allComments, JSON_PRETTY_PRINT));
+      Storage::disk('public')->put($filename, json_encode($allComments, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
       $result = [
         'success' => true,

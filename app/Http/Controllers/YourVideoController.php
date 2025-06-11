@@ -63,9 +63,32 @@ class YourVideoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $analysis = Analysis::findOrFail($id);
+
+        $commentsPath = storage_path('app/' . $analysis->video->comments_path);
+
+        $gamblingComments = [];
+        $nonGamblingComments = [];
+
+        if (file_exists($commentsPath)) {
+            $allComments = json_decode(file_get_contents($commentsPath), true);
+
+            foreach ($allComments as $comment) {
+                if ($comment['label'] === 1) {
+                    $gamblingComments[] = $comment;
+                } else {
+                    $nonGamblingComments[] = $comment;
+                }
+            }
+        }
+
+        return Inertia::render('analysis/detail', [
+            'analysis' => $analysis,
+            'gamblingComments' => $gamblingComments,
+            'nonGamblingComments' => $nonGamblingComments,
+        ]);
     }
 
     /**
