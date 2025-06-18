@@ -29,7 +29,7 @@ class SocialiteController extends Controller
                 'https://www.googleapis.com/auth/youtube.force-ssl'
             ])->with([
                 'access_type' => 'offline',
-                'prompt' => 'consent', // wajib agar refresh_token dikirim ulang
+                'prompt' => 'consent',
             ])
             ->redirect();
     }

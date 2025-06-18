@@ -21,7 +21,7 @@ import { Check, Loader2, Play, PlusIcon, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-export function DialogYourVideo() {
+export default function DialogYourVideo() {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [videos, setVideos] = useState<Video[]>([]);
     const [loadingVideo, setLoadingVideo] = useState<boolean>(false);

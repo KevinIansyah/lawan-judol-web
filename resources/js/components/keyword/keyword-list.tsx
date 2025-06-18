@@ -1,7 +1,7 @@
 import { Keyword } from '@/types';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { KeywordBadge } from './keyword-badge';
+import KeywordBadge from './keyword-badge';
 
 type KeywordListProps = {
     data: Keyword[];
@@ -14,7 +14,7 @@ type KeywordListProps = {
     }) => React.ReactNode;
 };
 
-export function KeywordList({ data: initialData, ActionButtons }: KeywordListProps) {
+export default function KeywordList({ data: initialData, ActionButtons }: KeywordListProps) {
     const [data, setData] = useState<Keyword[]>(() => initialData);
     const [originalData] = useState<Keyword[]>(() => initialData);
 
@@ -41,7 +41,6 @@ export function KeywordList({ data: initialData, ActionButtons }: KeywordListPro
         setData(originalData);
         toast('Kata kunci berhasil direset!', {
             description: 'Semua perubahan label telah dikembalikan ke kondisi semula.',
-            // duration: Infinity,
         });
     };
 

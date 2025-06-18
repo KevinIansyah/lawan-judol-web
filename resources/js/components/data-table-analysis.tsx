@@ -53,10 +53,10 @@ import {
     LoaderIcon,
     MoreVerticalIcon,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
-import { DialogPublicVideo } from './dialog/dialog-public-video';
-import { DialogYourVideo } from './dialog/dialog-your-video';
+import DialogPublicVideo from './dialog/dialog-public-video';
+import DialogYourVideo from './dialog/dialog-your-video';
 
 type DataTableProps = {
     data: Analysis[];
@@ -70,7 +70,7 @@ type DataTableProps = {
     };
 };
 
-export function DataTable({
+export default function DataTable({
     data,
     pageIndex,
     setPageIndex,
@@ -79,116 +79,140 @@ export function DataTable({
     perPage,
     initialFilters = {},
 }: DataTableProps) {
-    const [searchValue, setSearchValue] = useState(initialFilters.search || '');
+    const getSearchFromUrl = () => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('search') || '';
+        }
+        return '';
+    };
+    const [searchValue, setSearchValue] = useState(() => {
+        const urlSearch = getSearchFromUrl();
+        return urlSearch || initialFilters.search || '';
+    });
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = useState<SortingState>([]);
     const { url } = usePage();
 
-    const columns: ColumnDef<Analysis>[] = [
-        {
-            accessorKey: 'title',
-            header: 'Judul',
-            cell: ({ row }) => {
-                return <TableCellViewer item={row.original} />;
+    useEffect(() => {
+        const urlSearch = getSearchFromUrl();
+        const newSearchValue = urlSearch || initialFilters.search || '';
+        setSearchValue(newSearchValue);
+    }, [initialFilters.search]);
+
+    const columns: ColumnDef<Analysis>[] = useMemo(
+        () => [
+            {
+                accessorKey: 'title',
+                header: 'Judul',
+                cell: ({ row }) => {
+                    return <TableCellViewer item={row.original} />;
+                },
+                enableHiding: false,
             },
-            enableHiding: false,
-        },
-        {
-            accessorKey: 'channel',
-            header: 'Channel',
-            cell: ({ row }) => {
-                return (
-                    <div className="text-foreground text-left">
-                        {row.original.video.channel_title}
-                    </div>
-                );
+            {
+                accessorKey: 'channel',
+                header: 'Channel',
+                cell: ({ row }) => {
+                    return (
+                        <div className="text-foreground text-left">
+                            {row.original.video?.channel_title || '-'}
+                        </div>
+                    );
+                },
             },
-        },
-        {
-            accessorKey: 'komentar utama',
-            header: 'Komentar Utama',
-            cell: ({ row }) => {
-                return (
-                    <div className="text-foreground text-left">
-                        {row.original.video.comments_total}
-                    </div>
-                );
+            {
+                accessorKey: 'komentar utama',
+                header: 'Komentar Utama',
+                cell: ({ row }) => {
+                    return (
+                        <div className="text-foreground text-left">
+                            {row.original.video?.comments_total || 0}
+                        </div>
+                    );
+                },
             },
-        },
-        {
-            accessorKey: 'tanggal analisis',
-            header: 'Tanggal Analisis',
-            cell: ({ row }) => {
-                return (
-                    <div className="text-foreground text-left">
-                        {formatDate(row.original.created_at)}
-                    </div>
-                );
+            {
+                accessorKey: 'tanggal analisis',
+                header: 'Tanggal Analisis',
+                cell: ({ row }) => {
+                    return (
+                        <div className="text-foreground text-left">
+                            {formatDate(row.original.created_at)}
+                        </div>
+                    );
+                },
             },
-        },
-        {
-            accessorKey: 'status',
-            header: 'Status',
-            cell: ({ row }) => (
-                <Badge
-                    variant="outline"
-                    className="text-muted-foreground flex gap-1 px-1.5 [&_svg]:size-3"
-                >
-                    {row.original.status === 'success' && (
-                        <CheckCircle2Icon className="text-green-500 dark:text-green-400" />
-                    )}
-                    {row.original.status === 'on_process' && (
-                        <LoaderIcon className="animate-spin text-yellow-500 dark:text-yellow-400" />
-                    )}
-                    {row.original.status === 'failed' && (
-                        <CircleX className="text-red-500 dark:text-red-400" />
-                    )}
-                    {row.original.status === 'queue' && (
-                        <LoaderIcon className="text-muted-foreground" />
-                    )}
-                    {
+            {
+                accessorKey: 'status',
+                header: 'Status',
+                cell: ({ row }) => (
+                    <Badge
+                        variant="outline"
+                        className="text-muted-foreground flex gap-1 px-1.5 [&_svg]:size-3"
+                    >
+                        {row.original.status === 'success' && (
+                            <CheckCircle2Icon className="text-green-500 dark:text-green-400" />
+                        )}
+                        {row.original.status === 'on_process' && (
+                            <LoaderIcon className="animate-spin text-yellow-500 dark:text-yellow-400" />
+                        )}
+                        {row.original.status === 'failed' && (
+                            <CircleX className="text-red-500 dark:text-red-400" />
+                        )}
+                        {row.original.status === 'queue' && (
+                            <LoaderIcon className="text-muted-foreground" />
+                        )}
                         {
-                            success: 'Selesai',
-                            on_process: 'Sedang Diproses',
-                            failed: 'Gagal',
-                            queue: 'Antrian',
-                        }[row.original.status]
-                    }
-                </Badge>
-            ),
-        },
-        {
-            id: 'actions',
-            cell: ({ row }) => (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            className="text-muted-foreground data-[state=open]:bg-muted flex size-8"
-                            size="icon"
-                        >
-                            <MoreVerticalIcon />
-                            <span className="sr-only">Open menu</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-32">
-                        <DropdownMenuItem asChild>
-                            {url.startsWith('/analysis/your-video') ? (
-                                <Link href={`/analysis/your-video/${row.original.id}`}>Detail</Link>
-                            ) : url.startsWith('/analysis/public-video') ? (
-                                <Link href={`/analysis/public-video/${row.original.id}`}>
-                                    Detail
-                                </Link>
-                            ) : null}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>Batalkan</DropdownMenuItem>
-                        <DropdownMenuItem>Hapus</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            ),
-        },
-    ];
+                            {
+                                success: 'Selesai',
+                                on_process: 'Sedang Diproses',
+                                failed: 'Gagal',
+                                queue: 'Antrian',
+                            }[row.original.status]
+                        }
+                    </Badge>
+                ),
+            },
+            {
+                id: 'actions',
+                header: 'Aksi',
+                cell: ({ row }) => (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                className="text-muted-foreground data-[state=open]:bg-muted flex size-8"
+                                size="icon"
+                            >
+                                <MoreVerticalIcon />
+                                <span className="sr-only">Open menu</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-32">
+                            <DropdownMenuItem asChild>
+                                {url.startsWith('/analysis/your-video') ? (
+                                    <Link href={`/analysis/your-video/${row.original.id}`}>
+                                        Detail
+                                    </Link>
+                                ) : url.startsWith('/analysis/public-video') ? (
+                                    <Link href={`/analysis/public-video/${row.original.id}`}>
+                                        Detail
+                                    </Link>
+                                ) : (
+                                    <span>Detail</span>
+                                )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>Batalkan</DropdownMenuItem>
+                            <DropdownMenuItem>Hapus</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ),
+            },
+        ],
+        [url],
+    );
 
     const buildUrlWithParams = (params: Record<string, string | number | undefined>) => {
         const currentUrl = new URL(window.location.href);
@@ -223,7 +247,7 @@ export function DataTable({
 
         const url = buildUrlWithParams({
             page: newPage + 1,
-            search: searchValue || undefined,
+            search: getSearchFromUrl(),
         });
         router.visit(url, {
             preserveState: true,
@@ -233,10 +257,11 @@ export function DataTable({
     };
 
     const changePageSize = (newPerPage: number) => {
+        const currentSearch = getSearchFromUrl();
         const url = buildUrlWithParams({
             per_page: newPerPage,
             page: 1,
-            search: searchValue || undefined,
+            search: currentSearch || undefined,
         });
 
         router.visit(url, {
@@ -251,12 +276,6 @@ export function DataTable({
         setSearchValue(value);
         debouncedSearch(value);
     };
-
-    useEffect(() => {
-        if (initialFilters.search !== searchValue) {
-            setSearchValue(initialFilters.search || '');
-        }
-    }, [initialFilters.search]);
 
     const table = useReactTable({
         data,
@@ -358,7 +377,7 @@ export function DataTable({
                                 </TableRow>
                             ))}
                         </TableHeader>
-                        <TableBody className="**:data-[slot=table-cell]:first:w-8">
+                        <TableBody>
                             {table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow key={row.id}>

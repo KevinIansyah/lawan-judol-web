@@ -34,7 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('video')->group(function () {
         Route::get('/', [VideoController::class, 'getVideo'])->name('video');
         Route::get('/all', [VideoController::class, 'getVideos'])->name('video.all');
-        Route::get('/comment', [VideoController::class, 'getComments'])->name('video.all');
+        Route::get('/comment', [VideoController::class, 'getComments'])->name('video.comment');
         Route::post('/clear-cache', [VideoController::class, 'clearCache'])->name('video.clear-cache');
     });
 

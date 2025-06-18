@@ -1,12 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
     Table,
@@ -22,7 +16,6 @@ import {
     ColumnFiltersState,
     FilterFn,
     SortingState,
-    VisibilityState,
     flexRender,
     getCoreRowModel,
     getFacetedRowModel,
@@ -34,13 +27,7 @@ import {
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import {
-    ArrowUpDown,
-    CheckCircle2Icon,
-    ChevronDownIcon,
-    ColumnsIcon,
-    FileTextIcon,
-} from 'lucide-react';
+import { ArrowUpDown, CheckCircle2Icon, FileTextIcon, PlusIcon } from 'lucide-react';
 import * as React from 'react';
 
 dayjs.extend(relativeTime);
@@ -147,10 +134,9 @@ const columns: ColumnDef<Comment>[] = [
 ];
 
 export default function DataTableGambling({ data: initialData }: { data: Comment[] }) {
-    const [data, setData] = React.useState(() => initialData);
+    const [data] = React.useState(() => initialData);
     const [globalFilter, setGlobalFilter] = React.useState('');
     const [rowSelection, setRowSelection] = React.useState({});
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const multiColumnFilter: FilterFn<Comment> = (row, columnId, value) => {
@@ -167,7 +153,6 @@ export default function DataTableGambling({ data: initialData }: { data: Comment
         state: {
             globalFilter,
             sorting,
-            columnVisibility,
             rowSelection,
             columnFilters,
         },
@@ -176,7 +161,6 @@ export default function DataTableGambling({ data: initialData }: { data: Comment
         onRowSelectionChange: setRowSelection,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
-        onColumnVisibilityChange: setColumnVisibility,
         onGlobalFilterChange: setGlobalFilter,
         globalFilterFn: multiColumnFilter,
         getCoreRowModel: getCoreRowModel(),
@@ -192,7 +176,7 @@ export default function DataTableGambling({ data: initialData }: { data: Comment
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                     <div className="flex w-full gap-2 md:order-2 md:justify-end">
                         <div className="flex-1 md:flex-none">
-                            <DropdownMenu>
+                            {/* <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" className="w-full md:w-auto">
                                         <ColumnsIcon />
@@ -222,7 +206,11 @@ export default function DataTableGambling({ data: initialData }: { data: Comment
                                             </DropdownMenuCheckboxItem>
                                         ))}
                                 </DropdownMenuContent>
-                            </DropdownMenu>
+                            </DropdownMenu> */}
+                            <Button variant="outline" className="w-full">
+                                <PlusIcon />
+                                <span>Tambah ke Dataset</span>
+                            </Button>
                         </div>
                     </div>
 

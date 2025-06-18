@@ -1,10 +1,10 @@
+import DataTable from '@/components/data-table-analysis';
 import Heading from '@/components/heading';
 import AppLayout from '@/layouts/app-layout';
 
 import { Analysis, Paginator, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { DataTable } from '../../components/data-table-analysis';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

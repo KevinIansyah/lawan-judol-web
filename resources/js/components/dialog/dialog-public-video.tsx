@@ -21,7 +21,7 @@ import { Loader2, Play, PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-export function DialogPublicVideo() {
+export default function DialogPublicVideo() {
     const [videoId, setVideoId] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
     const [loadingVideo, setLoadingVideo] = useState(false);

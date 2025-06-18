@@ -46,61 +46,11 @@ export interface Payment {
     email: string;
 }
 
-export interface Keyword {
+export interface Keywords {
     id: number;
     keyword: string;
     label: 0 | 1;
 }
-
-// export interface Video {
-//     video_id: string;
-//     title: string;
-//     description: string;
-//     thumbnail: string;
-//     published_at: string;
-//     channel_title: string;
-//     youtube_url: string;
-// }
-
-// export interface ApiResponseVideo {
-//     success: boolean;
-//     video: Video | null;
-//     message?: string;
-// }
-
-// export interface ChannelInfo {
-//     subscriber_count: number;
-//     video_count: number;
-// }
-
-// export interface ApiResponseVideos {
-//     success: boolean;
-//     videos: Video[];
-//     channel_info: ChannelInfo | null;
-//     from_cache: boolean;
-//     message?: string;
-// }
-
-// export interface Comment {
-//     comment_id: string;
-//     text: string;
-//     label: 0 | 1;
-//     source: string;
-//     timestamp: string;
-//     user_metadata: {
-//         username: string;
-//         user_id: string;
-//         profile_url: string;
-//     };
-//     status: 'heldForReview' | 'reject' | 'draft' | 'database';
-// }
-
-// export interface ApiResponseComment {
-//     success: boolean;
-//     comments: string;
-//     message?: string;
-//     total: number;
-// }
 
 export interface Video {
     video_id: string;

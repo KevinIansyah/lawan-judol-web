@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Analysis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class YourVideoController extends Controller
@@ -67,12 +68,14 @@ class YourVideoController extends Controller
     {
         $analysis = Analysis::findOrFail($id);
 
-        $commentsPath = storage_path('app/' . $analysis->video->comments_path);
+        $commentsPath = storage_path('app/public/' . $analysis->video['comments_path']);
 
         $gamblingComments = [];
         $nonGamblingComments = [];
 
         if (file_exists($commentsPath)) {
+            Log::info('Memuat file komentar untuk analysis');
+
             $allComments = json_decode(file_get_contents($commentsPath), true);
 
             foreach ($allComments as $comment) {
@@ -82,6 +85,10 @@ class YourVideoController extends Controller
                     $nonGamblingComments[] = $comment;
                 }
             }
+
+            Log::info('Berhasil memuat file komentar untuk analysis');
+        } else {
+            Log::warning('File komentar tidak ditemukan', ['path' => $commentsPath]);
         }
 
         return Inertia::render('analysis/detail', [
