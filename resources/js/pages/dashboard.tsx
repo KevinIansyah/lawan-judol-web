@@ -1,4 +1,4 @@
-import { ClasificationChart } from '@/components/clasification-chart';
+import { ChartClasification } from '@/components/chart-clasification';
 import { HistoryChart } from '@/components/history-chart';
 import { ListChart } from '@/components/list-chart';
 import { SpiderChart } from '@/components/spider-chart';
@@ -26,7 +26,7 @@ export default function Dashboard() {
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                     <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
                         {/* <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" /> */}
-                        <ClasificationChart />
+                        <ChartClasification data="comments" />
                     </div>
                     <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
                         {/* <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" /> */}

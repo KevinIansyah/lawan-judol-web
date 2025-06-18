@@ -1,4 +1,4 @@
-import DataTable from '@/components/data-table-analysis';
+import DataTableAnalysis from '@/components/data-table-analysis';
 import Heading from '@/components/heading';
 import AppLayout from '@/layouts/app-layout';
 
@@ -30,7 +30,7 @@ export default function PublicVideo() {
                     title="Analisis Video Publik"
                     description="Lihat riwayat analisis video dan mulai analisis baru kapan saja."
                 />
-                <DataTable
+                <DataTableAnalysis
                     data={data}
                     pageIndex={pageIndex}
                     setPageIndex={setPageIndex}

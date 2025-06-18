@@ -1,4 +1,4 @@
-import { ClasificationChart } from '@/components/clasification-chart';
+import { ChartClasification } from '@/components/chart-clasification';
 import DataTableGambling from '@/components/data-table-gambling';
 import DataTableNonGambling from '@/components/data-table-non-gambling';
 import Heading from '@/components/heading';
@@ -7,8 +7,7 @@ import KeywordList from '@/components/keyword/keyword-list';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VideoMetadata from '@/components/video-metadata';
 import AppLayout from '@/layouts/app-layout';
-import { Comment } from '@/lib/schemas/comment-schema';
-import { Analysis, Keywords, type BreadcrumbItem } from '@/types';
+import { Analysis, Comment, Keywords, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import dataKeyword from './data-keyword.json';
@@ -68,18 +67,18 @@ export default function Detail() {
                                 <VideoMetadata analysis={analysis} />
                             </div>
                             <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
-                                <ClasificationChart
-                                    title="Klasifikasi Komentar"
-                                    description="Judi online dan bukan judi"
+                                <ChartClasification
+                                    title="Distribusi Komentar"
+                                    description="Perbandingan komentar judi online dan bukan judi"
                                     data="comments"
                                     gamblingCount={gamblingComments.length}
                                     nonGamblingCount={nonGamblingComments.length}
                                 />
                             </div>
                             <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
-                                <ClasificationChart
-                                    title="Klasifikasi Kata Kunci"
-                                    description="Kata kunci judi online"
+                                <ChartClasification
+                                    title="Distribusi Kata Kunci"
+                                    description="Jumlah kata kunci judi online yang terdeteksi"
                                     data="keywords"
                                     keywordCount={10}
                                 />

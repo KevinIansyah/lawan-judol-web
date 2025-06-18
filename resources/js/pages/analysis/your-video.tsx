@@ -1,4 +1,4 @@
-import DataTable from '@/components/data-table-analysis';
+import DataTableAnalysis from '@/components/data-table-analysis';
 import Heading from '@/components/heading';
 import AppLayout from '@/layouts/app-layout';
 import { Analysis, Paginator, type BreadcrumbItem } from '@/types';
@@ -30,7 +30,7 @@ export default function YourVideo() {
                     title="Analisis Video Saya"
                     description="Lihat riwayat analisis video dan mulai analisis baru kapan saja."
                 />
-                <DataTable
+                <DataTableAnalysis
                     data={data}
                     pageIndex={pageIndex}
                     setPageIndex={setPageIndex}

@@ -4,10 +4,6 @@ import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -23,7 +19,6 @@ import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
-    Bell,
     BookOpen,
     ChevronDown,
     ChevronRight,
@@ -35,6 +30,8 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import AppLogo from './app-logo';
+import AppearanceToggleDropdown from './appearance-dropdown';
+import NotificationDropdown from './notification-dropdown';
 
 const activeItemStyles = 'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
 
@@ -49,7 +46,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
     const [isMobileAnalysisOpen, setIsMobileAnalysisOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [position, setPosition] = useState('bottom');
 
     const closeMobileMenu = () => {
         setIsMobileMenuOpen(false);
@@ -427,39 +423,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     )}
 
                     {auth.user ? (
-                        <div className="ml-auto flex items-center space-x-2">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <div className="relative flex items-center space-x-1">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="group h-9 w-9 cursor-pointer"
-                                        >
-                                            <Bell className="!size-5 opacity-80 group-hover:opacity-100" />
-                                        </Button>
-                                    </div>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-76 md:w-100" align="end">
-                                    {/* <UserMenuContent user={auth.user} /> */}
-                                    <DropdownMenuLabel>Notifikasi</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuRadioGroup
-                                        value={position}
-                                        onValueChange={setPosition}
-                                    >
-                                        <DropdownMenuRadioItem value="top">
-                                            Top
-                                        </DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="bottom">
-                                            Bottom
-                                        </DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="right">
-                                            Right
-                                        </DropdownMenuRadioItem>
-                                    </DropdownMenuRadioGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                        <div className="ml-auto flex items-center">
+                            <AppearanceToggleDropdown />
+                            <NotificationDropdown />
+
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="size-10 rounded-full p-1">

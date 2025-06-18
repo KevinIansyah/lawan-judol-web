@@ -99,7 +99,7 @@ export interface Comment {
         user_id: string | null;
         profile_url: string;
     };
-    status: 'heldForReview' | 'reject' | 'draft' | 'database';
+    status: 'heldForReview' | 'reject' | 'draft' | 'dataset';
 }
 
 export interface ApiResponseComment {

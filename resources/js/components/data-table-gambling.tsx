@@ -10,7 +10,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Comment } from '@/lib/schemas/comment-schema';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -38,6 +37,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Comment } from '@/types';
 
 dayjs.extend(relativeTime);
 
@@ -149,7 +149,7 @@ const columns: ColumnDef<Comment>[] = [
                 {row.original.status === 'draft' && (
                     <FileTextIcon className="text-gray-500 dark:text-gray-400" />
                 )}
-                {row.original.status === 'database' && (
+                {row.original.status === 'dataset' && (
                     <CheckCircle2Icon className="text-green-500 dark:text-green-400" />
                 )}
                 {
@@ -157,7 +157,7 @@ const columns: ColumnDef<Comment>[] = [
                         reject: 'Ditolak',
                         heldForReview: 'Ditahan untuk Review',
                         draft: 'Draf',
-                        database: 'Ditambahkan ke Database',
+                        dataset: 'Ditambahkan ke Dataset',
                     }[row.original.status]
                 }
             </Badge>

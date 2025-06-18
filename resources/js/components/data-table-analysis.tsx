@@ -70,7 +70,7 @@ type DataTableProps = {
     };
 };
 
-export default function DataTable({
+export default function DataTableAnalysis({
     data,
     pageIndex,
     setPageIndex,

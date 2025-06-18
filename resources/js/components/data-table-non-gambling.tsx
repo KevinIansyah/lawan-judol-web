@@ -10,7 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Comment } from '@/lib/schemas/comment-schema';
+import { Comment } from '@/types';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -27,36 +27,57 @@ import {
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { ArrowUpDown, CheckCircle2Icon, FileTextIcon, PlusIcon } from 'lucide-react';
-import * as React from 'react';
+import { ArrowUpDown, CheckCircle2Icon, FileTextIcon, Loader2, PlusIcon } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 dayjs.extend(relativeTime);
 
 const columns: ColumnDef<Comment>[] = [
     {
         id: 'select',
-        header: ({ table }) => (
-            <div className="flex w-8 items-center justify-center">
-                <Checkbox
-                    className="dark:border-white/25"
-                    checked={
-                        table.getIsAllPageRowsSelected() ||
-                        (table.getIsSomePageRowsSelected() && 'indeterminate')
-                    }
-                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                    aria-label="Select all"
-                />
-            </div>
-        ),
-        cell: ({ row }) => (
-            <div className="flex items-center justify-center">
-                <Checkbox
-                    checked={row.getIsSelected()}
-                    onCheckedChange={(value) => row.toggleSelected(!!value)}
-                    aria-label="Select row"
-                />
-            </div>
-        ),
+        header: ({ table }) => {
+            const draftRows = table
+                .getFilteredRowModel()
+                .rows.filter((row) => row.original.status === 'draft');
+
+            const allDraftSelected = draftRows.every((row) => row.getIsSelected());
+            const someDraftSelected =
+                draftRows.some((row) => row.getIsSelected()) && !allDraftSelected;
+
+            return (
+                <div className="flex w-10 items-center justify-center">
+                    <Checkbox
+                        className="dark:border-white/25"
+                        checked={
+                            allDraftSelected ? true : someDraftSelected ? 'indeterminate' : false
+                        }
+                        onCheckedChange={(value) => {
+                            draftRows.forEach((row) => {
+                                row.toggleSelected(!!value);
+                            });
+                        }}
+                        aria-label="Select all draft comments"
+                        disabled={draftRows.length === 0}
+                    />
+                </div>
+            );
+        },
+        cell: ({ row }) => {
+            const isDraft = row.original.status === 'draft';
+
+            return (
+                <div className="flex items-center justify-center">
+                    <Checkbox
+                        checked={row.getIsSelected()}
+                        onCheckedChange={(value) => row.toggleSelected(!!value)}
+                        aria-label="Select row"
+                        disabled={!isDraft}
+                        className={!isDraft ? 'cursor-not-allowed opacity-30' : ''}
+                    />
+                </div>
+            );
+        },
         enableSorting: false,
         enableHiding: false,
     },
@@ -64,7 +85,7 @@ const columns: ColumnDef<Comment>[] = [
         accessorKey: 'text',
         header: () => <div className="w-full text-left">Teks Komentar</div>,
         cell: ({ row }) => {
-            const text = row.getValue('text');
+            const text = row.getValue('text') as string;
             const timestamp = row.original.timestamp;
             const user = row.original.user_metadata;
 
@@ -73,18 +94,21 @@ const columns: ColumnDef<Comment>[] = [
                     <img
                         src={user.profile_url}
                         alt={user.username}
-                        className="h-6 w-6 rounded-full object-cover"
+                        className="h-6 w-6 flex-shrink-0 rounded-full object-cover"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/default-avatar.png';
+                        }}
                     />
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                            <div className="text-muted-foreground text-xs font-medium">
+                    <div className="min-w-0 flex-1 space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <div className="text-muted-foreground truncate text-xs font-medium">
                                 {user.username.replace(/^@/, '')}
                             </div>
                             <Badge variant={'timestamp'}>{dayjs(timestamp).fromNow()}</Badge>
                         </div>
                         <div
-                            className="text-sm whitespace-normal"
-                            dangerouslySetInnerHTML={{ __html: text as string }}
+                            className="text-sm break-words whitespace-normal"
+                            dangerouslySetInnerHTML={{ __html: text }}
                         />
                     </div>
                 </div>
@@ -106,7 +130,7 @@ const columns: ColumnDef<Comment>[] = [
         cell: ({ row }) => (
             <Badge
                 variant="outline"
-                className="text-muted-foreground flex gap-1 px-1.5 [&_svg]:size-3"
+                className="text-muted-foreground flex gap-1 px-1.5 whitespace-nowrap [&_svg]:size-3"
             >
                 {row.original.status === 'reject' && (
                     <CheckCircle2Icon className="text-red-500 dark:text-red-400" />
@@ -117,7 +141,7 @@ const columns: ColumnDef<Comment>[] = [
                 {row.original.status === 'draft' && (
                     <FileTextIcon className="text-gray-500 dark:text-gray-400" />
                 )}
-                {row.original.status === 'database' && (
+                {row.original.status === 'dataset' && (
                     <CheckCircle2Icon className="text-green-500 dark:text-green-400" />
                 )}
                 {
@@ -125,7 +149,7 @@ const columns: ColumnDef<Comment>[] = [
                         reject: 'Ditolak',
                         heldForReview: 'Ditahan untuk Review',
                         draft: 'Draf',
-                        database: 'Ditambahkan ke Database',
+                        dataset: 'Ditambahkan ke Dataset',
                     }[row.original.status]
                 }
             </Badge>
@@ -133,20 +157,31 @@ const columns: ColumnDef<Comment>[] = [
     },
 ];
 
-export default function DataTableNonGambling({ data: initialData }: { data: Comment[] }) {
-    const [data] = React.useState(() => initialData);
-    const [globalFilter, setGlobalFilter] = React.useState('');
-    const [rowSelection, setRowSelection] = React.useState({});
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const multiColumnFilter: FilterFn<Comment> = (row, columnId, value) => {
+interface DataTableGamblingProps {
+    data: Comment[];
+    onAddDatasetComplete?: (updatedComments: Comment[]) => void;
+}
+
+export default function DataTableNonGambling({
+    data: initialData,
+    onAddDatasetComplete,
+}: DataTableGamblingProps) {
+    const [data] = useState(() => initialData);
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [rowSelection, setRowSelection] = useState({});
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const multiColumnFilter: FilterFn<Comment> = useCallback((row, columnId, value) => {
         const search = String(value).toLowerCase();
         return ['text', 'status'].some((key) =>
             String(row.getValue(key) || '')
                 .toLowerCase()
                 .includes(search),
         );
-    };
+    }, []);
+
     const table = useReactTable({
         data,
         columns,
@@ -157,7 +192,7 @@ export default function DataTableNonGambling({ data: initialData }: { data: Comm
             columnFilters,
         },
         getRowId: (row) => row.comment_id.toString(),
-        enableRowSelection: true,
+        enableRowSelection: (row) => row.original.status === 'draft',
         onRowSelectionChange: setRowSelection,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -170,46 +205,94 @@ export default function DataTableNonGambling({ data: initialData }: { data: Comm
         getFacetedUniqueValues: getFacetedUniqueValues(),
     });
 
+    const getSelectedCommentIds = useCallback((): string[] => {
+        const selectedRows = table.getFilteredSelectedRowModel().rows;
+        return selectedRows.map((row) => row.original.comment_id.toString());
+    }, [table]);
+
+    const getSelectedComments = useCallback((): Comment[] => {
+        const selectedRows = table.getFilteredSelectedRowModel().rows;
+        return selectedRows.map((row) => row.original);
+    }, [table]);
+
+    const fetchDataset = async (): Promise<void> => {
+        const selectedCommentIds = getSelectedCommentIds();
+        const selectedComments = getSelectedComments();
+        console.log('Selected Comment IDs:', selectedCommentIds);
+        console.log('Selected Comments:', selectedComments);
+        console.log('Row Selection State:', rowSelection);
+
+        if (selectedCommentIds.length === 0) {
+            toast('Tidak ada komentar yang dipilih', {
+                description: 'Silakan pilih minimal satu komentar untuk melanjutkan.',
+            });
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            // const response = await fetch('/api/moderate-comments', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({
+            //         comment_ids: selectedCommentIds,
+            //         action: 'moderate',
+            //     }),
+            // });
+            // if (!response.ok) {
+            //     throw new Error(`HTTP error! status: ${response.status}`);
+            // }
+            // const result = await response.json();
+            // toast.success('Moderasi berhasil', {
+            //     description: `${selectedCommentIds.length} komentar telah diproses.`,
+            // });
+            // // Reset selection setelah berhasil
+            // setRowSelection({});
+            // // Callback untuk update data di parent component jika ada
+            // if (onAddDatasetComplete && result.updatedComments) {
+            //     onAddDatasetComplete(result.updatedComments);
+            // }
+            // console.log(`Berhasil memproses ${selectedCommentIds.length} komentar`);
+        } catch (error) {
+            console.error('Error processing moderation:', error);
+
+            toast.error('Gagal memproses moderasi', {
+                description:
+                    error instanceof Error
+                        ? error.message
+                        : 'Terjadi kesalahan yang tidak diketahui',
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        setRowSelection({});
+    }, [data]);
+
+    const selectedCount = Object.keys(rowSelection).length;
+
     return (
         <div className="flex w-full flex-col justify-start gap-4">
             <div className="relative flex flex-col gap-4 overflow-auto">
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                     <div className="flex w-full gap-2 md:order-2 md:justify-end">
                         <div className="flex-1 md:flex-none">
-                            {/* <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" className="w-full md:w-auto">
-                                        <ColumnsIcon />
-                                        <span className="hidden lg:inline">Sesuaikan Kolom</span>
-                                        <span className="lg:hidden">Kolom</span>
-                                        <ChevronDownIcon />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-56">
-                                    {table
-                                        .getAllColumns()
-                                        .filter(
-                                            (column) =>
-                                                typeof column.accessorFn !== 'undefined' &&
-                                                column.getCanHide(),
-                                        )
-                                        .map((column) => (
-                                            <DropdownMenuCheckboxItem
-                                                key={column.id}
-                                                className="capitalize"
-                                                checked={column.getIsVisible()}
-                                                onCheckedChange={(value) =>
-                                                    column.toggleVisibility(!!value)
-                                                }
-                                            >
-                                                {column.id}
-                                            </DropdownMenuCheckboxItem>
-                                        ))}
-                                </DropdownMenuContent>
-                            </DropdownMenu> */}
-                            <Button variant="outline" className="w-full">
-                                <PlusIcon />
-                                <span>Tambah ke Dataset</span>
+                            <Button
+                                variant="outline"
+                                onClick={fetchDataset}
+                                className="w-full"
+                                disabled={selectedCount === 0 || isLoading}
+                            >
+                                {isLoading ? <Loader2 className="animate-spin" /> : <PlusIcon />}
+                                <span>
+                                    {isLoading ? 'Memproses...' : 'Tambah ke Dataset'}
+                                    {selectedCount > 0 && ` (${selectedCount} Komentar)`}
+                                </span>
                             </Button>
                         </div>
                     </div>
@@ -242,10 +325,16 @@ export default function DataTableNonGambling({ data: initialData }: { data: Comm
                                 </TableRow>
                             ))}
                         </TableHeader>
-                        <TableBody className="**:data-[slot=table-cell]:first:w-8">
+                        <TableBody className="**:data-[slot=table-cell]:first:w-10">
                             {table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
-                                    <TableRow key={row.id}>
+                                    <TableRow
+                                        key={row.id}
+                                        data-state={row.getIsSelected() && 'selected'}
+                                        className={
+                                            row.original.status !== 'draft' ? 'opacity-60' : ''
+                                        }
+                                    >
                                         {row.getVisibleCells().map((cell) => (
                                             <TableCell key={cell.id}>
                                                 {flexRender(
@@ -270,7 +359,7 @@ export default function DataTableNonGambling({ data: initialData }: { data: Comm
                     </Table>
                 </div>
 
-                <div className="flex items-center justify-between px-4">
+                <div className="flex items-center justify-between px-2">
                     <div className="text-muted-foreground flex flex-1 text-sm">
                         {table.getFilteredSelectedRowModel().rows.length} dari{' '}
                         {table.getFilteredRowModel().rows.length} baris dipilih.

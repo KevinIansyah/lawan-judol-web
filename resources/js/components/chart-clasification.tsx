@@ -52,7 +52,7 @@ interface ClasificationChartProps {
 //     },
 // } satisfies ChartConfig;
 
-export function ClasificationChart({
+export function ChartClasification({
     title = 'Chart Title',
     description = 'Chart Description',
     data,
@@ -77,8 +77,8 @@ export function ClasificationChart({
     return (
         <Card className="h-full border-0">
             <CardHeader className="items-center pb-0">
-                <CardTitle>{title}</CardTitle>
-                <CardDescription>{description}</CardDescription>
+                <CardTitle className="text-center">{title}</CardTitle>
+                <CardDescription className="text-center">{description}</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 pb-0">
                 <ChartContainer config={{}} className="mx-auto aspect-square max-h-[250px]">
@@ -131,7 +131,7 @@ export function ClasificationChart({
                             Total komentar: {gamblingCount + nonGamblingCount}
                         </div>
                         <div className="text-muted-foreground text-center">
-                            {gamblingCount} komentar terkait <strong>judi online</strong> dan{' '}
+                            {gamblingCount} komentar <strong>judi online</strong> dan{' '}
                             {nonGamblingCount} komentar <strong>bukan judi</strong>
                         </div>
                     </CardFooter>
