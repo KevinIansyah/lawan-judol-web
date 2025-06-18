@@ -133,7 +133,7 @@ const columns: ColumnDef<Comment>[] = [
     },
 ];
 
-export default function DataTableGambling({ data: initialData }: { data: Comment[] }) {
+export default function DataTableNonGambling({ data: initialData }: { data: Comment[] }) {
     const [data] = React.useState(() => initialData);
     const [globalFilter, setGlobalFilter] = React.useState('');
     const [rowSelection, setRowSelection] = React.useState({});

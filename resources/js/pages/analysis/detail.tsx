@@ -1,4 +1,6 @@
 import { ClasificationChart } from '@/components/clasification-chart';
+import DataTableGambling from '@/components/data-table-gambling';
+import DataTableNonGambling from '@/components/data-table-non-gambling';
 import Heading from '@/components/heading';
 import KeywordActions from '@/components/keyword/keyword-action';
 import KeywordList from '@/components/keyword/keyword-list';
@@ -9,8 +11,6 @@ import { Comment } from '@/lib/schemas/comment-schema';
 import { Analysis, Keywords, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import DataTableGambling from '../../components/data-table-gambling';
-import DataTableNonGambling from '../../components/data-table-non-gambling';
 import dataKeyword from './data-keyword.json';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -68,10 +68,21 @@ export default function Detail() {
                                 <VideoMetadata analysis={analysis} />
                             </div>
                             <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
-                                <ClasificationChart />
+                                <ClasificationChart
+                                    title="Klasifikasi Komentar"
+                                    description="Judi online dan bukan judi"
+                                    data="comments"
+                                    gamblingCount={gamblingComments.length}
+                                    nonGamblingCount={nonGamblingComments.length}
+                                />
                             </div>
                             <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
-                                <ClasificationChart />
+                                <ClasificationChart
+                                    title="Klasifikasi Kata Kunci"
+                                    description="Kata kunci judi online"
+                                    data="keywords"
+                                    keywordCount={10}
+                                />
                             </div>
                         </div>
                     </TabsContent>
