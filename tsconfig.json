@@ -117,6 +117,5 @@
     "include": [
         "resources/js/**/*.ts",
         "resources/js/**/*.tsx",
-        "resources/js/components/dialog/dialog-your-video.tsx"
     ]
 }

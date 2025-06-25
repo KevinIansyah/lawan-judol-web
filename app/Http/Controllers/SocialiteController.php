@@ -34,14 +34,26 @@ class SocialiteController extends Controller
             ->redirect();
     }
 
-    public function callback()
+    public function callback(Request $request)
     {
-        $googleUser = Socialite::driver('google')->user();
+        if ($request->has('error')) {
+            return redirect('/')
+                ->with('error', 'Login dibatalkan. Silakan coba lagi jika ingin melanjutkan.');
+        }
 
-        $user = $this->googleService->findOrCreateUser($googleUser);
+        try {
+            $googleUser = Socialite::driver('google')->user();
 
-        Auth::login($user);
+            $user = $this->googleService->findOrCreateUser($googleUser);
 
-        return redirect('/dashboard');
+            Auth::login($user);
+
+            return redirect('/dashboard');
+        } catch (\Exception $e) {
+            Log::error('Google login error: ' . $e->getMessage());
+
+            return redirect('/')
+                ->with('error', 'Terjadi kesalahan saat login dengan Google.');
+        }
     }
 }

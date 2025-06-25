@@ -29,7 +29,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     };
 
     return (
-        <AuthLayout title="Masuk ke Akun Anda" description="Selamat datang di Dasbor LawanJudol.ID, silakan masuk untuk melanjutkan.">
+        <AuthLayout title="Masuk ke Akun Anda" description="Selamat datang di Dasbor LawanJudol.ID. Silakan masuk untuk melanjutkan.">
             <Head title="Log in" />
             <Button className="w-full" asChild>
                 <a href="/auth/google/redirect" className="flex w-full items-center gap-2">

@@ -2,6 +2,8 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData, type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -11,7 +13,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Welcome() {
-    const { auth } = usePage<SharedData>().props;
+    const { auth, error } = usePage<SharedData & { error?: string }>().props;
+
+    useEffect(() => {
+        if (error) {
+            toast.error('Gagal Masuk dengan Google', {
+                description: error,
+                duration: 5000, // dalam ms
+            });
+        }
+    }, [error]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

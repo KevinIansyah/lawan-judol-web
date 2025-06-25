@@ -10,14 +10,17 @@ interface AuthLayoutProps {
 
 export default function AuthSplitLayout({ children, title, description }: AuthLayoutProps) {
     const { name, quote } = usePage<SharedData>().props;
-    
+
     return (
         <div className="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
             <div className="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-r">
                 <div className="absolute inset-0 bg-red-50 bg-[url('/assets/images/welcome.svg')] bg-cover bg-center dark:bg-red-700/10" />
                 <div className="absolute inset-0 bg-black/80" />
 
-                <Link href={route('home')} className="relative z-20 flex items-center text-lg font-medium">
+                <Link
+                    href={route('home')}
+                    className="relative z-20 flex items-center text-lg font-medium"
+                >
                     <AppLogoIcon />
                     <span className="ml-2">{name}</span>
                 </Link>
@@ -32,10 +35,13 @@ export default function AuthSplitLayout({ children, title, description }: AuthLa
             </div>
             <div className="w-full lg:p-8">
                 <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-                    <Link href={route('home')} className="relative z-20 flex items-center justify-center lg:hidden">
+                    <Link
+                        href={route('home')}
+                        className="relative z-20 flex items-center justify-center lg:hidden"
+                    >
                         <AppLogoIcon />
                     </Link>
-                    <div className="flex flex-col items-center gap-2 text-center">
+                    <div className="mb-0 flex flex-col items-center gap-2 text-center">
                         <h1 className="text-xl font-bold">{title}</h1>
                         <p className="text-muted-foreground text-sm text-balance">{description}</p>
                     </div>
