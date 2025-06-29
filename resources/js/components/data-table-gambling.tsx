@@ -10,6 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { Comment } from '@/types';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -37,9 +38,9 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Comment } from '@/types';
 
 dayjs.extend(relativeTime);
+dayjs.locale('id');
 
 const columns: ColumnDef<Comment>[] = [
     {
@@ -109,10 +110,13 @@ const columns: ColumnDef<Comment>[] = [
                     />
                     <div className="min-w-0 flex-1 space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
-                            <div className="text-muted-foreground truncate text-xs font-medium">
+                            <div className="truncate text-xs font-medium">
                                 {user.username.replace(/^@/, '')}
                             </div>
-                            <Badge variant={'timestamp'}>{dayjs(timestamp).fromNow()}</Badge>
+                            <div className="text-muted-foreground truncate text-xs font-medium">
+                                {dayjs(timestamp).fromNow()}
+                            </div>
+                            {/* <Badge>{dayjs(timestamp).fromNow()}</Badge> */}
                         </div>
                         <div
                             className="text-sm break-words whitespace-normal"
@@ -137,21 +141,30 @@ const columns: ColumnDef<Comment>[] = [
         ),
         cell: ({ row }) => (
             <Badge
-                variant="outline"
-                className="text-muted-foreground flex gap-1 px-1.5 whitespace-nowrap [&_svg]:size-3"
+                className={`flex gap-1 px-1.5 whitespace-nowrap [&_svg]:size-3 ${
+                    ['heldForReview', 'dataset'].includes(row.original.status)
+                        ? 'text-black'
+                        : 'text-white'
+                }`}
+                style={{
+                    backgroundColor:
+                        row.original.status === 'reject'
+                            ? 'var(--chart-1)'
+                            : row.original.status === 'heldForReview'
+                              ? 'var(--chart-3)'
+                              : row.original.status === 'draft'
+                                ? 'var(--muted)'
+                                : row.original.status === 'dataset'
+                                  ? 'var(--chart-4)'
+                                  : undefined,
+                }}
             >
-                {row.original.status === 'reject' && (
-                    <CheckCircle2Icon className="text-red-500 dark:text-red-400" />
-                )}
+                {row.original.status === 'reject' && <CheckCircle2Icon className="text-white" />}
                 {row.original.status === 'heldForReview' && (
-                    <CheckCircle2Icon className="text-yellow-500 dark:text-yellow-400" />
+                    <CheckCircle2Icon className="text-black" />
                 )}
-                {row.original.status === 'draft' && (
-                    <FileTextIcon className="text-gray-500 dark:text-gray-400" />
-                )}
-                {row.original.status === 'dataset' && (
-                    <CheckCircle2Icon className="text-green-500 dark:text-green-400" />
-                )}
+                {row.original.status === 'draft' && <FileTextIcon className="text-white" />}
+                {row.original.status === 'dataset' && <CheckCircle2Icon className="text-black" />}
                 {
                     {
                         reject: 'Ditolak',
@@ -348,12 +361,17 @@ export default function DataTableGambling({
                                     <TableRow
                                         key={row.id}
                                         data-state={row.getIsSelected() && 'selected'}
-                                        className={
-                                            row.original.status !== 'draft' ? 'opacity-60' : ''
-                                        }
                                     >
                                         {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id}>
+                                            <TableCell
+                                                key={cell.id}
+                                                className={
+                                                    row.original.status !== 'draft' &&
+                                                    cell.column.id !== 'status'
+                                                        ? 'opacity-60'
+                                                        : ''
+                                                }
+                                            >
                                                 {flexRender(
                                                     cell.column.columnDef.cell,
                                                     cell.getContext(),

@@ -46,21 +46,32 @@ export default function VideoMetadata({ analysis }: VideoMetadataProps) {
                     <TableCell className="font-semibold">Status</TableCell>
                     <TableCell className="text-muted-foreground break-words whitespace-normal">
                         <Badge
-                            variant="outline"
-                            className="text-muted-foreground flex gap-1 px-1.5 [&_svg]:size-3"
+                            className={`flex gap-1 px-1.5 [&_svg]:size-3 ${
+                                ['success', 'on_process'].includes(analysis.status)
+                                    ? 'text-black'
+                                    : 'text-white'
+                            }`}
+                            style={{
+                                backgroundColor:
+                                    analysis.status === 'success'
+                                        ? 'var(--chart-4)'
+                                        : analysis.status === 'on_process'
+                                          ? 'var(--chart-3)'
+                                          : analysis.status === 'failed'
+                                            ? 'var(--chart-1)'
+                                            : analysis.status === 'queue'
+                                              ? 'var(--muted)'
+                                              : undefined,
+                            }}
                         >
                             {analysis.status === 'success' && (
-                                <CheckCircle2Icon className="text-green-500 dark:text-green-400" />
+                                <CheckCircle2Icon className="text-black" />
                             )}
                             {analysis.status === 'on_process' && (
-                                <LoaderIcon className="animate-spin text-yellow-500 dark:text-yellow-400" />
+                                <LoaderIcon className="animate-spin text-black" />
                             )}
-                            {analysis.status === 'failed' && (
-                                <CircleX className="text-red-500 dark:text-red-400" />
-                            )}
-                            {analysis.status === 'queue' && (
-                                <LoaderIcon className="text-muted-foreground" />
-                            )}
+                            {analysis.status === 'failed' && <CircleX className="text-white" />}
+                            {analysis.status === 'queue' && <LoaderIcon className="text-white" />}
                             {
                                 {
                                     success: 'Selesai',
@@ -76,10 +87,10 @@ export default function VideoMetadata({ analysis }: VideoMetadataProps) {
                     <TableCell className="font-semibold">Tipe</TableCell>
                     <TableCell className="text-muted-foreground break-words whitespace-normal">
                         <Badge
-                            variant="outline"
-                            className="text-muted-foreground flex gap-1 px-1.5 [&_svg]:size-3"
+                            style={{ backgroundColor: 'var(--muted)' }}
+                            className="flex gap-1 px-1.5 text-white [&_svg]:size-3"
                         >
-                            <Youtube className="text-muted-foreground" />
+                            <Youtube className="text-white" />
                             {
                                 {
                                     your: 'Video Anda',

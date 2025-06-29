@@ -20,8 +20,8 @@ return new class extends Migration
             $table->enum('role', ['admin', 'user']);
             $table->string('avatar')->nullable();
             $table->string('google_id')->nullable();
-            $table->text('google_token')->nullable();
-            $table->text('google_refresh_token')->nullable();
+            $table->mediumText('google_token')->nullable();
+            $table->mediumText('google_refresh_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

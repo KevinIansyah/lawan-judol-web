@@ -64,11 +64,11 @@ export function ChartClasification({
 
     const chartData = isCommentChart
         ? [
-              { category: 'Judi Online', visitors: gamblingCount, fill: 'hsl(var(--chart-2))' },
-              { category: 'Bukan Judi', visitors: nonGamblingCount, fill: 'hsl(var(--chart-1))' },
+              { category: 'Judi Online', visitors: gamblingCount, fill: 'var(--chart-2)' },
+              { category: 'Bukan Judi', visitors: nonGamblingCount, fill: 'var(--chart-1)' },
           ]
         : [
-              { category: 'Kata Kunci', visitors: keywordCount, fill: 'hsl(var(--chart-1))' },
+              { category: 'Kata Kunci', visitors: keywordCount, fill: 'var(--chart-3)' },
               { category: 'kosong', visitors: 0, fill: 'transparent' },
           ];
 

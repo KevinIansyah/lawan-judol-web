@@ -63,7 +63,7 @@ export default function Detail() {
                     </TabsList>
                     <TabsContent value="summary">
                         <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                            <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border px-4 py-2">
+                            <div className="border-sidebar-border/70 dark:border-sidebar-border bg-card relative h-full rounded-xl border px-4 py-2">
                                 <VideoMetadata analysis={analysis} />
                             </div>
                             <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">

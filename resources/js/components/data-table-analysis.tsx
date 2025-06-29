@@ -149,21 +149,32 @@ export default function DataTableAnalysis({
                 header: 'Status',
                 cell: ({ row }) => (
                     <Badge
-                        variant="outline"
-                        className="text-muted-foreground flex gap-1 px-1.5 [&_svg]:size-3"
+                        className={`flex gap-1 px-1.5 [&_svg]:size-3 ${
+                            ['success', 'on_process'].includes(row.original.status)
+                                ? 'text-black'
+                                : 'text-white'
+                        }`}
+                        style={{
+                            backgroundColor:
+                                row.original.status === 'success'
+                                    ? 'var(--chart-4)'
+                                    : row.original.status === 'on_process'
+                                      ? 'var(--chart-3)'
+                                      : row.original.status === 'failed'
+                                        ? 'var(--chart-1)'
+                                        : row.original.status === 'queue'
+                                          ? 'var(--muted)'
+                                          : undefined,
+                        }}
                     >
                         {row.original.status === 'success' && (
-                            <CheckCircle2Icon className="text-green-500 dark:text-green-400" />
+                            <CheckCircle2Icon className="text-black" />
                         )}
                         {row.original.status === 'on_process' && (
-                            <LoaderIcon className="animate-spin text-yellow-500 dark:text-yellow-400" />
+                            <LoaderIcon className="animate-spin text-black" />
                         )}
-                        {row.original.status === 'failed' && (
-                            <CircleX className="text-red-500 dark:text-red-400" />
-                        )}
-                        {row.original.status === 'queue' && (
-                            <LoaderIcon className="text-muted-foreground" />
-                        )}
+                        {row.original.status === 'failed' && <CircleX className="text-white" />}
+                        {row.original.status === 'queue' && <LoaderIcon className="text-white" />}
                         {
                             {
                                 success: 'Selesai',
@@ -484,4 +495,3 @@ export default function DataTableAnalysis({
         </div>
     );
 }
-

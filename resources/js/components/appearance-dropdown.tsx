@@ -18,7 +18,7 @@ export default function AppearanceToggleDropdown({
     const { appearance, updateAppearance } = useAppearance();
 
     const getCurrentIcon = () => {
-        const baseClass = 'size-4.5 opacity-80 transition-opacity group-hover:opacity-100';
+        const baseClass = 'size-4.5';
         switch (appearance) {
             case 'dark':
                 return <Moon className={baseClass} />;
@@ -41,21 +41,36 @@ export default function AppearanceToggleDropdown({
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Tampilan</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => updateAppearance('light')}>
+                    <DropdownMenuItem
+                        onClick={() => updateAppearance('light')}
+                        className={
+                            appearance === 'light' ? 'bg-primary text-white' : ''
+                        }
+                    >
                         <span className="flex items-center gap-2">
-                            <Sun className="h-5 w-5" />
+                            <Sun className="h-5 w-5 dark:text-white" />
                             Terang
                         </span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => updateAppearance('dark')}>
+                    <DropdownMenuItem
+                        onClick={() => updateAppearance('dark')}
+                        className={
+                            appearance === 'dark' ? 'bg-primary text-white' : ''
+                        }
+                    >
                         <span className="flex items-center gap-2">
-                            <Moon className="h-5 w-5" />
+                            <Moon className="h-5 w-5 dark:text-white" />
                             Gelap
                         </span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => updateAppearance('system')}>
+                    <DropdownMenuItem
+                        onClick={() => updateAppearance('system')}
+                        className={
+                            appearance === 'system' ? 'bg-primary text-white' : ''
+                        }
+                    >
                         <span className="flex items-center gap-2">
-                            <Monitor className="h-5 w-5" />
+                            <Monitor className="h-5 w-5 dark:text-white" />
                             Sistem
                         </span>
                     </DropdownMenuItem>

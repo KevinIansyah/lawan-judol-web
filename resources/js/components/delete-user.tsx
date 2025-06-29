@@ -8,11 +8,27 @@ import { Label } from '@/components/ui/label';
 
 import HeadingSmall from '@/components/heading-small';
 
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 
 export default function DeleteUser() {
     const passwordInput = useRef<HTMLInputElement>(null);
-    const { data, setData, delete: destroy, processing, reset, errors, clearErrors } = useForm({ password: '' });
+    const {
+        data,
+        setData,
+        delete: destroy,
+        processing,
+        reset,
+        errors,
+        clearErrors,
+    } = useForm({ password: '' });
 
     const deleteUser: FormEventHandler = (e) => {
         e.preventDefault();
@@ -32,11 +48,16 @@ export default function DeleteUser() {
 
     return (
         <div className="space-y-6">
-            <HeadingSmall title="Hapus Akun" description="Hapus akun Anda beserta semua sumber daya yang terkait" />
+            <HeadingSmall
+                title="Hapus Akun"
+                description="Hapus akun Anda beserta semua sumber daya yang terkait"
+            />
             <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
                 <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
                     <p className="font-medium">Peringatan</p>
-                    <p className="text-sm">Harap berhati-hati, tindakan ini tidak dapat dibatalkan.</p>
+                    <p className="text-sm">
+                        Harap berhati-hati, tindakan ini tidak dapat dibatalkan.
+                    </p>
                 </div>
 
                 <Dialog>
@@ -45,14 +66,27 @@ export default function DeleteUser() {
                     </DialogTrigger>
                     <DialogContent>
                         <DialogTitle>Apakah Anda yakin ingin menghapus akun Anda?</DialogTitle>
-                        <DialogDescription>Setelah akun Anda dihapus, semua sumber daya dan data terkait juga akan dihapus secara permanen. Masukkan kata sandi Anda untuk mengonfirmasi bahwa Anda ingin menghapus akun secara permanen.</DialogDescription>
+                        <DialogDescription>
+                            Setelah akun Anda dihapus, semua sumber daya dan data terkait juga akan
+                            dihapus secara permanen. Masukkan kata sandi Anda untuk mengonfirmasi
+                            bahwa Anda ingin menghapus akun secara permanen.
+                        </DialogDescription>
                         <form className="space-y-6" onSubmit={deleteUser}>
                             <div className="grid gap-2">
                                 <Label htmlFor="password" className="sr-only">
                                     Kata Sandi
                                 </Label>
 
-                                <Input id="password" type="password" name="password" ref={passwordInput} value={data.password} onChange={(e) => setData('password', e.target.value)} placeholder="Kata Sandi" autoComplete="current-password" />
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    name="password"
+                                    ref={passwordInput}
+                                    value={data.password}
+                                    onChange={(e) => setData('password', e.target.value)}
+                                    placeholder="Kata Sandi"
+                                    autoComplete="current-password"
+                                />
 
                                 <InputError message={errors.password} />
                             </div>

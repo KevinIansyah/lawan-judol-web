@@ -8,8 +8,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
     NavigationMenu,
+    NavigationMenuContent,
     NavigationMenuItem,
+    NavigationMenuLink,
     NavigationMenuList,
+    NavigationMenuTrigger,
     navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -43,7 +46,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
-    const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
     const [isMobileAnalysisOpen, setIsMobileAnalysisOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -86,9 +88,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             <Link
                                                 href="/dashboard"
                                                 className={cn(
-                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
                                                     page.url === '/dashboard'
-                                                        ? 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
+                                                        ? 'bg-primary text-white'
                                                         : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                 )}
                                                 onClick={closeMobileMenu}
@@ -101,9 +103,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 <Button
                                                     variant="ghost"
                                                     className={cn(
-                                                        'flex h-auto items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                                                        'flex h-auto items-center justify-between rounded-lg px-3 py-2 text-sm font-medium',
                                                         page.url.startsWith('/analysis/')
-                                                            ? 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
+                                                            ? 'bg-primary text-white'
                                                             : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                     )}
                                                     onClick={() =>
@@ -128,11 +130,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                         <Link
                                                             href="/analysis/public-video"
                                                             className={cn(
-                                                                'rounded-md px-3 py-2 text-sm transition-colors',
+                                                                'rounded-md px-3 py-2 text-sm',
                                                                 page.url.startsWith(
                                                                     '/analysis/public-video',
                                                                 )
-                                                                    ? 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
+                                                                    ? 'bg-primary text-white'
                                                                     : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                             )}
                                                             onClick={closeMobileMenu}
@@ -142,11 +144,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                         <Link
                                                             href="/analysis/your-video"
                                                             className={cn(
-                                                                'rounded-md px-3 py-2 text-sm transition-colors',
+                                                                'rounded-md px-3 py-2 text-sm',
                                                                 page.url.startsWith(
                                                                     '/analysis/your-video',
                                                                 )
-                                                                    ? 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
+                                                                    ? 'bg-primary text-white'
                                                                     : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                             )}
                                                             onClick={closeMobileMenu}
@@ -160,9 +162,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             <Link
                                                 href="/keyword"
                                                 className={cn(
-                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
                                                     page.url === '/keyword'
-                                                        ? 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
+                                                        ? 'bg-primary text-white'
                                                         : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                 )}
                                                 onClick={closeMobileMenu}
@@ -174,9 +176,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             <Link
                                                 href="/guide"
                                                 className={cn(
-                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
                                                     page.url === '/guide'
-                                                        ? 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
+                                                        ? 'bg-primary text-white'
                                                         : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                 )}
                                                 onClick={closeMobileMenu}
@@ -190,9 +192,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             <Link
                                                 href="/keyword"
                                                 className={cn(
-                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
                                                     page.url === '/keyword'
-                                                        ? 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
+                                                        ? 'bg-primary text-white'
                                                         : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                 )}
                                                 onClick={closeMobileMenu}
@@ -204,9 +206,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             <Link
                                                 href="/guide"
                                                 className={cn(
-                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
                                                     page.url === '/guide'
-                                                        ? 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
+                                                        ? 'bg-primary text-white'
                                                         : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                 )}
                                                 onClick={closeMobileMenu}
@@ -218,9 +220,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             <Link
                                                 href="#"
                                                 className={cn(
-                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
                                                     page.url === '/guide'
-                                                        ? 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
+                                                        ? 'bg-primary text-white'
                                                         : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                 )}
                                                 onClick={closeMobileMenu}
@@ -261,7 +263,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                         )}
                                     </NavigationMenuItem>
 
-                                    <NavigationMenuItem className="relative flex h-full items-center">
+                                    {/* <NavigationMenuItem className="relative flex h-full items-center">
                                         <DropdownMenu
                                             open={isAnalysisOpen}
                                             onOpenChange={(open) => {
@@ -273,8 +275,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                     variant="ghost"
                                                     className={cn(
                                                         navigationMenuTriggerStyle(),
-                                                        'h-9 px-3 hover:bg-neutral-100 dark:hover:bg-neutral-800',
-                                                        'focus:bg-transparent',
+                                                        'h-9 px-3',
                                                         page.url.startsWith('/analysis/') &&
                                                             activeItemStyles,
                                                     )}
@@ -292,10 +293,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 <Link
                                                     href="/analysis/public-video"
                                                     className={cn(
-                                                        'hover:bg-muted block w-full rounded-md px-2 py-1.5 text-sm',
+                                                        'block w-full rounded-md px-2 py-1.5 text-sm',
                                                         page.url.startsWith(
                                                             '/analysis/public-video',
-                                                        ) && 'bg-neutral-100 dark:bg-neutral-800',
+                                                        ) && 'bg-primary',
                                                     )}
                                                     onClick={() => setIsAnalysisOpen(false)}
                                                 >
@@ -304,10 +305,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 <Link
                                                     href="/analysis/your-video"
                                                     className={cn(
-                                                        'hover:bg-muted mt-1 block w-full rounded-md px-2 py-1.5 text-sm',
+                                                        'mt-1 block w-full rounded-md px-2 py-1.5 text-sm',
                                                         page.url.startsWith(
                                                             '/analysis/your-video',
-                                                        ) && 'bg-neutral-100 dark:bg-neutral-800',
+                                                        ) && 'bg-primary',
                                                     )}
                                                     onClick={() => setIsAnalysisOpen(false)}
                                                 >
@@ -319,6 +320,43 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                         {page.url.startsWith('/analysis/') && (
                                             <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
                                         )}
+                                    </NavigationMenuItem> */}
+
+                                    <NavigationMenuItem className="relative flex h-full items-center">
+                                        <NavigationMenuTrigger>
+                                            <Youtube className="mr-2 h-4 w-4" />
+                                            Analisis
+                                        </NavigationMenuTrigger>
+                                        <NavigationMenuContent>
+                                            <ul className="grid w-[200px] gap-4">
+                                                <li>
+                                                    <NavigationMenuLink asChild>
+                                                        <Link
+                                                            href="/analysis/public-video"
+                                                            className={cn(
+                                                                page.url.startsWith(
+                                                                    '/analysis/public-video',
+                                                                ) && 'bg-primary',
+                                                            )}
+                                                        >
+                                                            Video Publik
+                                                        </Link>
+                                                    </NavigationMenuLink>
+                                                    <NavigationMenuLink asChild>
+                                                        <Link
+                                                            href="/analysis/your-video"
+                                                            className={cn(
+                                                                page.url.startsWith(
+                                                                    '/analysis/your-video',
+                                                                ) && 'bg-primary',
+                                                            )}
+                                                        >
+                                                            Video Saya
+                                                        </Link>
+                                                    </NavigationMenuLink>
+                                                </li>
+                                            </ul>
+                                        </NavigationMenuContent>
                                     </NavigationMenuItem>
 
                                     <NavigationMenuItem className="relative flex h-full items-center">

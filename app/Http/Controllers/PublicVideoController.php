@@ -68,8 +68,6 @@ class PublicVideoController extends Controller
         $nonGamblingComments = [];
 
         if (file_exists($commentsPath)) {
-            Log::info('Memuat file komentar untuk analysis');
-
             $allComments = json_decode(file_get_contents($commentsPath), true);
 
             foreach ($allComments as $comment) {
@@ -79,8 +77,6 @@ class PublicVideoController extends Controller
                     $nonGamblingComments[] = $comment;
                 }
             }
-
-            Log::info('Berhasil memuat file komentar untuk analysis');
         } else {
             Log::warning('File komentar tidak ditemukan', ['path' => $commentsPath]);
         }

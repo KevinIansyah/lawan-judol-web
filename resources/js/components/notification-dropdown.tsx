@@ -23,7 +23,7 @@ export default function NotificationDropdown() {
                         size="icon"
                         className="group h-9 w-9 cursor-pointer rounded-md"
                     >
-                        <Bell className="size-4.5 opacity-80 group-hover:opacity-100" />
+                        <Bell className="size-4.5" />
                         <span className="sr-only">Notifikasi</span>
                     </Button>
                 </div>

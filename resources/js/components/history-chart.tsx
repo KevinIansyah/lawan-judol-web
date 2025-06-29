@@ -4,8 +4,21 @@ import * as React from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    ChartConfig,
+    ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
+    ChartTooltip,
+    ChartTooltipContent,
+} from '@/components/ui/chart';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 const chartData = [
     { date: '2024-04-01', desktop: 222, mobile: 150 },
     { date: '2024-04-02', desktop: 97, mobile: 180 },
@@ -106,11 +119,11 @@ const chartConfig = {
     },
     desktop: {
         label: 'Desktop',
-        color: 'hsl(var(--chart-1))',
+        color: 'var(--chart-1)',
     },
     mobile: {
         label: 'Mobile',
-        color: 'hsl(var(--chart-2))',
+        color: 'var(--chart-2)',
     },
 } satisfies ChartConfig;
 
@@ -139,7 +152,10 @@ export function HistoryChart() {
                     <CardDescription>Showing total visitors for the last 3 months</CardDescription>
                 </div>
                 <Select value={timeRange} onValueChange={setTimeRange}>
-                    <SelectTrigger className="w-[160px] rounded-lg sm:ml-auto" aria-label="Select a value">
+                    <SelectTrigger
+                        className="w-[160px] rounded-lg sm:ml-auto"
+                        aria-label="Select a value"
+                    >
                         <SelectValue placeholder="Last 3 months" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
@@ -160,12 +176,28 @@ export function HistoryChart() {
                     <AreaChart data={filteredData}>
                         <defs>
                             <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="var(--color-desktop)" stopOpacity={0.8} />
-                                <stop offset="95%" stopColor="var(--color-desktop)" stopOpacity={0.1} />
+                                <stop
+                                    offset="5%"
+                                    stopColor="var(--color-desktop)"
+                                    stopOpacity={0.8}
+                                />
+                                <stop
+                                    offset="95%"
+                                    stopColor="var(--color-desktop)"
+                                    stopOpacity={0.1}
+                                />
                             </linearGradient>
                             <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="var(--color-mobile)" stopOpacity={0.8} />
-                                <stop offset="95%" stopColor="var(--color-mobile)" stopOpacity={0.1} />
+                                <stop
+                                    offset="5%"
+                                    stopColor="var(--color-mobile)"
+                                    stopOpacity={0.8}
+                                />
+                                <stop
+                                    offset="95%"
+                                    stopColor="var(--color-mobile)"
+                                    stopOpacity={0.1}
+                                />
                             </linearGradient>
                         </defs>
                         <CartesianGrid vertical={false} />
@@ -197,8 +229,20 @@ export function HistoryChart() {
                                 />
                             }
                         />
-                        <Area dataKey="mobile" type="natural" fill="url(#fillMobile)" stroke="var(--color-mobile)" stackId="a" />
-                        <Area dataKey="desktop" type="natural" fill="url(#fillDesktop)" stroke="var(--color-desktop)" stackId="a" />
+                        <Area
+                            dataKey="mobile"
+                            type="natural"
+                            fill="url(#fillMobile)"
+                            stroke="var(--color-mobile)"
+                            stackId="a"
+                        />
+                        <Area
+                            dataKey="desktop"
+                            type="natural"
+                            fill="url(#fillDesktop)"
+                            stroke="var(--color-desktop)"
+                            stackId="a"
+                        />
                         <ChartLegend content={<ChartLegendContent />} />
                     </AreaChart>
                 </ChartContainer>
