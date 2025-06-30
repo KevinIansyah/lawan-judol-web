@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -17,45 +16,20 @@ import {
     ApiResponseVideo,
     MergedVideoData,
 } from '@/types';
-import { router } from '@inertiajs/react';
-import { AlertCircle, Loader2, Play, PlusIcon, WifiOff } from 'lucide-react';
+import { router } from '@inertiajs/react'; // Import router dari Inertia
+import { Loader2, Play, PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function DialogPublicVideo() {
     const [videoId, setVideoId] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
-    const [errorType, setErrorType] = useState<'network' | 'server' | 'validation' | null>(null);
     const [loadingVideo, setLoadingVideo] = useState(false);
     const [loadingComments, setLoadingComments] = useState(false);
     const [loadingAnalysis, setLoadingAnalysis] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
-    const getUserFriendlyError = (
-        error: unknown,
-    ): { message: string; type: 'network' | 'server' | 'validation' } => {
-        let message = 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.';
-
-        if (typeof error === 'string') {
-            message = error;
-        }
-
-        if (!navigator.onLine) {
-            return {
-                message: 'Tidak ada koneksi internet. Periksa koneksi Anda dan coba lagi.',
-                type: 'network',
-            };
-        }
-
-        return {
-            message,
-            type: 'server',
-        };
-    };
-
     const handleProceed = (): void => {
-        setError(null);
-        setErrorType(null);
         setLoadingVideo(true);
         fetchVideo();
     };
@@ -80,11 +54,7 @@ export default function DialogPublicVideo() {
             });
 
             if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                const friendlyError = getUserFriendlyError(errorResponse.message);
-                setError(friendlyError.message);
-                setErrorType(friendlyError.type);
-                return;
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const videoData: ApiResponseVideo = await response.json();
@@ -93,16 +63,13 @@ export default function DialogPublicVideo() {
                 setLoadingComments(true);
                 fetchComments(videoData);
             } else {
-                const friendlyError = getUserFriendlyError(videoData.message);
-                setError(friendlyError.message);
-                setErrorType(friendlyError.type);
+                setError(videoData.message || 'Failed to fetch videos');
             }
         } catch (err) {
-            console.log(err);
-            console.error('Error fetching video:', err);
-            const friendlyError = getUserFriendlyError(err);
-            setError(friendlyError.message);
-            setErrorType(friendlyError.type);
+            const errorMessage =
+                err instanceof Error ? err.message : 'Network error. Please try again.';
+            setError(errorMessage);
+            console.error('Error fetching videos:', err);
         } finally {
             setLoadingVideo(false);
         }
@@ -128,11 +95,7 @@ export default function DialogPublicVideo() {
             });
 
             if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                const friendlyError = getUserFriendlyError(errorResponse.message);
-                setError(friendlyError.message);
-                setErrorType(friendlyError.type);
-                return;
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const commentData: ApiResponseComment = await response.json();
@@ -153,15 +116,13 @@ export default function DialogPublicVideo() {
                 setLoadingAnalysis(true);
                 fetchAnalysis(mergedData);
             } else {
-                const friendlyError = getUserFriendlyError(commentData.message);
-                setError(friendlyError.message);
-                setErrorType(friendlyError.type);
+                setError(commentData.message || 'Failed to fetch comments');
             }
         } catch (err) {
+            const errorMessage =
+                err instanceof Error ? err.message : 'Network error. Please try again.';
+            setError(errorMessage);
             console.error('Error fetching comments:', err);
-            const friendlyError = getUserFriendlyError(err);
-            setError(friendlyError.message);
-            setErrorType(friendlyError.type);
         } finally {
             setLoadingComments(false);
         }
@@ -190,11 +151,7 @@ export default function DialogPublicVideo() {
             });
 
             if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                const friendlyError = getUserFriendlyError(errorResponse.message);
-                setError(friendlyError.message);
-                setErrorType(friendlyError.type);
-                return;
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const analysisData: ApiResponseAnalysis = await response.json();
@@ -209,15 +166,13 @@ export default function DialogPublicVideo() {
                     description: 'Video telah masuk ke antrean analisis dan akan diproses segera.',
                 });
             } else {
-                const friendlyError = getUserFriendlyError(analysisData.message);
-                setError(friendlyError.message);
-                setErrorType(friendlyError.type);
+                setError(analysisData.message || 'Failed to fetch analysis');
             }
         } catch (err) {
+            const errorMessage =
+                err instanceof Error ? err.message : 'Network error. Please try again.';
+            setError(errorMessage);
             console.error('Error fetching analysis:', err);
-            const friendlyError = getUserFriendlyError(err);
-            setError(friendlyError.message);
-            setErrorType(friendlyError.type);
         } finally {
             setLoadingAnalysis(false);
         }
@@ -226,28 +181,9 @@ export default function DialogPublicVideo() {
     const resetForm = () => {
         setVideoId('');
         setError(null);
-        setErrorType(null);
         setLoadingVideo(false);
         setLoadingComments(false);
         setLoadingAnalysis(false);
-    };
-
-    const getErrorIcon = () => {
-        switch (errorType) {
-            case 'network':
-                return <WifiOff className="text-primary h-8 w-8" />;
-            default:
-                return <AlertCircle className="text-primary h-8 w-8" />;
-        }
-    };
-
-    const getRetryButtonText = () => {
-        switch (errorType) {
-            case 'network':
-                return 'Periksa Koneksi & Coba Lagi';
-            default:
-                return 'Coba Lagi';
-        }
     };
 
     return (
@@ -322,20 +258,17 @@ export default function DialogPublicVideo() {
                         </div>
                     ) : error ? (
                         <div className="flex flex-1 items-center overflow-hidden">
-                            <div className="flex w-full flex-col items-center justify-center text-center">
-                                <div className="mb-4">{getErrorIcon()}</div>
-                                <div className="space-y-2">
-                                    <p className="font-medium">Oops! Ada masalah</p>
-                                    <p className="text-muted-foreground max-w-sm text-sm">
-                                        {error}
-                                    </p>
+                            <div className="flex w-full flex-col items-center justify-center">
+                                <div className="text-center">
+                                    <p className="font-medium">Terjadi kesalahan</p>
+                                    <p className="text-muted-foreground mt-1 text-sm">{error}</p>
                                 </div>
                                 <Button
                                     variant="outline"
-                                    className="mt-6"
+                                    className="mt-4"
                                     onClick={() => resetForm()}
                                 >
-                                    {getRetryButtonText()}
+                                    Coba Lagi
                                 </Button>
                             </div>
                         </div>
@@ -358,11 +291,7 @@ export default function DialogPublicVideo() {
                             <Button
                                 onClick={handleProceed}
                                 disabled={
-                                    !videoId.trim() ||
-                                    loadingVideo ||
-                                    loadingComments ||
-                                    loadingAnalysis ||
-                                    !!error
+                                    !videoId.trim() || loadingVideo || loadingComments || !!error
                                 }
                                 className="flex items-center gap-2"
                             >

@@ -17,7 +17,7 @@ import {
     Video,
 } from '@/types';
 import { router } from '@inertiajs/react';
-import { AlertCircle, Check, Loader2, Play, PlusIcon, RefreshCw, WifiOff } from 'lucide-react';
+import { Check, Loader2, Play, PlusIcon, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -30,122 +30,9 @@ export default function DialogYourVideo() {
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [errorType, setErrorType] = useState<'network' | 'server' | 'validation' | null>(null);
+    // const [channelInfo, setChannelInfo] = useState<ChannelInfo | null>(null);
+    // const [fromCache, setFromCache] = useState<boolean>(false);
     const [hasInitialLoad, setHasInitialLoad] = useState<boolean>(false);
-
-    // Helper function to detect network errors
-    const isNetworkError = (error: unknown): boolean => {
-        if (typeof error === 'string') {
-            return (
-                error.toLowerCase().includes('network') ||
-                error.toLowerCase().includes('offline') ||
-                error.toLowerCase().includes('fetch') ||
-                error.toLowerCase().includes('connection') ||
-                error.toLowerCase().includes('curl error')
-            );
-        }
-        return false;
-    };
-
-    // Helper function to get user-friendly error message
-    const getUserFriendlyError = (
-        error: unknown,
-        statusCode?: number,
-    ): { message: string; type: 'network' | 'server' | 'validation' } => {
-        console.log(error);
-        console.log(statusCode);
-        // Check if offline
-        if (!navigator.onLine) {
-            return {
-                message: 'Tidak ada koneksi internet. Periksa koneksi Anda dan coba lagi.',
-                type: 'network',
-            };
-        }
-
-        // Check for network-related errors
-        if (isNetworkError(error) || statusCode === 503) {
-            return {
-                message:
-                    'Koneksi terputus atau server tidak dapat dijangkau. Periksa koneksi internet Anda.',
-                type: 'network',
-            };
-        }
-
-        // Handle specific status codes
-        switch (statusCode) {
-            case 401:
-                return {
-                    message: 'Sesi Anda telah berakhir. Silakan login ulang.',
-                    type: 'validation',
-                };
-            case 404:
-                return {
-                    message: 'Video tidak ditemukan. Periksa kembali ID video yang Anda masukkan.',
-                    type: 'validation',
-                };
-            case 429:
-                return {
-                    message: 'Terlalu banyak permintaan. Mohon tunggu beberapa saat dan coba lagi.',
-                    type: 'server',
-                };
-            case 500:
-                return {
-                    message: 'Terjadi kesalahan pada server. Tim kami akan segera memperbaikinya.',
-                    type: 'server',
-                };
-            default:
-                if (
-                    typeof error === 'string' &&
-                    error.toLowerCase().includes('tidak memiliki komentar')
-                ) {
-                    return {
-                        message: 'Video tidak memiliki komentar.',
-                        type: 'server',
-                    };
-                }
-
-                if (
-                    typeof error === 'string' &&
-                    error.toLowerCase().includes('komentar dinonaktifkan')
-                ) {
-                    return {
-                        message: 'Komentar dinonaktifkan.',
-                        type: 'server',
-                    };
-                }
-
-                if (typeof error === 'string' && error.toLowerCase().includes('youtube')) {
-                    return {
-                        message:
-                            'Layanan YouTube sedang tidak tersedia. Coba lagi dalam beberapa menit.',
-                        type: 'server',
-                    };
-                }
-
-                return {
-                    message: 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.',
-                    type: 'server',
-                };
-        }
-    };
-
-    const getErrorIcon = () => {
-        switch (errorType) {
-            case 'network':
-                return <WifiOff className="text-primary h-8 w-8" />;
-            default:
-                return <AlertCircle className="text-primary h-8 w-8" />;
-        }
-    };
-
-    const getRetryButtonText = () => {
-        switch (errorType) {
-            case 'network':
-                return 'Periksa Koneksi & Coba Lagi';
-            default:
-                return 'Coba Lagi';
-        }
-    };
 
     const handleModalOpen = (): void => {
         setIsOpen(true);
@@ -177,8 +64,6 @@ export default function DialogYourVideo() {
     const resetForm = () => {
         setSelectedVideo(null);
         setError(null);
-        setErrorType(null);
-        setErrorType(null);
         setLoadingVideo(false);
         setLoadingComments(false);
         setLoadingAnalysis(false);
@@ -214,31 +99,34 @@ export default function DialogYourVideo() {
             });
 
             if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                const friendlyError = getUserFriendlyError(errorResponse.message, response.status);
-                setError(friendlyError.message);
-                setErrorType(friendlyError.type);
-                return;
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data: ApiResponseVideos = await response.json();
 
             if (data.success) {
                 setVideos(data.videos);
+                // setChannelInfo(data.channel_info);
+                // setFromCache(data.from_cache);
                 setHasInitialLoad(true);
 
-                console.log(`Videos loaded successfully`);
-                console.log(`Total videos: ${data.videos.length}`);
+                // Log the data source for debugging
+                // console.log(`Videos loaded from: ${data.from_cache ? 'Cache' : 'YouTube API'}`);
+                // console.log(`Total videos: ${data.videos.length}`);
+
+                // if (!data.from_cache) {
+                //     console.log('Fresh data fetched from YouTube API');
+                // } else {
+                //     console.log('Data loaded from 24-hour cache');
+                // }
             } else {
-                const friendlyError = getUserFriendlyError(data.message);
-                setError(friendlyError.message);
-                setErrorType(friendlyError.type);
+                setError(data.message || 'Failed to fetch videos');
             }
         } catch (err) {
+            const errorMessage =
+                err instanceof Error ? err.message : 'Network error. Please try again.';
+            setError(errorMessage);
             console.error('Error fetching videos:', err);
-            const friendlyError = getUserFriendlyError(err);
-            setError(friendlyError.message);
-            setErrorType(friendlyError.type);
         } finally {
             setLoadingVideo(false);
             setRefreshing(false);
@@ -266,11 +154,7 @@ export default function DialogYourVideo() {
             });
 
             if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                const friendlyError = getUserFriendlyError(errorResponse.message, response.status);
-                setError(friendlyError.message);
-                setErrorType(friendlyError.type);
-                return;
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const commentData: ApiResponseComment = await response.json();
@@ -291,15 +175,13 @@ export default function DialogYourVideo() {
                 setLoadingAnalysis(true);
                 fetchAnalysis(mergedData);
             } else {
-                const friendlyError = getUserFriendlyError(commentData.message);
-                setError(friendlyError.message);
-                setErrorType(friendlyError.type);
+                setError(commentData.message || 'Failed to fetch comments');
             }
         } catch (err) {
+            const errorMessage =
+                err instanceof Error ? err.message : 'Network error. Please try again.';
+            setError(errorMessage);
             console.error('Error fetching comments:', err);
-            const friendlyError = getUserFriendlyError(err);
-            setError(friendlyError.message);
-            setErrorType(friendlyError.type);
         } finally {
             setLoadingComments(false);
         }
@@ -328,36 +210,54 @@ export default function DialogYourVideo() {
             });
 
             if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                const friendlyError = getUserFriendlyError(errorResponse.message, response.status);
-                setError(friendlyError.message);
-                setErrorType(friendlyError.type);
-                return;
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const analysisData: ApiResponseAnalysis = await response.json();
 
             if (analysisData.success) {
                 setIsOpen(false);
+
                 router.reload();
 
                 toast('Analisis berhasil ditambahkan!', {
                     description: 'Video telah masuk ke antrean analisis dan akan diproses segera.',
                 });
             } else {
-                const friendlyError = getUserFriendlyError(analysisData.message);
-                setError(friendlyError.message);
-                setErrorType(friendlyError.type);
+                setError(analysisData.message || 'Failed to fetch analysis');
             }
         } catch (err) {
+            const errorMessage =
+                err instanceof Error ? err.message : 'Network error. Please try again.';
+            setError(errorMessage);
             console.error('Error fetching analysis:', err);
-            const friendlyError = getUserFriendlyError(err);
-            setError(friendlyError.message);
-            setErrorType(friendlyError.type);
         } finally {
             setLoadingAnalysis(false);
         }
     };
+
+    // const formatNumber = (num: number | undefined): string => {
+    //     if (!num) return '0';
+
+    //     if (num >= 1000000) {
+    //         return (num / 1000000).toFixed(1) + 'M';
+    //     }
+    //     if (num >= 1000) {
+    //         return (num / 1000).toFixed(1) + 'K';
+    //     }
+    //     return num.toString();
+    // };
+
+    // const getCacheStatusText = (): string => {
+    //     if (loading || refreshing) return '';
+    //     if (!hasInitialLoad) return '';
+
+    //     if (fromCache) {
+    //         return 'Data dari cache (24 jam)';
+    //     } else {
+    //         return 'Data terbaru dari YouTube';
+    //     }
+    // };
 
     return (
         <Dialog
@@ -380,9 +280,11 @@ export default function DialogYourVideo() {
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-between">
                         <span>Analisis Video</span>
+                        {/* {getCacheStatusText() && <span className={`text-sm font-normal ${fromCache ? 'text-blue-600' : 'text-green-600'}`}>{getCacheStatusText()}</span>} */}
                     </DialogTitle>
                     <DialogDescription>
                         Pilih video YouTube Anda yang ingin dianalisis.
+                        {/* {fromCache && <span className="mt-1 block text-xs text-blue-600">Cache akan diperbarui otomatis setelah 24 jam, atau klik tombol Perbarui untuk data terbaru.</span>} */}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -419,20 +321,19 @@ export default function DialogYourVideo() {
                         </div>
                     ) : error ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <div className="mb-4">{getErrorIcon()}</div>
-                            <div className="space-y-2 text-center">
+                            <div className="text-center">
                                 <p className="font-medium">Oops! Ada masalah</p>
-                                <p className="text-muted-foreground max-w-sm text-sm">{error}</p>
+                                <p className="text-muted-foreground mt-1 text-sm">{error}</p>
                             </div>
                             <Button
                                 variant="outline"
-                                className="mt-6"
+                                className="mt-4"
                                 onClick={() => {
                                     resetForm();
                                     fetchVideos();
                                 }}
                             >
-                                {getRetryButtonText()}
+                                Coba Lagi
                             </Button>
                         </div>
                     ) : videos.length === 0 ? (
@@ -451,7 +352,7 @@ export default function DialogYourVideo() {
                                 {videos.map((video) => (
                                     <div
                                         key={video.video_id}
-                                        className="relative h-full cursor-pointer rounded-xl transition-all hover:shadow-lg"
+                                        className="relative h-full cursor-pointer rounded-xl"
                                         onClick={() => handleVideoSelect(video)}
                                     >
                                         <img
@@ -462,7 +363,7 @@ export default function DialogYourVideo() {
 
                                         {selectedVideo?.video_id === video.video_id && (
                                             <div className="absolute inset-0 flex h-40 items-center justify-center rounded bg-black/80 text-white">
-                                                <Check className="h-8 w-8" />
+                                                <Check />
                                             </div>
                                         )}
 
@@ -492,7 +393,7 @@ export default function DialogYourVideo() {
                                 refreshing ||
                                 loadingVideo ||
                                 loadingComments ||
-                                loadingAnalysis ||
+                                loadingComments ||
                                 !!error
                             }
                             className="flex items-center gap-2"
@@ -507,7 +408,7 @@ export default function DialogYourVideo() {
                                 !selectedVideo ||
                                 loadingVideo ||
                                 loadingComments ||
-                                loadingAnalysis ||
+                                loadingComments ||
                                 refreshing ||
                                 !!error
                             }
