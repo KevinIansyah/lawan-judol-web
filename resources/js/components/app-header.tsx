@@ -252,7 +252,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
                                                 page.url === '/dashboard' && activeItemStyles,
-                                                'h-9 cursor-pointer px-3',
+                                                'h-9 px-3',
                                             )}
                                         >
                                             <LayoutGrid className="mr-2 h-4 w-4" />
@@ -365,7 +365,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
                                                 page.url === '/keyword' && activeItemStyles,
-                                                'h-9 cursor-pointer px-3',
+                                                'h-9 px-3',
                                             )}
                                         >
                                             <FileKey className="mr-2 h-4 w-4" />
@@ -382,7 +382,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
                                                 page.url === '/guide' && activeItemStyles,
-                                                'h-9 cursor-pointer px-3',
+                                                'h-9 px-3',
                                             )}
                                         >
                                             <BookOpen className="mr-2 h-4 w-4" />
@@ -405,7 +405,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
                                                 page.url === '/keyword' && activeItemStyles,
-                                                'h-9 cursor-pointer px-3',
+                                                'h-9 px-3',
                                             )}
                                         >
                                             <FileKey className="mr-2 h-4 w-4" />
@@ -422,7 +422,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
                                                 page.url === '/guide' && activeItemStyles,
-                                                'h-9 cursor-pointer px-3',
+                                                'h-9 px-3',
                                             )}
                                         >
                                             <BookOpen className="mr-2 h-4 w-4" />
@@ -439,7 +439,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
                                                 page.url === '/guide' && activeItemStyles,
-                                                'h-9 cursor-pointer px-3',
+                                                'h-9 px-3',
                                             )}
                                         >
                                             <ShieldCheck className="mr-2 h-4 w-4" />

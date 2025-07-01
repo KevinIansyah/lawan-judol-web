@@ -43,9 +43,7 @@ export default function AppearanceToggleDropdown({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                         onClick={() => updateAppearance('light')}
-                        className={
-                            appearance === 'light' ? 'bg-primary text-white' : ''
-                        }
+                        className={appearance === 'light' ? 'bg-primary text-white' : ''}
                     >
                         <span className="flex items-center gap-2">
                             <Sun className="h-5 w-5 dark:text-white" />
@@ -54,9 +52,7 @@ export default function AppearanceToggleDropdown({
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => updateAppearance('dark')}
-                        className={
-                            appearance === 'dark' ? 'bg-primary text-white' : ''
-                        }
+                        className={appearance === 'dark' ? 'bg-primary text-white' : ''}
                     >
                         <span className="flex items-center gap-2">
                             <Moon className="h-5 w-5 dark:text-white" />
@@ -65,9 +61,7 @@ export default function AppearanceToggleDropdown({
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => updateAppearance('system')}
-                        className={
-                            appearance === 'system' ? 'bg-primary text-white' : ''
-                        }
+                        className={appearance === 'system' ? 'bg-primary text-white' : ''}
                     >
                         <span className="flex items-center gap-2">
                             <Monitor className="h-5 w-5 dark:text-white" />
