@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\YouTube\Handlers\CacheHandler;
 use App\Services\Youtube\YoutubeService;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -12,82 +12,12 @@ use Illuminate\Http\JsonResponse;
 class VideoController extends Controller
 {
     protected $youtubeService;
+    protected $cacheHandler;
 
-    public function __construct(YoutubeService $youtubeService)
+    public function __construct(YoutubeService $youtubeService, CacheHandler $cacheHandler)
     {
         $this->youtubeService = $youtubeService;
-    }
-
-    /**
-     * Get user-friendly error message and status code
-     */
-    private function getErrorResponse(\Exception $e, string $context = 'operation'): array
-    {
-        $message = $e->getMessage();
-        $statusCode = 500;
-        $userMessage = 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.';
-
-        // Network/Connection errors
-        if (
-            $e instanceof ConnectionException ||
-            str_contains($message, 'cURL error') ||
-            str_contains($message, 'Connection') ||
-            str_contains($message, 'network') ||
-            str_contains($message, 'timeout')
-        ) {
-
-            $statusCode = 503;
-            $userMessage = 'Tidak dapat terhubung ke layanan YouTube. Periksa koneksi internet Anda dan coba lagi.';
-        } elseif (str_contains($message, 'quotaExceeded')) {
-            $statusCode = 429;
-            $userMessage = 'Batas penggunaan YouTube API telah tercapai. Coba lagi dalam beberapa jam.';
-        } elseif (str_contains($message, 'videoNotFound') || str_contains($message, 'Video not found')) {
-            $statusCode = 404;
-            $userMessage = 'Video tidak ditemukan. Pastikan ID video yang Anda masukkan benar.';
-        } elseif (str_contains($message, 'forbidden') || str_contains($message, 'accessNotConfigured')) {
-            $statusCode = 403;
-            $userMessage = 'Akses ditolak. Periksa pengaturan privasi video atau coba video lain.';
-        } elseif (str_contains($message, 'invalid') && str_contains($message, 'videoId')) {
-            $statusCode = 400;
-            $userMessage = 'ID video tidak valid. Periksa kembali ID video yang Anda masukkan.';
-        }
-        // Authentication errors
-        elseif (str_contains($message, 'unauthorized') || str_contains($message, 'authentication')) {
-            $statusCode = 401;
-            $userMessage = 'Akun Google belum terhubung atau sesi telah berakhir. Silakan login ulang.';
-        }
-
-        // Log the technical error for developers
-        Log::error("Error in {$context}: " . $message, [
-            'exception' => $e,
-            'user_id' => Auth::id(),
-            'context' => $context,
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return [
-            'status_code' => $statusCode,
-            'user_message' => $userMessage,
-            'technical_message' => config('app.debug') ? $message : null
-        ];
-    }
-
-    /**
-     * Check if user has valid Google token
-     */
-    private function checkGoogleToken(): ?JsonResponse
-    {
-        $user = Auth::user();
-
-        if (!$user || !$user->google_token) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Akun Google belum terhubung. Silakan login ulang.',
-                'error_code' => 'GOOGLE_TOKEN_MISSING'
-            ], 401);
-        }
-
-        return null;
+        $this->cacheHandler = $cacheHandler;
     }
 
     /**
@@ -129,7 +59,7 @@ class VideoController extends Controller
 
             return response()->json($result);
         } catch (\Exception $e) {
-            Log::error("Gagal mengambil video di getVideo(): " . $e->getMessage(), [
+            Log::error("Failed fetch video in getVideo(): " . $e->getMessage(), [
                 'user_id' => $user->id,
                 'video_id' => $videoId ?? null,
                 'trace' => $e->getTraceAsString(),
@@ -149,16 +79,23 @@ class VideoController extends Controller
      */
     public function getVideos(Request $request): JsonResponse
     {
-        // Check authentication
-        if ($tokenError = $this->checkGoogleToken()) {
-            return $tokenError;
+        $user = Auth::user();
+
+        if (!$user->google_token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Google belum terhubung. Silakan login ulang.',
+                'videos' => [],
+                'total' => 0,
+                'channel_info' => null,
+                'from_cache' => false
+            ], 401);
         }
 
-        $user = Auth::user();
         $forceRefresh = $request->boolean('refresh', false);
 
         try {
-            $shouldFetchFresh = $forceRefresh || !$this->youtubeService->isVideosCached($user);
+            $shouldFetchFresh = $forceRefresh || !$this->cacheHandler->isVideosCached($user);
 
             if ($forceRefresh) {
                 Log::info("Force refresh requested for user: {$user->id}");
@@ -181,18 +118,19 @@ class VideoController extends Controller
 
             return response()->json($result);
         } catch (\Exception $e) {
-            $errorResponse = $this->getErrorResponse($e, 'getVideos');
+            Log::error("Failed fetch videos in getVideos(): " . $e->getMessage(), [
+                'user_id' => $user->id,
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             return response()->json([
                 'success' => false,
-                'message' => $errorResponse['user_message'],
+                'message' => 'Akun Google belum terhubung. Silakan login ulang.',
                 'videos' => [],
                 'total' => 0,
                 'channel_info' => null,
-                'from_cache' => false,
-                'error_code' => 'VIDEOS_FETCH_ERROR',
-                'debug_info' => $errorResponse['technical_message']
-            ], $errorResponse['status_code']);
+                'from_cache' => false
+            ], 500);
         }
     }
 
@@ -201,24 +139,18 @@ class VideoController extends Controller
      */
     public function getComments(Request $request): JsonResponse
     {
-        // Check authentication
-        if ($tokenError = $this->checkGoogleToken()) {
-            return $tokenError;
+        $user = Auth::user();
+
+        if (!$user->google_token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Google belum terhubung. Silakan login ulang.',
+                'comments' => '',
+                'total' => 0,
+            ], 401);
         }
 
-        $user = Auth::user();
         $videoId = $request->input('video_id');
-
-        // Validate video ID format
-        // if (empty($videoId) || !$this->isValidYouTubeVideoId($videoId)) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'ID video tidak valid. Pastikan Anda memasukkan ID video YouTube yang benar.',
-        //         'comments' => '',
-        //         'total' => 0,
-        //         'error_code' => 'INVALID_VIDEO_ID'
-        //     ], 400);
-        // }
 
         try {
             $result = $this->youtubeService->getCommentsByVideoId($user, $videoId);
@@ -233,85 +165,52 @@ class VideoController extends Controller
 
             return response()->json($result);
         } catch (\Exception $e) {
-            $errorResponse = $this->getErrorResponse($e, 'getComments');
+            Log::error("Failed fetch comments in getComments(): " . $e->getMessage(), [
+                'user_id' => $user->id,
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             return response()->json([
                 'success' => false,
-                'message' => $errorResponse['user_message'],
+                'message' => 'Terjadi kesalahan saat mengambil komentar. Silakan coba lagi.',
                 'comments' => '',
                 'total' => 0,
-                'error_code' => 'COMMENTS_FETCH_ERROR',
-                'debug_info' => $errorResponse['technical_message']
-            ], $errorResponse['status_code']);
+            ], 500);
         }
     }
 
     /**
      * Clear user videos cache
      */
-    public function clearCache(Request $request): JsonResponse
+    public function clearCache(): JsonResponse
     {
-        // Check authentication
-        if ($tokenError = $this->checkGoogleToken()) {
-            return $tokenError;
-        }
-
         $user = Auth::user();
 
-        try {
-            $this->youtubeService->clearUserVideosCache($user);
+        $this->cacheHandler->clearUserVideosCache($user);
 
-            Log::info("Cache cleared for user: {$user->id}");
+        Log::info("Cache cleared for user: {$user->id}");
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Cache berhasil dihapus.',
-            ]);
-        } catch (\Exception $e) {
-            $errorResponse = $this->getErrorResponse($e, 'clearCache');
-
-            return response()->json([
-                'success' => false,
-                'message' => $errorResponse['user_message'],
-                'error_code' => 'CACHE_CLEAR_ERROR',
-                'debug_info' => $errorResponse['technical_message']
-            ], $errorResponse['status_code']);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Cache berhasil dihapus.',
+        ]);
     }
 
     /**
      * Get cache information
      */
-    public function getCacheInfo(Request $request): JsonResponse
+    public function getCacheInfo(): JsonResponse
     {
-        // Check authentication
-        if ($tokenError = $this->checkGoogleToken()) {
-            return $tokenError;
-        }
-
         $user = Auth::user();
 
-        try {
-            $cacheInfo = $this->youtubeService->getCacheExpiry($user);
+        $cacheInfo = $this->cacheHandler->getCacheExpiry($user);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Informasi cache berhasil diambil.',
-                'cache_info' => $cacheInfo,
-                'is_cached' => $this->youtubeService->isVideosCached($user)
-            ]);
-        } catch (\Exception $e) {
-            $errorResponse = $this->getErrorResponse($e, 'getCacheInfo');
-
-            return response()->json([
-                'success' => false,
-                'message' => $errorResponse['user_message'],
-                'cache_info' => null,
-                'is_cached' => false,
-                'error_code' => 'CACHE_INFO_ERROR',
-                'debug_info' => $errorResponse['technical_message']
-            ], $errorResponse['status_code']);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Informasi cache berhasil diambil.',
+            'cache_info' => $cacheInfo,
+            'is_cached' => $this->cacheHandler->isVideosCached($user)
+        ]);
     }
 
     /**

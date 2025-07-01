@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -33,28 +34,10 @@ export default function DialogYourVideo() {
     const [errorType, setErrorType] = useState<'network' | 'server' | 'validation' | null>(null);
     const [hasInitialLoad, setHasInitialLoad] = useState<boolean>(false);
 
-    // Helper function to detect network errors
-    const isNetworkError = (error: unknown): boolean => {
-        if (typeof error === 'string') {
-            return (
-                error.toLowerCase().includes('network') ||
-                error.toLowerCase().includes('offline') ||
-                error.toLowerCase().includes('fetch') ||
-                error.toLowerCase().includes('connection') ||
-                error.toLowerCase().includes('curl error')
-            );
-        }
-        return false;
-    };
-
-    // Helper function to get user-friendly error message
     const getUserFriendlyError = (
         error: unknown,
         statusCode?: number,
     ): { message: string; type: 'network' | 'server' | 'validation' } => {
-        console.log(error);
-        console.log(statusCode);
-        // Check if offline
         if (!navigator.onLine) {
             return {
                 message: 'Tidak ada koneksi internet. Periksa koneksi Anda dan coba lagi.',
@@ -62,71 +45,56 @@ export default function DialogYourVideo() {
             };
         }
 
-        // Check for network-related errors
-        if (isNetworkError(error) || statusCode === 503) {
-            return {
-                message:
-                    'Koneksi terputus atau server tidak dapat dijangkau. Periksa koneksi internet Anda.',
-                type: 'network',
-            };
-        }
-
-        // Handle specific status codes
         switch (statusCode) {
             case 401:
                 return {
                     message: 'Sesi Anda telah berakhir. Silakan login ulang.',
                     type: 'validation',
                 };
-            case 404:
-                return {
-                    message: 'Video tidak ditemukan. Periksa kembali ID video yang Anda masukkan.',
-                    type: 'validation',
-                };
-            case 429:
-                return {
-                    message: 'Terlalu banyak permintaan. Mohon tunggu beberapa saat dan coba lagi.',
-                    type: 'server',
-                };
             case 500:
                 return {
                     message: 'Terjadi kesalahan pada server. Tim kami akan segera memperbaikinya.',
                     type: 'server',
                 };
-            default:
-                if (
-                    typeof error === 'string' &&
-                    error.toLowerCase().includes('tidak memiliki komentar')
-                ) {
-                    return {
-                        message: 'Video tidak memiliki komentar.',
-                        type: 'server',
-                    };
-                }
-
-                if (
-                    typeof error === 'string' &&
-                    error.toLowerCase().includes('komentar dinonaktifkan')
-                ) {
-                    return {
-                        message: 'Komentar dinonaktifkan.',
-                        type: 'server',
-                    };
-                }
-
-                if (typeof error === 'string' && error.toLowerCase().includes('youtube')) {
-                    return {
-                        message:
-                            'Layanan YouTube sedang tidak tersedia. Coba lagi dalam beberapa menit.',
-                        type: 'server',
-                    };
-                }
-
-                return {
-                    message: 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.',
-                    type: 'server',
-                };
         }
+
+        let message = 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.';
+
+        if (typeof error === 'string') {
+            const lower = error.toLowerCase();
+            const isSensitive =
+                lower.includes('exception') ||
+                lower.includes('call to') ||
+                lower.includes('undefined') ||
+                lower.includes('sql') ||
+                lower.includes('stack');
+
+            if (!isSensitive) {
+                message = error;
+            }
+        } else if (
+            typeof error === 'object' &&
+            error !== null &&
+            'message' in error &&
+            typeof (error as any).message === 'string'
+        ) {
+            const msg = (error as any).message.toLowerCase();
+            const isSensitive =
+                msg.includes('exception') ||
+                msg.includes('call to') ||
+                msg.includes('undefined') ||
+                msg.includes('sql') ||
+                msg.includes('stack');
+
+            if (!isSensitive) {
+                message = (error as any).message;
+            }
+        }
+
+        return {
+            message,
+            type: 'server',
+        };
     };
 
     const getErrorIcon = () => {

@@ -58,4 +58,24 @@ class YoutubeFormatter
       'view_count' => $statistics['viewCount'] ?? 0
     ];
   }
+
+  public static function topLevelComment(array $comment, string $videoId): array
+  {
+    $topLevelComment = $comment['snippet']['topLevelComment'] ?? [];
+    $snippet = $topLevelComment['snippet'] ?? [];
+
+    return [
+      'comment_id' => $topLevelComment['id'] ?? '',
+      'text' => $snippet['textDisplay'] ?? '',
+      'label' => 0,
+      'source' => "Video: {$videoId}",
+      'timestamp' => $snippet['publishedAt'] ?? '',
+      'user_metadata' => [
+        'username' => $snippet['authorDisplayName'] ?? '',
+        'user_id' => $snippet['authorChannelId']['value'] ?? '',
+        'profile_url' => $snippet['authorProfileImageUrl'] ?? '',
+      ],
+      'status' => 'draft',
+    ];
+  }
 }

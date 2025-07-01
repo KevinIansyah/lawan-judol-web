@@ -9,6 +9,7 @@ use App\Services\YouTube\Handlers\CacheHandler;
 use App\Services\YouTube\Handlers\TokenHandler;
 use App\Services\YouTube\Helpers\YouTubeErrorHelper;
 use App\Services\YouTube\Responses\ErrorResponseBuilder;
+use App\Services\YouTube\Responses\SuccessResponseBuilder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -22,6 +23,7 @@ class YoutubeService
   protected $youtubeFormatter;
   protected $youtubeErrorHelper;
   protected $errorResponseBuilder;
+  protected $successResponseBuilder;
 
   public function __construct(
     TokenHandler $tokenHandler,
@@ -30,7 +32,7 @@ class YoutubeService
     YoutubeFormatter $youtubeFormatter,
     YouTubeErrorHelper $youTubeErrorHelper,
     ErrorResponseBuilder $errorResponseBuilder,
-
+    SuccessResponseBuilder $successResponseBuilder,
   ) {
     $this->tokenHandler = $tokenHandler;
     $this->cacheHandler = $cacheHandler;
@@ -38,10 +40,11 @@ class YoutubeService
     $this->youtubeFormatter = $youtubeFormatter;
     $this->youtubeErrorHelper = $youTubeErrorHelper;
     $this->errorResponseBuilder = $errorResponseBuilder;
+    $this->successResponseBuilder = $successResponseBuilder;
   }
 
   /**
-   * Get video by ID
+   * Get video details by video ID.
    */
   public function getVideoById(User $user, string $videoId): array
   {
@@ -86,12 +89,7 @@ class YoutubeService
 
       Log::info("Fetched video: {$video['title']} from channel: {$video['channel_title']}");
 
-      return [
-        'success' => true,
-        'message' => 'Data video berhasil diambil.',
-        'video' => $video,
-        'total' => 1,
-      ];
+      return $this->successResponseBuilder->videoSuccessResponse($video);
     } catch (\Exception $e) {
       Log::error("Error fetching video: " . $e->getMessage(), [
         'user_id' => $user->id,
@@ -104,15 +102,15 @@ class YoutubeService
   }
 
   /**
-   * Get user channel information
+   * Get authenticated user's channel information.
    */
   public function getUserChannel(User $user): ?array
   {
     try {
-      $initialResponse = $this->youtubeFetcher->fetchAuthenticatedUserChannel($user->google_token);
+      $initialResponse = $this->youtubeFetcher->authenticatedUserChannel($user->google_token);
 
-      $tokenResult = $this->tokenHandler->handleTokenRefresh($user, $initialResponse, function ($token) {
-        return $this->youtubeFetcher->fetchAuthenticatedUserChannel($token);
+      $tokenResult = $this->tokenHandler->tokenRefresh($user, $initialResponse, function ($token) {
+        return $this->youtubeFetcher->authenticatedUserChannel($token);
       });
 
       if (!$tokenResult['success']) {
@@ -122,13 +120,21 @@ class YoutubeService
       $response = $tokenResult['response'];
 
       if (!$response->successful()) {
-        if ($this->youtubeErrorHelper->isQuotaExceeded($response)) {
+        $quotaError = $this->youtubeErrorHelper->quotaError($response);
+
+        if ($quotaError['reason']) {
           Log::critical("YouTube API quota exceeded for user ID {$user->id}. Cannot continue.");
-          return $this->errorResponseBuilder->buildVideoErrorResponse('Kuota YouTube API telah habis. Silakan coba lagi besok.');
+          return $this->errorResponseBuilder->userVideosErrorResponse($quotaError['message']);
         }
 
-        Log::error("Video fetch failed with status {$response->status()} for user ID {$user->id}.");
-        return $this->errorResponseBuilder->buildVideoErrorResponse('Gagal mengambil data video.');
+        $channelError = $this->youtubeErrorHelper->channelError($response);
+        if ($channelError['reason']) {
+          Log::warning("Channel not found or forbidden for user ID {$user->id}.");
+          return $this->errorResponseBuilder->userVideosErrorResponse($channelError['message']);
+        }
+
+        Log::error("Channel fetch failed with status {$response->status()} for user ID {$user->id}.");
+        return $this->errorResponseBuilder->userVideosErrorResponse('Terjadi kesalahan saat mengambil data channel. Silakan coba beberapa saat lagi.');
       }
 
       return $tokenResult['response']->json();
@@ -142,7 +148,7 @@ class YoutubeService
   }
 
   /**
-   * Get all user videos
+   * Get all videos from the user's uploads playlist.
    */
   public function getUserVideos(User $user, bool $forceRefresh = false): array
   {
@@ -159,15 +165,7 @@ class YoutubeService
       $channelData = $this->getUserChannel($user);
 
       if (!$channelData || empty($channelData['items'])) {
-        return $this->userVideosErrorResponse('Channel tidak ditemukan atau tidak memiliki akses.');
-      }
-
-      if (isset($channelData['error'])) {
-        $reason = $channelData['error']['errors'][0]['reason'] ?? null;
-        if ($reason === 'quotaExceeded') {
-          Log::critical("YouTube API quota exceeded for user ID {$user->id}. Cannot continue.");
-          return $this->userVideosErrorResponse('Kuota YouTube API telah habis. Silakan coba lagi besok.');
-        }
+        return $this->errorResponseBuilder->userVideosErrorResponse('Channel tidak ditemukan atau Anda tidak memiliki izin untuk mengaksesnya.');
       }
 
       $channel = $channelData['items'][0];
@@ -182,16 +180,16 @@ class YoutubeService
       Log::info("Starting to fetch all videos from YouTube API for user: {$user->id}");
 
       do {
-        $initialResponse = $this->fetchUserVideos($user->google_token, $uploadsPlaylistId, $nextPageToken);
+        $initialResponse = $this->youtubeFetcher->videosFromUploadsPlaylist($user->google_token, $uploadsPlaylistId, $nextPageToken);
 
         if (!$tokenRefreshed && $initialResponse->status() === 401) {
-          $tokenResult = $this->handleTokenRefresh($user, $initialResponse, function ($token) use ($uploadsPlaylistId, $nextPageToken) {
-            return $this->fetchUserVideos($token, $uploadsPlaylistId, $nextPageToken);
+          $tokenResult = $this->tokenHandler->tokenRefresh($user, $initialResponse, function ($token) use ($uploadsPlaylistId, $nextPageToken) {
+            return $this->youtubeFetcher->videosFromUploadsPlaylist($token, $uploadsPlaylistId, $nextPageToken);
           });
 
           if (!$tokenResult['success']) {
             Log::error("Failed to refresh token while fetching videos for user ID {$user->id}.");
-            return $this->userVideosErrorResponse($tokenResult['message']);
+            return $this->errorResponseBuilder->userVideosErrorResponse($tokenResult['message']);
           }
 
           $response = $tokenResult['response'];
@@ -205,7 +203,7 @@ class YoutubeService
           $videos = $data['items'] ?? [];
 
           foreach ($videos as $video) {
-            $allVideos[] = $this->formatVideoDataFromChannel($video);
+            $allVideos[] = $this->youtubeFormatter->videoFromChannelList($video);
             $videoCount++;
           }
 
@@ -214,44 +212,27 @@ class YoutubeService
 
           Log::info("Fetched batch {$requestCount}, got " . count($videos) . " videos");
 
-          // Rate limiting
           if ($nextPageToken) {
-            usleep(config('youtube.api.max_results_per_request'));
+            usleep(config('youtube.api.request_delay_microseconds'));
           }
         } else {
-          if ($this->isQuotaExceeded($response)) {
+          $quotaError = $this->youtubeErrorHelper->quotaError($response);
+
+          if ($quotaError['reason']) {
             Log::critical("YouTube API quota exceeded for user ID {$user->id}. Cannot continue.");
-            return $this->userVideosErrorResponse('Kuota YouTube API telah habis. Silakan coba lagi besok.');
+            return $this->errorResponseBuilder->userVideosErrorResponse($quotaError['message']);
           }
 
           Log::error("Failed to fetch videos batch {$requestCount} for user ID {$user->id}");
           break;
         }
-      } while ($nextPageToken && $requestCount < self::MAX_REQUESTS);
+      } while ($nextPageToken && $requestCount < config('youtube.api.max_requests'));
 
-      $snippet = $channel['snippet'] ?? [];
-      $statistics = $channel['statistics'] ?? [];
+      $result = $this->successResponseBuilder->userVideosSuccessResponse($allVideos, $videoCount, $channel, $requestCount);
 
-      $result = [
-        'success' => true,
-        'message' => 'Data video berhasil diambil',
-        'videos' => $allVideos,
-        'total' => $videoCount,
-        'channel_info' => [
-          'title' => $snippet['title'] ?? '',
-          'description' => $snippet['description'] ?? '',
-          'subscriber_count' => $statistics['subscriberCount'] ?? 0,
-          'video_count' => $statistics['videoCount'] ?? 0,
-          'view_count' => $statistics['viewCount'] ?? 0
-        ],
-        'cached_at' => now()->toISOString(),
-        'requests_made' => $requestCount,
-        'from_cache' => false
-      ];
+      Cache::put($cacheKey, $result, now()->addHours(config('youtube.cache.hours')));
 
-      Cache::put($cacheKey, $result, now()->addHours(self::CACHE_HOURS));
-
-      Log::info("Successfully fetched and cached {$result['total']} videos for user: {$user->id} for " . self::CACHE_HOURS . " hours");
+      Log::info("Successfully fetched and cached {$result['total']} videos for user: {$user->id} for " . config('youtube.cache.hours') . " hours");
 
       return $result;
     } catch (\Exception $e) {
@@ -260,12 +241,12 @@ class YoutubeService
         'trace' => $e->getTraceAsString()
       ]);
 
-      return $this->userVideosErrorResponse('Terjadi kesalahan saat mengambil video: ' . $e->getMessage());
+      return $this->errorResponseBuilder->userVideosErrorResponse('Terjadi kesalahan saat mengambil data video. Silakan coba beberapa saat lagi');
     }
   }
 
   /**
-   * Get comments by video ID
+   * Get comments for a given video ID.
    */
   public function getCommentsByVideoId(User $user, string $videoId): array
   {
@@ -307,23 +288,7 @@ class YoutubeService
           }
 
           foreach ($comments as $comment) {
-            $topLevelComment = $comment['snippet']['topLevelComment'] ?? [];
-            $snippet = $topLevelComment['snippet'] ?? [];
-
-            $allComments[] = [
-              'comment_id' => $topLevelComment['id'] ?? '',
-              'text' => $snippet['textDisplay'] ?? '',
-              'label' => 0,
-              'source' => "Video: {$videoId}",
-              'timestamp' => $snippet['publishedAt'] ?? '',
-              'user_metadata' => [
-                'username' => $snippet['authorDisplayName'] ?? '',
-                'user_id' => $snippet['authorChannelId']['value'] ?? '',
-                'profile_url' => $snippet['authorProfileImageUrl'] ?? '',
-              ],
-              'status' => 'draft',
-            ];
-
+            $allComments[] = $this->youtubeFormatter->topLevelComment($comment, $videoId);
             $commentCount++;
           }
 
@@ -364,17 +329,9 @@ class YoutubeService
         Log::error("Failed to save comments to file: " . $e->getMessage());
       }
 
-      $result = [
-        'success' => true,
-        'message' => 'Data komentar berhasil diambil',
-        'comments' => $filename,
-        'total' => $commentCount,
-        'requests_made' => $requestCount,
-      ];
+      Log::info("Successfully fetched {$commentCount} comments for video: {$videoId} and for user: {$user->id}");
 
-      Log::info("Successfully fetched {$result['total']} comments for video: {$videoId} and for user: {$user->id}");
-
-      return $result;
+      return $this->successResponseBuilder->commentsSuccessResponse($filename, $commentCount, $requestCount);
     } catch (\Exception $e) {
       Log::error("Error fetching comments: " . $e->getMessage(), [
         'user_id' => $user->id,
