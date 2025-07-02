@@ -64,27 +64,32 @@ class PublicVideoController extends Controller
 
         $commentsPath = storage_path('app/public/' . $analysis->video['comments_path']);
 
-        $gamblingComments = [];
-        $nonGamblingComments = [];
+        $gambling = [];
+        $gamblingCount = 10;
+        $nonGambling = [];
+        $nonGamblingCount = 20;
 
         if (file_exists($commentsPath)) {
             $allComments = json_decode(file_get_contents($commentsPath), true);
+            $nonGambling = $allComments;
 
-            foreach ($allComments as $comment) {
-                if ($comment['label'] === 1) {
-                    $gamblingComments[] = $comment;
-                } else {
-                    $nonGamblingComments[] = $comment;
-                }
-            }
+            // foreach ($allComments as $comment) {
+            //     if ($comment['label'] === 1) {
+            //         $gamblingComments[] = $comment;
+            //     } else {
+            //         $nonGamblingComments[] = $comment;
+            //     }
+            // }
         } else {
             Log::warning('File komentar tidak ditemukan', ['path' => $commentsPath]);
         }
 
         return Inertia::render('analysis/detail', [
             'analysis' => $analysis,
-            'gamblingComments' => $gamblingComments,
-            'nonGamblingComments' => $nonGamblingComments,
+            'gambling' => $gambling,
+            'gamblingCount' => $gamblingCount,
+            'nonGambling' => $nonGambling,
+            'nonGamblingCount' => $nonGamblingCount,
         ]);
     }
 

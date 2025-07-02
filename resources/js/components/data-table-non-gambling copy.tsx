@@ -27,10 +27,9 @@ import {
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { ArrowUpDown, CheckCircle2Icon, FileTextIcon, Info, Loader2, PlusIcon } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { ArrowUpDown, CheckCircle2Icon, FileTextIcon, Loader2, PlusIcon } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 dayjs.extend(relativeTime);
 dayjs.locale('id');
@@ -171,96 +170,20 @@ const columns: ColumnDef<Comment>[] = [
 ];
 
 interface DataTableGamblingProps {
-    data: {
-        total_comments: number;
-        total_chunks: number;
-        chunks: Array<{
-            chunk_id: number;
-            comments: Comment[];
-        }>;
-    };
+    data: Comment[];
     onAddDatasetComplete?: (updatedComments: Comment[]) => void;
 }
 
 export default function DataTableNonGambling({
-    data: apiData,
+    data: initialData,
     onAddDatasetComplete,
 }: DataTableGamblingProps) {
-    const [data, setData] = useState<Comment[]>([]);
+    const [data] = useState(() => initialData);
     const [globalFilter, setGlobalFilter] = useState('');
     const [rowSelection, setRowSelection] = useState({});
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [currentChunk, setCurrentChunk] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
-
-    // Ref untuk sentinel element
-    const sentinelRef = useRef<HTMLDivElement>(null);
-
-    // Load initial chunk
-    useEffect(() => {
-        if (apiData && apiData.chunks.length > 0) {
-            setData(apiData.chunks[0].comments);
-            setCurrentChunk(0);
-            setHasMore(apiData.chunks.length > 1);
-        }
-    }, [apiData]);
-
-    // Function untuk load chunk berikutnya
-    const loadNextChunk = useCallback(async () => {
-        if (isLoadingMore || !hasMore || !apiData) return;
-
-        setIsLoadingMore(true);
-
-        // Simulate network delay (hapus jika data sudah ada semua)
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        try {
-            const nextChunkIndex = currentChunk + 1;
-            const nextChunk = apiData.chunks[nextChunkIndex];
-
-            if (nextChunk && nextChunk.comments) {
-                setData((prev) => [...prev, ...nextChunk.comments]);
-                setCurrentChunk(nextChunkIndex);
-
-                // Check if there are more chunks
-                setHasMore(nextChunkIndex < apiData.chunks.length - 1);
-            } else {
-                setHasMore(false);
-            }
-        } catch (error) {
-            console.error('Error loading chunk:', error);
-            toast.error('Gagal memuat data', {
-                description: 'Terjadi kesalahan saat memuat data tambahan',
-            });
-        }
-
-        setIsLoadingMore(false);
-    }, [currentChunk, isLoadingMore, hasMore, apiData]);
-
-    // Setup Intersection Observer
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                const target = entries[0];
-                if (target.isIntersecting) {
-                    loadNextChunk();
-                }
-            },
-            {
-                threshold: 0.1,
-                rootMargin: '100px',
-            },
-        );
-
-        if (sentinelRef.current) {
-            observer.observe(sentinelRef.current);
-        }
-
-        return () => observer.disconnect();
-    }, [loadNextChunk]);
 
     const multiColumnFilter: FilterFn<Comment> = useCallback((row, columnId, value) => {
         const search = String(value).toLowerCase();
@@ -394,24 +317,7 @@ export default function DataTableNonGambling({
                     />
                 </div>
 
-                <Alert>
-                    <Info />
-                    <AlertTitle>
-                        {table.getFilteredSelectedRowModel().rows.length} dari{' '}
-                        {table.getFilteredRowModel().rows.length} baris dipilih
-                    </AlertTitle>
-                    <AlertDescription>
-                        <span>
-                            Menampilkan {data.length} dari total {apiData.total_comments} komentar
-                        </span>
-                        {/* <Progress
-                            value={(data.length / apiData.total_comments) * 100}
-                            className="h-2"
-                        /> */}
-                    </AlertDescription>
-                </Alert>
-
-                <div className="custom-scrollbar max-h-[70vh] overflow-hidden overflow-y-auto rounded-lg border">
+                <div className="overflow-hidden rounded-lg border">
                     <Table>
                         <TableHeader className="bg-muted sticky top-0 z-10">
                             {table.getHeaderGroups().map((headerGroup) => (
@@ -468,40 +374,14 @@ export default function DataTableNonGambling({
                             )}
                         </TableBody>
                     </Table>
-
-                    {/* Sentinel element untuk trigger loading */}
-                    {hasMore && (
-                        <div
-                            ref={sentinelRef}
-                            className="bg-muted/20 flex items-center justify-center py-6"
-                        >
-                            {isLoadingMore ? (
-                                <div className="text-muted-foreground flex items-center gap-3">
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    <span className="text-sm">Memuat komentar lainnya...</span>
-                                </div>
-                            ) : (
-                                <div className="text-muted-foreground text-sm">
-                                    Scroll untuk memuat lebih banyak...
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* End message */}
-                    {!hasMore && data.length > 0 && (
-                        <div className="bg-muted/20 text-muted-foreground py-6 text-center text-sm">
-                            ✨ Semua komentar telah dimuat ({data.length} total)
-                        </div>
-                    )}
                 </div>
 
-                {/* <div className="flex items-center justify-between px-2">
+                <div className="flex items-center justify-between px-2">
                     <div className="text-muted-foreground flex flex-1 text-sm">
                         {table.getFilteredSelectedRowModel().rows.length} dari{' '}
                         {table.getFilteredRowModel().rows.length} baris dipilih.
                     </div>
-                </div> */}
+                </div>
             </div>
         </div>
     );

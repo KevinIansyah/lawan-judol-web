@@ -21,14 +21,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface DetailProps {
     analysis: Analysis;
-    gamblingComments: Comment[];
-    nonGamblingComments: Comment[];
+    gambling: Comment[];
+    gamblingCount: number;
+    nonGambling: Comment[];
+    nonGamblingCount: number;
     [key: string]: unknown;
 }
 
 export default function Detail() {
     const { props } = usePage<DetailProps>();
-    const { analysis, gamblingComments, nonGamblingComments } = props;
+    const { analysis, gambling, gamblingCount, nonGambling, nonGamblingCount } = props;
     const [activeTab, setActiveTab] = useState('summary');
 
     useEffect(() => {
@@ -71,8 +73,8 @@ export default function Detail() {
                                     title="Distribusi Komentar"
                                     description="Perbandingan komentar judi online dan bukan judi"
                                     data="comments"
-                                    gamblingCount={gamblingComments.length}
-                                    nonGamblingCount={nonGamblingComments.length}
+                                    gamblingCount={gamblingCount}
+                                    nonGamblingCount={nonGamblingCount}
                                 />
                             </div>
                             <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
@@ -86,10 +88,10 @@ export default function Detail() {
                         </div>
                     </TabsContent>
                     <TabsContent value="gambling">
-                        <DataTableGambling data={gamblingComments} />
+                        <DataTableGambling data={gambling} />
                     </TabsContent>
                     <TabsContent value="non-gambling">
-                        <DataTableNonGambling data={nonGamblingComments} />
+                        <DataTableNonGambling data={nonGambling} />
                     </TabsContent>
                     <TabsContent value="keyword">
                         <KeywordList
