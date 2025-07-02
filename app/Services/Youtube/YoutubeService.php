@@ -320,16 +320,32 @@ class YoutubeService
         }
       } while ($nextPageToken);
 
+      $chunks = array_chunk($allComments, 100);
+      $totalChunks = count($chunks);
+
+      $chunkedComments = [
+        'total_comments' => $commentCount,
+        'total_chunks' => $totalChunks,
+        'chunks' => []
+      ];
+
+      for ($i = 0; $i < $totalChunks; $i++) {
+        $chunkedComments['chunks'][] = [
+          'chunk_id' => $i + 1,
+          'comments' => $chunks[$i]
+        ];
+      }
+
       $timestamp = Carbon::now()->format('Ymd_His');
       $filename = "comments/{$user->id}_{$videoId}_{$timestamp}.json";
 
       try {
-        Storage::disk('public')->put($filename, json_encode($allComments, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        Storage::disk('public')->put($filename, json_encode($chunkedComments, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
       } catch (\Exception $e) {
         Log::error("Failed to save comments to file: " . $e->getMessage());
       }
 
-      Log::info("Successfully fetched {$commentCount} comments for video: {$videoId} and for user: {$user->id}");
+      Log::info("Successfully fetched {$commentCount} comments for video: {$videoId} and for user: {$user->id} and filename: {$filename}");
 
       return $this->successResponseBuilder->commentsSuccessResponse($filename, $commentCount, $requestCount);
     } catch (\Exception $e) {
