@@ -70,6 +70,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                     className="mr-2 h-[34px] w-[34px]"
                                 >
                                     <Menu className="h-5 w-5" />
+                                    <span className="sr-only">Buka menu navigasi</span>
                                 </Button>
                             </SheetTrigger>
                             <SheetContent

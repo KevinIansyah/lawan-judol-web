@@ -469,7 +469,6 @@ export default function DataTableNonGambling({
                         </TableBody>
                     </Table>
 
-                    {/* Sentinel element untuk trigger loading */}
                     {hasMore && (
                         <div
                             ref={sentinelRef}
@@ -488,7 +487,6 @@ export default function DataTableNonGambling({
                         </div>
                     )}
 
-                    {/* End message */}
                     {!hasMore && data.length > 0 && (
                         <div className="bg-muted/20 text-muted-foreground py-6 text-center text-sm">
                             ✨ Semua komentar telah dimuat ({data.length} total)

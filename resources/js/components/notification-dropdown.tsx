@@ -17,16 +17,14 @@ export default function NotificationDropdown() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div className="relative mr-2 flex items-center space-x-1">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="group h-9 w-9 cursor-pointer rounded-md"
-                    >
-                        <Bell className="size-4.5" />
-                        <span className="sr-only">Notifikasi</span>
-                    </Button>
-                </div>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="group h-9 w-9 cursor-pointer rounded-md mr-2"
+                >
+                    <Bell className="size-4.5" />
+                    <span className="sr-only">Notifikasi</span>
+                </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-76 md:w-100" align="end">
                 {/* <UserMenuContent user={auth.user} /> */}
