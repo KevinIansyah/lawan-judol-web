@@ -9,7 +9,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { formatDate } from '@/lib/utils';
+import { formatDate, getUserFriendlyError } from '@/lib/utils';
 import {
     ApiResponseAnalysis,
     ApiResponseComment,
@@ -33,69 +33,6 @@ export default function DialogYourVideo() {
     const [error, setError] = useState<string | null>(null);
     const [errorType, setErrorType] = useState<'network' | 'server' | 'validation' | null>(null);
     const [hasInitialLoad, setHasInitialLoad] = useState<boolean>(false);
-
-    const getUserFriendlyError = (
-        error: unknown,
-        statusCode?: number,
-    ): { message: string; type: 'network' | 'server' | 'validation' } => {
-        if (!navigator.onLine) {
-            return {
-                message: 'Tidak ada koneksi internet. Periksa koneksi Anda dan coba lagi.',
-                type: 'network',
-            };
-        }
-
-        switch (statusCode) {
-            case 401:
-                return {
-                    message: 'Sesi Anda telah berakhir. Silakan login ulang.',
-                    type: 'validation',
-                };
-            case 500:
-                return {
-                    message: 'Terjadi kesalahan pada server. Tim kami akan segera memperbaikinya.',
-                    type: 'server',
-                };
-        }
-
-        let message = 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.';
-
-        if (typeof error === 'string') {
-            const lower = error.toLowerCase();
-            const isSensitive =
-                lower.includes('exception') ||
-                lower.includes('call to') ||
-                lower.includes('undefined') ||
-                lower.includes('sql') ||
-                lower.includes('stack');
-
-            if (!isSensitive) {
-                message = error;
-            }
-        } else if (
-            typeof error === 'object' &&
-            error !== null &&
-            'message' in error &&
-            typeof (error as any).message === 'string'
-        ) {
-            const msg = (error as any).message.toLowerCase();
-            const isSensitive =
-                msg.includes('exception') ||
-                msg.includes('call to') ||
-                msg.includes('undefined') ||
-                msg.includes('sql') ||
-                msg.includes('stack');
-
-            if (!isSensitive) {
-                message = (error as any).message;
-            }
-        }
-
-        return {
-            message,
-            type: 'server',
-        };
-    };
 
     const getErrorIcon = () => {
         switch (errorType) {

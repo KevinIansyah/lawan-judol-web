@@ -19,7 +19,7 @@ export default function Welcome() {
         if (error) {
             toast.error('Gagal Masuk dengan Google', {
                 description: error,
-                duration: 5000, // dalam ms
+                duration: 5000,
             });
         }
     }, [error]);

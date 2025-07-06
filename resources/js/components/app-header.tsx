@@ -35,6 +35,7 @@ import { useState } from 'react';
 import AppLogo from './app-logo';
 import AppearanceToggleDropdown from './appearance-dropdown';
 import NotificationDropdown from './notification-dropdown';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 const activeItemStyles = 'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
 
@@ -48,6 +49,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const getInitials = useInitials();
     const [isMobileAnalysisOpen, setIsMobileAnalysisOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const isConnected = true;
 
     const closeMobileMenu = () => {
         setIsMobileMenuOpen(false);
@@ -264,65 +266,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                         )}
                                     </NavigationMenuItem>
 
-                                    {/* <NavigationMenuItem className="relative flex h-full items-center">
-                                        <DropdownMenu
-                                            open={isAnalysisOpen}
-                                            onOpenChange={(open) => {
-                                                setIsAnalysisOpen(open);
-                                            }}
-                                        >
-                                            <DropdownMenuTrigger asChild>
-                                                <Button
-                                                    variant="ghost"
-                                                    className={cn(
-                                                        navigationMenuTriggerStyle(),
-                                                        'h-9 px-3',
-                                                        page.url.startsWith('/analysis/') &&
-                                                            activeItemStyles,
-                                                    )}
-                                                >
-                                                    <Youtube className="mr-2 h-4 w-4" />
-                                                    Analisis
-                                                    {isAnalysisOpen ? (
-                                                        <ChevronDown className="ml-2 h-4 w-4" />
-                                                    ) : (
-                                                        <ChevronRight className="ml-2 h-4 w-4" />
-                                                    )}
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="start">
-                                                <Link
-                                                    href="/analysis/public-video"
-                                                    className={cn(
-                                                        'block w-full rounded-md px-2 py-1.5 text-sm',
-                                                        page.url.startsWith(
-                                                            '/analysis/public-video',
-                                                        ) && 'bg-primary',
-                                                    )}
-                                                    onClick={() => setIsAnalysisOpen(false)}
-                                                >
-                                                    Video Publik
-                                                </Link>
-                                                <Link
-                                                    href="/analysis/your-video"
-                                                    className={cn(
-                                                        'mt-1 block w-full rounded-md px-2 py-1.5 text-sm',
-                                                        page.url.startsWith(
-                                                            '/analysis/your-video',
-                                                        ) && 'bg-primary',
-                                                    )}
-                                                    onClick={() => setIsAnalysisOpen(false)}
-                                                >
-                                                    Video Anda
-                                                </Link>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-
-                                        {page.url.startsWith('/analysis/') && (
-                                            <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
-                                        )}
-                                    </NavigationMenuItem> */}
-
                                     <NavigationMenuItem className="relative flex h-full items-center">
                                         <NavigationMenuTrigger>
                                             <Youtube className="mr-2 h-4 w-4" />
@@ -463,6 +406,29 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                     {auth.user ? (
                         <div className="ml-auto flex items-center">
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="group h-9 w-9 cursor-pointer rounded-md hover:bg-transparent"
+                                    >
+                                        {isConnected ? (
+                                            <span className="bg-chart-4 h-2 w-2 rounded-full" />
+                                        ) : (
+                                            <span className="bg-chart-1 h-2 w-2 rounded-full" />
+                                        )}
+                                        <span className="sr-only">Notifikasi</span>
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {isConnected ? (
+                                        <p>Terhubung dengan YouTube</p>
+                                    ) : (
+                                        <p>Belum terhubung dengan YouTube</p>
+                                    )}
+                                </TooltipContent>
+                            </Tooltip>
                             <AppearanceToggleDropdown />
                             <NotificationDropdown />
 

@@ -22,8 +22,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
-        $name = 'a';
-        return Inertia::render('dashboard', compact('name'));
+        return Inertia::render('dashboard');
     })->name('dashboard');
 
     Route::prefix('analysis')->group(function () {
