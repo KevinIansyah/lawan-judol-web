@@ -42,11 +42,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 Route::get('/keyword', function () {
-    return Inertia::render('keyword');
+    return Inertia::render('keywords');
 })->name('keyword');
 
 Route::get('/guide', function () {
-    return Inertia::render('guide');
+    return Inertia::render('guides');
 })->name('guide');
 
 require __DIR__ . '/settings.php';

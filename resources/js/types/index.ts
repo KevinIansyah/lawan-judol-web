@@ -46,7 +46,7 @@ export interface Payment {
     email: string;
 }
 
-export interface Keywords {
+export interface Keyword {
     id: number;
     keyword: string;
     label: 0 | 1;

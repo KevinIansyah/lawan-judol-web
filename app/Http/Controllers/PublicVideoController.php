@@ -37,7 +37,7 @@ class PublicVideoController extends Controller
 
         $analyses->appends($request->query());
 
-        return Inertia::render('analysis/public-video', [
+        return Inertia::render('analyses/public-video', [
             'analyses' => $analyses,
             'filters' => [
                 'search' => $search,
@@ -84,7 +84,7 @@ class PublicVideoController extends Controller
             Log::warning('File komentar tidak ditemukan', ['path' => $commentsPath]);
         }
 
-        return Inertia::render('analysis/detail', [
+        return Inertia::render('analyses/detail', [
             'analysis' => $analysis,
             'gambling' => $gambling,
             'gamblingCount' => $gamblingCount,

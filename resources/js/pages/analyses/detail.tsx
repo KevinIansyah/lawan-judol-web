@@ -12,13 +12,6 @@ import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import dataKeyword from './data-keyword.json';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Public Video',
-        href: '/analysis/public-video',
-    },
-];
-
 interface DetailProps {
     analysis: Analysis;
     gambling: Comment[];
@@ -29,9 +22,27 @@ interface DetailProps {
 }
 
 export default function Detail() {
-    const { props } = usePage<DetailProps>();
+    const { props, url } = usePage<DetailProps>();
     const { analysis, gambling, gamblingCount, nonGambling, nonGamblingCount } = props;
     const [activeTab, setActiveTab] = useState('summary');
+
+    const isPublic = url.includes('public-video');
+    const isPrivate = url.includes('your-video');
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: isPublic ? 'Video Publik' : isPrivate ? 'Video Anda' : 'Video',
+            href: isPublic
+                ? '/analysis/public-video'
+                : isPrivate
+                  ? '/analysis/your-video'
+                  : '/analysis',
+        },
+        {
+            title: 'Detail',
+            href: url,
+        },
+    ];
 
     useEffect(() => {
         const savedTab = localStorage.getItem('active-analysis-tab');

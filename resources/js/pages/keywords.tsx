@@ -2,9 +2,9 @@ import Heading from '@/components/heading';
 import KeywordActions from '@/components/keyword/keyword-action';
 import KeywordList from '@/components/keyword/keyword-list';
 import AppLayout from '@/layouts/app-layout';
-import { Keywords, type BreadcrumbItem } from '@/types';
+import { Keyword, type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import dataKeyword from './analysis/data-keyword.json';
+import dataKeyword from './analyses/data-keyword.json';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -13,7 +13,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Keyword() {
+export default function Keywords() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Keyword" />
@@ -37,7 +37,7 @@ export default function Keyword() {
                 />
 
                 <KeywordList
-                    data={dataKeyword as Keywords[]}
+                    data={dataKeyword as Keyword[]}
                     ActionButtons={({ onCopy, onReset, onFilter }) => (
                         <KeywordActions onCopy={onCopy} onReset={onReset} onFilter={onFilter} />
                     )}

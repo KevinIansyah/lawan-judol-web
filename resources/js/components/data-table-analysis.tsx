@@ -194,7 +194,7 @@ export default function DataTableAnalysis({
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className="text-muted-foreground data-[state=open]:bg-muted flex size-8"
+                                className="text-muted-foreground data-[state=open]:bg-primary flex size-8 data-[state=open]:text-white"
                                 size="icon"
                             >
                                 <MoreVerticalIcon />

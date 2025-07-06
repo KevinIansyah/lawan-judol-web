@@ -246,7 +246,7 @@ export default function DialogYourVideo() {
                 setIsOpen(false);
                 router.reload();
 
-                toast('Analisis berhasil ditambahkan!', {
+                toast.success('Analisis berhasil ditambahkan!', {
                     description: 'Video telah masuk ke antrean analisis dan akan diproses segera.',
                 });
             } else {
@@ -294,7 +294,7 @@ export default function DialogYourVideo() {
                 <div className="flex-1 overflow-hidden">
                     {loadingVideo ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <Loader2 className="mb-4 h-8 w-8 animate-spin text-blue-500" />
+                            <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
                             <p className="text-center font-medium">
                                 Memeriksa ketersediaan video...
                             </p>
@@ -304,7 +304,7 @@ export default function DialogYourVideo() {
                         </div>
                     ) : loadingComments ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <Loader2 className="mb-4 h-8 w-8 animate-spin text-blue-500" />
+                            <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
                             <p className="text-center font-medium">
                                 Mengambil data komentar dari YouTube...
                             </p>
@@ -314,7 +314,7 @@ export default function DialogYourVideo() {
                         </div>
                     ) : loadingAnalysis ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <Loader2 className="mb-4 h-8 w-8 animate-spin text-blue-500" />
+                            <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
                             <p className="text-center font-medium">
                                 Menambahkan analisis ke dalam antrean...
                             </p>
