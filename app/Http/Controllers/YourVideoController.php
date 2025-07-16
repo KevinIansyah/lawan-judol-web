@@ -68,25 +68,30 @@ class YourVideoController extends Controller
     {
         $analysis = Analysis::findOrFail($id);
 
-        $commentsPath = storage_path('app/public/' . $analysis->video['comments_path']);
+        $gamblingPath = storage_path('app/public/' . $analysis->gambling_file_path);
+        $nonGamblingPath = storage_path('app/public/' . $analysis->nongambling_file_path);
 
         $gambling = [];
-        $gamblingCount = 10;
+        $gamblingCount = 0;
         $nonGambling = [];
-        $nonGamblingCount = 20;
+        $nonGamblingCount = 0;
 
-        if (file_exists($commentsPath)) {
-            $allComments = json_decode(file_get_contents($commentsPath), true);
+        if (file_exists($gamblingPath) || file_exists($nonGamblingPath)) {
+            if (file_exists($gamblingPath)) {
+                $gambling = json_decode(file_get_contents($gamblingPath), true);
+                $gamblingCount = $gambling['total_comments'] ?? 0;
+            }
 
-            // foreach ($allComments as $comment) {
-            //     if ($comment['label'] === 1) {
-            //         $gamblingComments[] = $comment;
-            //     } else {
-            //         $nonGamblingComments[] = $comment;
-            //     }
-            // }
+            // Baca file non-gambling jika ada
+            if (file_exists($nonGamblingPath)) {
+                $nonGambling = json_decode(file_get_contents($nonGamblingPath), true);
+                $nonGamblingCount = $nonGambling['total_comments'] ?? 0;
+            }
         } else {
-            Log::warning('File komentar tidak ditemukan', ['path' => $commentsPath]);
+            Log::warning('Kedua file tidak ditemukan', [
+                'gamblingPath' => $gamblingPath,
+                'nonGamblingPath' => $nonGamblingPath
+            ]);
         }
 
         return Inertia::render('analyses/detail', [

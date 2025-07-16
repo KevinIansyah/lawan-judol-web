@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Home',
-        href: '/home',
+        href: '/',
     },
 ];
 

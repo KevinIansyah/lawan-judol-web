@@ -195,11 +195,8 @@ export default function DataTableNonGambling({
     const [currentChunk, setCurrentChunk] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-
-    // Ref untuk sentinel element
     const sentinelRef = useRef<HTMLDivElement>(null);
 
-    // Load initial chunk
     useEffect(() => {
         if (apiData && apiData.chunks.length > 0) {
             setData(apiData.chunks[0].comments);
@@ -208,13 +205,11 @@ export default function DataTableNonGambling({
         }
     }, [apiData]);
 
-    // Function untuk load chunk berikutnya
     const loadNextChunk = useCallback(async () => {
         if (isLoadingMore || !hasMore || !apiData) return;
 
         setIsLoadingMore(true);
 
-        // Simulate network delay (hapus jika data sudah ada semua)
         await new Promise((resolve) => setTimeout(resolve, 500));
 
         try {
@@ -225,7 +220,6 @@ export default function DataTableNonGambling({
                 setData((prev) => [...prev, ...nextChunk.comments]);
                 setCurrentChunk(nextChunkIndex);
 
-                // Check if there are more chunks
                 setHasMore(nextChunkIndex < apiData.chunks.length - 1);
             } else {
                 setHasMore(false);
@@ -240,7 +234,6 @@ export default function DataTableNonGambling({
         setIsLoadingMore(false);
     }, [currentChunk, isLoadingMore, hasMore, apiData]);
 
-    // Setup Intersection Observer
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
@@ -394,22 +387,25 @@ export default function DataTableNonGambling({
                     />
                 </div>
 
-                <Alert>
-                    <Info />
-                    <AlertTitle>
-                        {table.getFilteredSelectedRowModel().rows.length} dari{' '}
-                        {table.getFilteredRowModel().rows.length} baris dipilih
-                    </AlertTitle>
-                    <AlertDescription>
-                        <span>
-                            Menampilkan {data.length} dari total {apiData.total_comments} komentar
-                        </span>
-                        {/* <Progress
-                            value={(data.length / apiData.total_comments) * 100}
-                            className="h-2"
-                        /> */}
-                    </AlertDescription>
-                </Alert>
+                {data.length > 0 && (
+                    <Alert>
+                        <Info />
+                        <AlertTitle>
+                            {table.getFilteredSelectedRowModel().rows.length} dari{' '}
+                            {table.getFilteredRowModel().rows.length} baris dipilih
+                        </AlertTitle>
+                        <AlertDescription>
+                            <p>
+                                Menampilkan {data.length} dari total {apiData.total_comments}{' '}
+                                komentar
+                            </p>
+                            {/* <Progress
+                                value={(data.length / apiData.total_comments) * 100}
+                                className="h-2"
+                            /> */}
+                        </AlertDescription>
+                    </Alert>
+                )}
 
                 <div className="custom-scrollbar max-h-[70vh] overflow-hidden overflow-y-auto rounded-lg border">
                     <Table>
@@ -472,17 +468,25 @@ export default function DataTableNonGambling({
                     {hasMore && (
                         <div
                             ref={sentinelRef}
-                            className="bg-muted/20 flex items-center justify-center py-6"
+                            className={`flex items-center justify-center ${
+                                data.length > 0 ? 'bg-muted/20 py-6' : 'py-0'
+                            }`}
                         >
-                            {isLoadingMore ? (
-                                <div className="text-muted-foreground flex items-center gap-3">
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    <span className="text-sm">Memuat komentar lainnya...</span>
-                                </div>
-                            ) : (
-                                <div className="text-muted-foreground text-sm">
-                                    Scroll untuk memuat lebih banyak...
-                                </div>
+                            {data.length > 0 && (
+                                <>
+                                    {isLoadingMore ? (
+                                        <div className="text-muted-foreground flex items-center gap-3">
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            <span className="text-sm">
+                                                Memuat komentar lainnya...
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="text-muted-foreground text-sm">
+                                            Scroll untuk memuat lebih banyak...
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     )}
@@ -493,13 +497,6 @@ export default function DataTableNonGambling({
                         </div>
                     )}
                 </div>
-
-                {/* <div className="flex items-center justify-between px-2">
-                    <div className="text-muted-foreground flex flex-1 text-sm">
-                        {table.getFilteredSelectedRowModel().rows.length} dari{' '}
-                        {table.getFilteredRowModel().rows.length} baris dipilih.
-                    </div>
-                </div> */}
             </div>
         </div>
     );

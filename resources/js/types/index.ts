@@ -88,18 +88,31 @@ export interface ApiResponseVideos {
     message?: string;
 }
 
+export interface UserCommentMetadata {
+    username: string;
+    user_id: string;
+    profile_url: string;
+}
+
 export interface Comment {
     comment_id: string;
     text: string;
-    label: 0 | 1;
+    label: number;
     source: string;
     timestamp: string;
-    user_metadata: {
-        username: string;
-        user_id: string | null;
-        profile_url: string;
-    };
+    user_metadata: UserCommentMetadata;
     status: 'heldForReview' | 'reject' | 'draft' | 'dataset';
+}
+
+export interface Chunk {
+    chunk_id: number;
+    comments: Comment[];
+}
+
+export interface CommentChunk {
+    total_comments: number;
+    total_chunks: number;
+    chunks: Chunk[];
 }
 
 export interface ApiResponseComment {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\CommentInferenceJob;
 use App\Models\Analysis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -60,6 +61,10 @@ class AnalysisController extends Controller
             ]);
 
             Log::info("Analysis data successfully stored for user ID: {$user->id}");
+
+            CommentInferenceJob::dispatch($analysis)->onQueue('inference');
+
+            Log::info("Analysis data successfully stored in queue for user ID: {$user->id}");
 
             return response()->json([
                 'success' => true,

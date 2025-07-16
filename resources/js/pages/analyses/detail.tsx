@@ -7,16 +7,16 @@ import KeywordList from '@/components/keyword/keyword-list';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VideoMetadata from '@/components/video-metadata';
 import AppLayout from '@/layouts/app-layout';
-import { Analysis, Comment, Keywords, type BreadcrumbItem } from '@/types';
+import { Analysis, CommentChunk, Keyword, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import dataKeyword from './data-keyword.json';
 
 interface DetailProps {
     analysis: Analysis;
-    gambling: Comment[];
+    gambling: CommentChunk;
     gamblingCount: number;
-    nonGambling: Comment[];
+    nonGambling: CommentChunk;
     nonGamblingCount: number;
     [key: string]: unknown;
 }
@@ -106,7 +106,7 @@ export default function Detail() {
                     </TabsContent>
                     <TabsContent value="keyword">
                         <KeywordList
-                            data={dataKeyword as Keywords[]}
+                            data={dataKeyword as Keyword[]}
                             ActionButtons={({ onCopy, onReset, onSave, onUpload }) => (
                                 <KeywordActions
                                     onCopy={onCopy}

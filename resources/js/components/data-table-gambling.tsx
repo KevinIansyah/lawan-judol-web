@@ -31,11 +31,11 @@ import {
     ArrowUpDown,
     CheckCircle2Icon,
     FileTextIcon,
-    InfoIcon,
+    Info,
     Loader2,
     ShieldEllipsis,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
@@ -116,7 +116,6 @@ const columns: ColumnDef<Comment>[] = [
                             <div className="text-muted-foreground truncate text-xs font-medium">
                                 {dayjs(timestamp).fromNow()}
                             </div>
-                            {/* <Badge>{dayjs(timestamp).fromNow()}</Badge> */}
                         </div>
                         <div
                             className="text-sm break-words whitespace-normal"
@@ -179,20 +178,88 @@ const columns: ColumnDef<Comment>[] = [
 ];
 
 interface DataTableGamblingProps {
-    data: Comment[];
+    data: {
+        total_comments: number;
+        total_chunks: number;
+        chunks: Array<{
+            chunk_id: number;
+            comments: Comment[];
+        }>;
+    };
     onModerationComplete?: (updatedComments: Comment[]) => void;
 }
 
 export default function DataTableGambling({
-    data: initialData,
+    data: apiData,
     onModerationComplete,
 }: DataTableGamblingProps) {
-    const [data] = useState(() => initialData);
+    const [data, setData] = useState<Comment[]>([]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [rowSelection, setRowSelection] = useState({});
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [currentChunk, setCurrentChunk] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const sentinelRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (apiData && apiData.chunks.length > 0) {
+            setData(apiData.chunks[0].comments);
+            setCurrentChunk(0);
+            setHasMore(apiData.chunks.length > 1);
+        }
+    }, [apiData]);
+
+    const loadNextChunk = useCallback(async () => {
+        if (isLoadingMore || !hasMore || !apiData) return;
+
+        setIsLoadingMore(true);
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        try {
+            const nextChunkIndex = currentChunk + 1;
+            const nextChunk = apiData.chunks[nextChunkIndex];
+
+            if (nextChunk && nextChunk.comments) {
+                setData((prev) => [...prev, ...nextChunk.comments]);
+                setCurrentChunk(nextChunkIndex);
+                setHasMore(nextChunkIndex < apiData.chunks.length - 1);
+            } else {
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error('Error loading chunk:', error);
+            toast.error('Gagal memuat data', {
+                description: 'Terjadi kesalahan saat memuat data tambahan',
+            });
+        }
+
+        setIsLoadingMore(false);
+    }, [currentChunk, isLoadingMore, hasMore, apiData]);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const target = entries[0];
+                if (target.isIntersecting) {
+                    loadNextChunk();
+                }
+            },
+            {
+                threshold: 0.1,
+                rootMargin: '100px',
+            },
+        );
+
+        if (sentinelRef.current) {
+            observer.observe(sentinelRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, [loadNextChunk]);
 
     const multiColumnFilter: FilterFn<Comment> = useCallback((row, columnId, value) => {
         const search = String(value).toLowerCase();
@@ -231,9 +298,16 @@ export default function DataTableGambling({
         return selectedRows.map((row) => row.original.comment_id.toString());
     }, [table]);
 
+    const getSelectedComments = useCallback((): Comment[] => {
+        const selectedRows = table.getFilteredSelectedRowModel().rows;
+        return selectedRows.map((row) => row.original);
+    }, [table]);
+
     const fetchModeration = async (): Promise<void> => {
         const selectedCommentIds = getSelectedCommentIds();
+        const selectedComments = getSelectedComments();
         console.log('Selected Comment IDs:', selectedCommentIds);
+        console.log('Selected Comments:', selectedComments);
         console.log('Row Selection State:', rowSelection);
 
         if (selectedCommentIds.length === 0) {
@@ -296,15 +370,6 @@ export default function DataTableGambling({
     return (
         <div className="flex w-full flex-col justify-start gap-4">
             <div className="relative flex flex-col gap-4 overflow-auto">
-                {draftCount > 0 && (
-                    <Alert>
-                        <InfoIcon className="h-4 w-4" />
-                        <AlertTitle>Komentar Siap Dimoderasi</AlertTitle>
-                        <AlertDescription>
-                            Ada {draftCount} komentar draft yang menunggu moderasi.
-                        </AlertDescription>
-                    </Alert>
-                )}
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                     <div className="flex w-full gap-2 md:order-2 md:justify-end">
                         <div className="flex-1 md:flex-none">
@@ -335,7 +400,32 @@ export default function DataTableGambling({
                     />
                 </div>
 
-                <div className="overflow-hidden rounded-lg border">
+                {data.length > 0 && (
+                    <Alert>
+                        <Info />
+                        <AlertTitle>
+                            {table.getFilteredSelectedRowModel().rows.length} dari{' '}
+                            {table.getFilteredRowModel().rows.length} baris dipilih
+                        </AlertTitle>
+                        <AlertDescription>
+                            <div>
+                                <p>
+                                    Menampilkan {data.length} dari total {apiData.total_comments}{' '}
+                                    komentar
+                                </p>
+                                {draftCount > 0 && (
+                                    <div className="bg-chart-3 mt-2 rounded-md px-2">
+                                        <p className="text-black">
+                                            Ada {draftCount} komentar draft yang menunggu moderasi
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </AlertDescription>
+                    </Alert>
+                )}
+
+                <div className="custom-scrollbar max-h-[70vh] overflow-hidden overflow-y-auto rounded-lg border">
                     <Table>
                         <TableHeader className="bg-muted sticky top-0 z-10">
                             {table.getHeaderGroups().map((headerGroup) => (
@@ -392,13 +482,38 @@ export default function DataTableGambling({
                             )}
                         </TableBody>
                     </Table>
-                </div>
 
-                <div className="flex items-center justify-between px-2">
-                    <div className="text-muted-foreground flex flex-1 text-sm">
-                        {table.getFilteredSelectedRowModel().rows.length} dari{' '}
-                        {table.getFilteredRowModel().rows.length} baris dipilih.
-                    </div>
+                    {hasMore && (
+                        <div
+                            ref={sentinelRef}
+                            className={`flex items-center justify-center ${
+                                data.length > 0 ? 'bg-muted/20 py-6' : 'py-0'
+                            }`}
+                        >
+                            {data.length > 0 && (
+                                <>
+                                    {isLoadingMore ? (
+                                        <div className="text-muted-foreground flex items-center gap-3">
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            <span className="text-sm">
+                                                Memuat komentar lainnya...
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="text-muted-foreground text-sm">
+                                            Scroll untuk memuat lebih banyak...
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
+
+                    {!hasMore && data.length > 0 && (
+                        <div className="bg-muted/20 text-muted-foreground py-6 text-center text-sm">
+                            ✨ Semua komentar telah dimuat ({data.length} total)
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

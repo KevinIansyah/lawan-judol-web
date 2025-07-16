@@ -13,19 +13,13 @@ return new class extends Migration
     {
         Schema::create('analyses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')
-                ->constrained()
-                ->onDelete('cascade')
-                ->comment('ID of the user who initiated the analysis');
-            $table->json('video')
-                ->comment('Serialized video data (e.g. YouTube video metadata)');
-            $table->enum('status', ['queue', 'on_process', 'failed', 'success'])
-                ->comment('Current status of the analysis');
-            $table->enum('type', ['public', 'your'])
-                ->comment('Video type: public = from other users\' channels, your = from the authenticated user\'s own channel');
-            $table->string('gambling_file_path')->nullable()->comment('Path to gambling keyword match result file');
-            $table->string('nongambling_file_path')->nullable()->comment('Path to clean result file (non-gambling)');
-            $table->string('keyword_file_path')->nullable()->comment('Path to original keyword input file');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->json('video');
+            $table->enum('status', ['queue', 'on_process', 'failed', 'success']);
+            $table->enum('type', ['public', 'your']);
+            $table->string('gambling_file_path')->nullable();
+            $table->string('nongambling_file_path')->nullable();
+            $table->string('keyword_file_path')->nullable();
             $table->timestamps();
         });
     }
