@@ -11,6 +11,11 @@ const sidebarNavItems: NavItem[] = [
         url: '/settings/profile',
         icon: null,
     },
+    {
+        title: 'Akses YouTube',
+        url: '/settings/youtube-access',
+        icon: null,
+    },
     // {
     //     title: 'Kata Sandi',
     //     url: '/settings/password',

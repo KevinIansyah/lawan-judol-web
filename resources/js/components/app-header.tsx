@@ -49,7 +49,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const getInitials = useInitials();
     const [isMobileAnalysisOpen, setIsMobileAnalysisOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const isConnected = true;
 
     const closeMobileMenu = () => {
         setIsMobileMenuOpen(false);
@@ -413,16 +412,16 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                         size="icon"
                                         className="group h-9 w-9 cursor-pointer rounded-md hover:bg-transparent"
                                     >
-                                        {isConnected ? (
+                                        {auth.user.youtube_permission_granted ? (
                                             <span className="bg-chart-4 h-2 w-2 rounded-full" />
                                         ) : (
                                             <span className="bg-chart-1 h-2 w-2 rounded-full" />
                                         )}
-                                        <span className="sr-only">Notifikasi</span>
+                                        <span className="sr-only">Indikaor akses youtube</span>
                                     </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    {isConnected ? (
+                                    {auth.user.youtube_permission_granted ? (
                                         <p>Terhubung dengan YouTube</p>
                                     ) : (
                                         <p>Belum terhubung dengan YouTube</p>

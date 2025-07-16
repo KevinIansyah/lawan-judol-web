@@ -33,6 +33,7 @@ export interface User {
     name: string;
     email: string;
     avatar?: string;
+    youtube_permission_granted: boolean;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;

@@ -39,21 +39,14 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Destroy an authenticated session.
+     * Revoke Google authentication and permissions.
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $user = User::where('id', Auth::id())->first();
-
-        // if ($user->google_token) {
-        //     Http::asForm()->post('https://oauth2.googleapis.com/revoke', [
-        //         'token' => $user->google_token,
-        //     ]);
-        // }
+        $user = User::find(Auth::id());
 
         $user->update([
             'google_token' => null,
-            'google_refresh_token' => null,
         ]);
 
         Auth::guard('web')->logout();

@@ -9,7 +9,10 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\SocialiteController;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+
+Route::get('auth/google/callback', [SocialiteController::class, 'callback'])->name('auth.google.callback');
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
@@ -20,7 +23,6 @@ Route::middleware('guest')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::prefix('google')->group(function () {
             Route::get('/redirect', [SocialiteController::class, 'redirect'])->name('auth.google.redirect');
-            Route::get('/callback', [SocialiteController::class, 'callback'])->name('auth.google.callback');
         });
     });
 

@@ -26,6 +26,7 @@ class User extends Authenticatable
         'google_id',
         'google_token',
         'google_refresh_token',
+        'youtube_permission_granted'
     ];
 
     /**

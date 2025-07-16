@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('google_id')->nullable();
             $table->mediumText('google_token')->nullable();
             $table->mediumText('google_refresh_token')->nullable();
+            $table->boolean('youtube_permission_granted')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

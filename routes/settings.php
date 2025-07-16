@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\SocialiteController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -18,4 +19,11 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/appearance', function () {
         return Inertia::render('settings/appearance');
     })->name('appearance');
+
+    Route::get('settings/youtube-access', function () {
+        return Inertia::render('settings/youtube-access');
+    })->name('youtube-access');
+
+    Route::get('settings/youtube-access/grant', [SocialiteController::class, 'grant'])->name('youtube-access.grant');
+    Route::delete('settings/youtube-access/revoke', [SocialiteController::class, 'revoke'])->name('youtube-access.revoke');
 });

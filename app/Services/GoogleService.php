@@ -22,9 +22,13 @@ class GoogleService
     $data = [
       'google_id' => $googleUser->id,
       'google_token' => $googleUser->token,
-      'google_refresh_token' => $googleUser->refreshToken,
       'avatar' => $googleUser->avatar,
     ];
+
+    if ($googleUser->refreshToken) {
+      $data['google_refresh_token'] = $googleUser->refreshToken;
+      $data['youtube_permission_granted'] = true;
+    }
 
     if ($user) {
       $user->update($data);
@@ -33,7 +37,6 @@ class GoogleService
         'name' => $googleUser->name,
         'email' => $googleUser->email,
         'role' => 'user',
-        // 'password' => Hash::make(Str::random(16)),
       ]));
     }
 
