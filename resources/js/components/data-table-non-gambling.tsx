@@ -226,7 +226,7 @@ export default function DataTableNonGambling({
             }
         } catch (error) {
             console.error('Error loading chunk:', error);
-            toast.error('Gagal memuat data', {
+            toast.error('Gagal!', {
                 description: 'Terjadi kesalahan saat memuat data tambahan',
             });
         }
@@ -305,7 +305,7 @@ export default function DataTableNonGambling({
         console.log('Row Selection State:', rowSelection);
 
         if (selectedCommentIds.length === 0) {
-            toast('Tidak ada komentar yang dipilih', {
+            toast('Informasi!', {
                 description: 'Silakan pilih minimal satu komentar untuk melanjutkan.',
             });
             return;
@@ -328,7 +328,7 @@ export default function DataTableNonGambling({
             //     throw new Error(`HTTP error! status: ${response.status}`);
             // }
             // const result = await response.json();
-            // toast.success('Moderasi berhasil', {
+            // toast.success('Berhasil!', {
             //     description: `${selectedCommentIds.length} komentar telah diproses.`,
             // });
             // // Reset selection setelah berhasil
@@ -341,7 +341,7 @@ export default function DataTableNonGambling({
         } catch (error) {
             console.error('Error processing moderation:', error);
 
-            toast.error('Gagal memproses moderasi', {
+            toast.error('Gagal!', {
                 description:
                     error instanceof Error
                         ? error.message

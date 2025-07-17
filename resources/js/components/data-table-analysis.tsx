@@ -55,8 +55,8 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
-import DialogPublicVideo from './dialog/dialog-public-video';
-import DialogYourVideo from './dialog/dialog-your-video';
+import DialogPublicVideo from './dialog-public-video';
+import DialogYourVideo from './dialog-your-video';
 
 type DataTableProps = {
     data: Analysis[];
@@ -202,7 +202,12 @@ export default function DataTableAnalysis({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-32">
-                            <DropdownMenuItem asChild>
+                            <DropdownMenuItem
+                                asChild
+                                disabled={['failed', 'on_process', 'queue'].includes(
+                                    row.original.status,
+                                )}
+                            >
                                 {url.startsWith('/analysis/your-video') ? (
                                     <Link href={`/analysis/your-video/${row.original.id}`}>
                                         Detail
@@ -215,8 +220,12 @@ export default function DataTableAnalysis({
                                     <span>Detail</span>
                                 )}
                             </DropdownMenuItem>
-                            <DropdownMenuItem>Batalkan</DropdownMenuItem>
-                            <DropdownMenuItem>Hapus</DropdownMenuItem>
+                            <DropdownMenuItem disabled={row.original.status !== 'failed'}>
+                                Ulang
+                            </DropdownMenuItem>
+                            <DropdownMenuItem disabled={row.original.status !== 'success'}>
+                                Hapus
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ),

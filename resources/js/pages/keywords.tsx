@@ -1,6 +1,6 @@
 import Heading from '@/components/heading';
-import KeywordActions from '@/components/keyword/keyword-action';
-import KeywordList from '@/components/keyword/keyword-list';
+import KeywordActions from '@/components/keyword-action';
+import KeywordList from '@/components/keyword-list';
 import AppLayout from '@/layouts/app-layout';
 import { Keyword, type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';

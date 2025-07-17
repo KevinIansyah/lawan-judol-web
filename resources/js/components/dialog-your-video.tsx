@@ -15,14 +15,16 @@ import {
     ApiResponseComment,
     ApiResponseVideos,
     MergedVideoData,
+    SharedData,
     Video,
 } from '@/types';
-import { router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { AlertCircle, Check, Loader2, Play, PlusIcon, RefreshCw, WifiOff } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function DialogYourVideo() {
+    const { auth } = usePage<SharedData>().props;
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [videos, setVideos] = useState<Video[]>([]);
     const [loadingVideo, setLoadingVideo] = useState<boolean>(false);
@@ -246,7 +248,7 @@ export default function DialogYourVideo() {
                 setIsOpen(false);
                 router.reload();
 
-                toast.success('Analisis berhasil ditambahkan!', {
+                toast.success('Berhasil!', {
                     description: 'Video telah masuk ke antrean analisis dan akan diproses segera.',
                 });
             } else {
@@ -292,7 +294,23 @@ export default function DialogYourVideo() {
                 </DialogHeader>
 
                 <div className="flex-1 overflow-hidden">
-                    {loadingVideo ? (
+                    {!auth.user.youtube_permission_granted ? (
+                        <div className="flex flex-1 items-center overflow-hidden">
+                            <div className="flex w-full flex-col items-center justify-center text-center">
+                                <div className="mb-4">{getErrorIcon()}</div>
+                                <div className="space-y-2">
+                                    <p className="font-medium">Akses YouTube Belum Diberikan</p>
+                                    <p className="text-muted-foreground max-w-sm text-sm">
+                                        Untuk melanjutkan, Anda perlu memberikan izin akses ke akun
+                                        YouTube Anda terlebih dahulu.
+                                    </p>
+                                </div>
+                                <Button variant="outline" className="mt-6" asChild>
+                                    <Link href="/settings/youtube-access">Berikan Akses</Link>
+                                </Button>
+                            </div>
+                        </div>
+                    ) : loadingVideo ? (
                         <div className="flex flex-col items-center justify-center py-12">
                             <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
                             <p className="text-center font-medium">

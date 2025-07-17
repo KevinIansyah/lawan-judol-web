@@ -1,7 +1,7 @@
+import KeywordBadge from '@/components/keyword-badge';
 import { Keyword } from '@/types';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import KeywordBadge from './keyword-badge';
 
 type KeywordListProps = {
     data: Keyword[];
@@ -32,14 +32,14 @@ export default function KeywordList({ data: initialData, ActionButtons }: Keywor
             .map((item) => item.keyword)
             .join(', ');
         navigator.clipboard.writeText(copiedText);
-        toast('Kata kunci berhasil disalin!', {
+        toast('Berhasil', {
             description: 'Semua kata kunci dengan label aktif telah disalin ke clipboard.',
         });
     };
 
     const handleReset = () => {
         setData(originalData);
-        toast('Kata kunci berhasil direset!', {
+        toast('Berhasil', {
             description: 'Semua perubahan label telah dikembalikan ke kondisi semula.',
         });
     };

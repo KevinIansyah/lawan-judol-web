@@ -5,8 +5,6 @@ import GrantAccess from '@/components/grant-access';
 import RevokeAccess from '@/components/revoke-access';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import { useEffect } from 'react';
-import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -16,29 +14,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function YoutubeAccess() {
-    const { auth, error, success, info } = usePage<
-        SharedData & { error?: string; success?: string; info?: string }
-    >().props;
-
-    useEffect(() => {
-        if (error) {
-            toast.error('Akses gagal diberikan!', {
-                description: error,
-            });
-        }
-
-        if (success) {
-            toast.success('Akses berhasil diberikan!', {
-                description: success,
-            });
-        }
-
-        if (info) {
-            toast('Informasi!', {
-                description: info,
-            });
-        }
-    }, [error, success, info]);
+    const { auth } = usePage<SharedData>().props;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -46,7 +22,6 @@ export default function YoutubeAccess() {
 
             <SettingsLayout>
                 {auth.user.youtube_permission_granted ? <RevokeAccess /> : <GrantAccess />}
-                <GrantAccess />
             </SettingsLayout>
         </AppLayout>
     );

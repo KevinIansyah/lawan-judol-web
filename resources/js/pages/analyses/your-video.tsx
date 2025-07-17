@@ -13,8 +13,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function YourVideo() {
-    const { props } = usePage<{ analyses: Paginator<Analysis> }>();
-    const { data, current_page, last_page, per_page, total } = props.analyses;
+    const { analyses } = usePage<{ analyses: Paginator<Analysis> }>().props;
+    const { data, current_page, last_page, per_page, total } = analyses;
     const [pageIndex, setPageIndex] = useState(current_page - 1);
 
     useEffect(() => {

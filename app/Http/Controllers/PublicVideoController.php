@@ -63,6 +63,10 @@ class PublicVideoController extends Controller
     {
         $analysis = Analysis::findOrFail($id);
 
+        if ($analysis->status !== 'success') {
+            return redirect()->back()->with('error', 'Mohon tunggu hingga proses analisis selesai sebelum melihat hasil.');
+        }
+
         $gamblingPath = storage_path('app/public/' . $analysis->gambling_file_path);
         $nonGamblingPath = storage_path('app/public/' . $analysis->nongambling_file_path);
 
@@ -96,7 +100,7 @@ class PublicVideoController extends Controller
             'nonGamblingCount' => $nonGamblingCount,
         ]);
     }
-    
+
     /**
      * Show the form for editing the specified resource.
      */

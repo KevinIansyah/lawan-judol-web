@@ -68,6 +68,10 @@ class YourVideoController extends Controller
     {
         $analysis = Analysis::findOrFail($id);
 
+        if ($analysis->status_analysis !== 'success') {
+            return redirect()->back()->with('error', 'Mohon tunggu hingga proses analisis selesai sebelum melihat hasil.');
+        }
+
         $gamblingPath = storage_path('app/public/' . $analysis->gambling_file_path);
         $nonGamblingPath = storage_path('app/public/' . $analysis->nongambling_file_path);
 
@@ -82,7 +86,6 @@ class YourVideoController extends Controller
                 $gamblingCount = $gambling['total_comments'] ?? 0;
             }
 
-            // Baca file non-gambling jika ada
             if (file_exists($nonGamblingPath)) {
                 $nonGambling = json_decode(file_get_contents($nonGamblingPath), true);
                 $nonGamblingCount = $nonGambling['total_comments'] ?? 0;

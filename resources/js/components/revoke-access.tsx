@@ -12,8 +12,6 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 
-import { toast } from 'sonner';
-
 export default function RevokeAccess() {
     const { delete: destroy, processing } = useForm();
     const [open, setOpen] = useState(false);
@@ -24,16 +22,9 @@ export default function RevokeAccess() {
         destroy(route('youtube-access.revoke'), {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Akses berhasil dicabut!', {
-                    description: 'Akses ke akun YouTube Anda telah berhasil dicabut.',
-                });
                 setOpen(false);
             },
             onError: () => {
-                toast.error('Akses gagal dicabut!', {
-                    description:
-                        'Terjadi kesalahan saat mencoba mencabut akses. Silakan coba lagi.',
-                });
                 setOpen(false);
             },
         });

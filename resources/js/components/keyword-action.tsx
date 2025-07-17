@@ -1,5 +1,5 @@
+import { Button } from '@/components/ui/button';
 import { ArrowUpFromLine, Copy, Filter, RotateCcw, Save } from 'lucide-react';
-import { Button } from '../ui/button';
 
 type KeywordActionsProps = {
     onCopy?: () => void;

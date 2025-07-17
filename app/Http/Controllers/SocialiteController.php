@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Services\GoogleService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -23,7 +22,7 @@ class SocialiteController extends Controller
     public function redirect()
     {
         return Socialite::driver('google')
-            ->setScopes([
+            ->scopes([
                 'email',
                 'profile',
                 'https://www.googleapis.com/auth/youtube.force-ssl'
@@ -32,7 +31,6 @@ class SocialiteController extends Controller
             ])
             ->redirect();
     }
-
 
     public function callback(Request $request)
     {
@@ -132,7 +130,7 @@ class SocialiteController extends Controller
         }
 
         return Socialite::driver('google')
-            ->setScopes([
+            ->scopes([
                 'email',
                 'profile',
                 'https://www.googleapis.com/auth/youtube.force-ssl'

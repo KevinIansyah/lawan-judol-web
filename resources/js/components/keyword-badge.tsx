@@ -1,7 +1,7 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Keyword } from '@/lib/schemas/keyword-schema';
 import { CircleCheck, CircleX } from 'lucide-react';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
 
 export default function KeywordBadge({ item, onToggle }: { item: Keyword; onToggle: () => void }) {
     return (
