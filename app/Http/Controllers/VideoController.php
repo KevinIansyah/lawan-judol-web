@@ -20,9 +20,6 @@ class VideoController extends Controller
         $this->cacheHandler = $cacheHandler;
     }
 
-    /**
-     * Get video (JSON response)
-     */
     public function getVideo(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -74,9 +71,6 @@ class VideoController extends Controller
         }
     }
 
-    /**
-     * Get all user videos (JSON response)
-     */
     public function getVideos(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -134,9 +128,6 @@ class VideoController extends Controller
         }
     }
 
-    /**
-     * Get comments (JSON response)
-     */
     public function getComments(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -179,9 +170,6 @@ class VideoController extends Controller
         }
     }
 
-    /**
-     * Clear user videos cache
-     */
     public function clearCache(): JsonResponse
     {
         $user = Auth::user();
@@ -196,9 +184,6 @@ class VideoController extends Controller
         ]);
     }
 
-    /**
-     * Get cache information
-     */
     public function getCacheInfo(): JsonResponse
     {
         $user = Auth::user();
@@ -213,9 +198,6 @@ class VideoController extends Controller
         ]);
     }
 
-    /**
-     * Validate YouTube video ID format
-     */
     private function isValidYouTubeVideoId(string $videoId): bool
     {
         return preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId);

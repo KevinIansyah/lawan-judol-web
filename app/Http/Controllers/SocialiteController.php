@@ -59,7 +59,6 @@ class SocialiteController extends Controller
         }
     }
 
-
     private function handleLoginCallback($googleUser)
     {
         $user = $this->googleService->findOrCreateUser($googleUser);

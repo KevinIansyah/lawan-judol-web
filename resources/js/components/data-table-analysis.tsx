@@ -1,3 +1,5 @@
+import DialogPublicVideo from '@/components/dialog-public-video';
+import DialogYourVideo from '@/components/dialog-your-video';
 import { TableCellViewer } from '@/components/table-cell-viewer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -55,8 +57,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
-import DialogPublicVideo from './dialog-public-video';
-import DialogYourVideo from './dialog-your-video';
 
 type DataTableProps = {
     data: Analysis[];
@@ -151,7 +151,7 @@ export default function DataTableAnalysis({
                     <Badge
                         className={`flex gap-1 px-1.5 [&_svg]:size-3 ${
                             ['success', 'on_process'].includes(row.original.status)
-                                ? 'text-black'
+                                ? 'text-[oklch(0.2178_0_0)]'
                                 : 'text-white'
                         }`}
                         style={{
@@ -168,10 +168,10 @@ export default function DataTableAnalysis({
                         }}
                     >
                         {row.original.status === 'success' && (
-                            <CheckCircle2Icon className="text-black" />
+                            <CheckCircle2Icon className="text-[oklch(0.2178_0_0)]" />
                         )}
                         {row.original.status === 'on_process' && (
-                            <LoaderIcon className="animate-spin text-black" />
+                            <LoaderIcon className="animate-spin text-[oklch(0.2178_0_0)]" />
                         )}
                         {row.original.status === 'failed' && <CircleX className="text-white" />}
                         {row.original.status === 'queue' && <LoaderIcon className="text-white" />}

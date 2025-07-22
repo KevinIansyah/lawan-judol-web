@@ -99,10 +99,10 @@ export default function Detail() {
                         </div>
                     </TabsContent>
                     <TabsContent value="gambling">
-                        <DataTableGambling data={gambling} />
+                        <DataTableGambling analysis_id={analysis.id} data={gambling} />
                     </TabsContent>
                     <TabsContent value="non-gambling">
-                        <DataTableNonGambling data={nonGambling} />
+                        <DataTableNonGambling analysis_id={analysis.id} data={nonGambling} />
                     </TabsContent>
                     <TabsContent value="keyword">
                         <KeywordList

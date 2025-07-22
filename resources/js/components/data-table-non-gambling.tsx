@@ -1,6 +1,15 @@
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
     Table,
@@ -10,7 +19,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Comment } from '@/types';
+import { Comment, ProcessLog } from '@/types';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -27,13 +36,37 @@ import {
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { ArrowUpDown, CheckCircle2Icon, FileTextIcon, Info, Loader2, PlusIcon } from 'lucide-react';
+import {
+    AlertCircle,
+    AlertTriangle,
+    ArrowUpDown,
+    CheckCircle2Icon,
+    CircleCheck,
+    CircleX,
+    FileText,
+    FileTextIcon,
+    Info,
+    Loader2,
+    PlusIcon,
+} from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 dayjs.extend(relativeTime);
 dayjs.locale('id');
+
+interface DataTableGamblingProps {
+    analysis_id: number;
+    data: {
+        total_comments: number;
+        total_chunks: number;
+        chunks: Array<{
+            chunk_id: number;
+            comments: Comment[];
+        }>;
+    };
+    onAddDatasetComplete?: (updatedComments: Comment[]) => void;
+}
 
 const columns: ColumnDef<Comment>[] = [
     {
@@ -135,8 +168,8 @@ const columns: ColumnDef<Comment>[] = [
             <Badge
                 className={`flex gap-1 px-1.5 whitespace-nowrap [&_svg]:size-3 ${
                     ['heldForReview', 'dataset'].includes(row.original.status)
-                        ? 'text-black'
-                        : 'text-white'
+                        ? 'text-[oklch(0.2178_0_0)]'
+                        : 'text-[oklch(1_0_0)]'
                 }`}
                 style={{
                     backgroundColor:
@@ -151,12 +184,18 @@ const columns: ColumnDef<Comment>[] = [
                                   : undefined,
                 }}
             >
-                {row.original.status === 'reject' && <CheckCircle2Icon className="text-white" />}
-                {row.original.status === 'heldForReview' && (
-                    <CheckCircle2Icon className="text-black" />
+                {row.original.status === 'reject' && (
+                    <CheckCircle2Icon className="text-[oklch(1_0_0)]" />
                 )}
-                {row.original.status === 'draft' && <FileTextIcon className="text-white" />}
-                {row.original.status === 'dataset' && <CheckCircle2Icon className="text-black" />}
+                {row.original.status === 'heldForReview' && (
+                    <CheckCircle2Icon className="text-[oklch(0.2178_0_0)]" />
+                )}
+                {row.original.status === 'draft' && (
+                    <FileTextIcon className="text-[oklch(1_0_0)]" />
+                )}
+                {row.original.status === 'dataset' && (
+                    <CheckCircle2Icon className="text-[oklch(0.2178_0_0)]" />
+                )}
                 {
                     {
                         reject: 'Ditolak',
@@ -170,19 +209,8 @@ const columns: ColumnDef<Comment>[] = [
     },
 ];
 
-interface DataTableGamblingProps {
-    data: {
-        total_comments: number;
-        total_chunks: number;
-        chunks: Array<{
-            chunk_id: number;
-            comments: Comment[];
-        }>;
-    };
-    onAddDatasetComplete?: (updatedComments: Comment[]) => void;
-}
-
 export default function DataTableNonGambling({
+    analysis_id,
     data: apiData,
     onAddDatasetComplete,
 }: DataTableGamblingProps) {
@@ -191,10 +219,18 @@ export default function DataTableNonGambling({
     const [rowSelection, setRowSelection] = useState({});
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = useState<SortingState>([]);
-    const [isLoading, setIsLoading] = useState(false);
+
     const [currentChunk, setCurrentChunk] = useState(0);
     const [hasMore, setHasMore] = useState(true);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+
+    const [loadingDataset, setLoadingDataset] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [processLogs, setProcessLogs] = useState<ProcessLog[]>([]);
+    const [successCount, setSuccessCount] = useState(0);
+    const [errorCount, setErrorCount] = useState(0);
+    const [finished, setFinished] = useState(false);
+
     const sentinelRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -206,9 +242,9 @@ export default function DataTableNonGambling({
     }, [apiData]);
 
     const loadNextChunk = useCallback(async () => {
-        if (isLoadingMore || !hasMore || !apiData) return;
+        if (loadingMore || !hasMore || !apiData) return;
 
-        setIsLoadingMore(true);
+        setLoadingMore(true);
 
         await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -231,8 +267,8 @@ export default function DataTableNonGambling({
             });
         }
 
-        setIsLoadingMore(false);
-    }, [currentChunk, isLoadingMore, hasMore, apiData]);
+        setLoadingMore(false);
+    }, [currentChunk, loadingMore, hasMore, apiData]);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -287,69 +323,172 @@ export default function DataTableNonGambling({
         getFacetedUniqueValues: getFacetedUniqueValues(),
     });
 
-    const getSelectedCommentIds = useCallback((): string[] => {
-        const selectedRows = table.getFilteredSelectedRowModel().rows;
-        return selectedRows.map((row) => row.original.comment_id.toString());
-    }, [table]);
-
     const getSelectedComments = useCallback((): Comment[] => {
         const selectedRows = table.getFilteredSelectedRowModel().rows;
         return selectedRows.map((row) => row.original);
     }, [table]);
 
-    const fetchDataset = async (): Promise<void> => {
-        const selectedCommentIds = getSelectedCommentIds();
-        const selectedComments = getSelectedComments();
-        console.log('Selected Comment IDs:', selectedCommentIds);
-        console.log('Selected Comments:', selectedComments);
-        console.log('Row Selection State:', rowSelection);
+    const addLogEntry = (comment_id: string, status: ProcessLog['status'], message: string) => {
+        setProcessLogs((prev) => [...prev, { comment_id, status, message }]);
+    };
 
-        if (selectedCommentIds.length === 0) {
+    const updateLogEntry = (comment_id: string, status: ProcessLog['status'], message: string) => {
+        setProcessLogs((prev) =>
+            prev.map((log) => (log.comment_id === comment_id ? { ...log, status, message } : log)),
+        );
+    };
+
+    const fetchDataset = async (): Promise<void> => {
+        const selectedComments = getSelectedComments();
+
+        if (selectedComments.length === 0) {
             toast('Informasi!', {
                 description: 'Silakan pilih minimal satu komentar untuk melanjutkan.',
             });
             return;
         }
 
-        setIsLoading(true);
+        setLoadingDataset(true);
+        setProcessLogs([]);
+        setSuccessCount(0);
+        setErrorCount(0);
+        setFinished(false);
+
+        let success = 0;
+        let failed = 0;
 
         try {
-            // const response = await fetch('/api/moderate-comments', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({
-            //         comment_ids: selectedCommentIds,
-            //         action: 'moderate',
-            //     }),
-            // });
-            // if (!response.ok) {
-            //     throw new Error(`HTTP error! status: ${response.status}`);
-            // }
-            // const result = await response.json();
-            // toast.success('Berhasil!', {
-            //     description: `${selectedCommentIds.length} komentar telah diproses.`,
-            // });
-            // // Reset selection setelah berhasil
-            // setRowSelection({});
-            // // Callback untuk update data di parent component jika ada
-            // if (onAddDatasetComplete && result.updatedComments) {
-            //     onAddDatasetComplete(result.updatedComments);
-            // }
-            // console.log(`Berhasil memproses ${selectedCommentIds.length} komentar`);
-        } catch (error) {
-            console.error('Error processing moderation:', error);
+            const csrfToken = document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute('content');
 
+            const updatedComments: Comment[] = [];
+
+            for (const selectedComment of selectedComments) {
+                addLogEntry(
+                    selectedComment.comment_id,
+                    'processing',
+                    `Memproses komentar dengan ID ${selectedComment.comment_id}`,
+                );
+
+                try {
+                    const response = await fetch('/dataset', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            ...(csrfToken && { 'X-CSRF-TOKEN': csrfToken }),
+                        },
+                        body: JSON.stringify({
+                            data: {
+                                analysis_id: analysis_id,
+                                comment: selectedComment,
+                                true_label: 'judol',
+                            },
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json();
+                        throw new Error(
+                            errorBody.message || `HTTP error! status: ${response.status}`,
+                        );
+                    }
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        success++;
+
+                        updateLogEntry(
+                            selectedComment.comment_id,
+                            'success',
+                            `Komentar dengan ID ${selectedComment.comment_id} berhasil ditambahkan ke dataset.`,
+                        );
+
+                        const updatedComment = { ...selectedComment, status: 'dataset' as const };
+                        updatedComments.push(updatedComment);
+                    } else {
+                        throw new Error(result.message || 'Unknown error');
+                    }
+                } catch (error) {
+                    failed++;
+                    console.error(`Error processing comment ${selectedComment.comment_id}:`, error);
+
+                    let message = 'Terjadi kesalahan saat menyimpan data.';
+
+                    if (error instanceof Error) {
+                        message = error.message;
+                    } else if (typeof error === 'string') {
+                        message = error;
+                    }
+
+                    updateLogEntry(
+                        selectedComment.comment_id,
+                        'error',
+                        `Komentar dengan ID ${selectedComment.comment_id} gagal ditambahkan ke dataset. ${message}`,
+                    );
+                }
+
+                await new Promise((resolve) => setTimeout(resolve, 300));
+            }
+
+            if (updatedComments.length > 0) {
+                setData((prevData) =>
+                    prevData.map((comment) => {
+                        const updatedComment = updatedComments.find(
+                            (updated) => updated.comment_id === comment.comment_id,
+                        );
+                        return updatedComment || comment;
+                    }),
+                );
+            }
+
+            setSuccessCount(success);
+            setErrorCount(failed);
+
+            if (failed === 0) {
+                toast.success('Berhasil!', {
+                    description: `${success} komentar berhasil ditambahkan ke dataset.`,
+                });
+            } else if (success === 0) {
+                toast.error('Gagal!', {
+                    description: `${failed} komentar gagal ditambahkan ke dataset.`,
+                });
+            } else {
+                toast.warning('Sebagian Berhasil!', {
+                    description: `${success} berhasil, ${failed} gagal ditambahkan ke dataset.`,
+                });
+            }
+
+            setRowSelection({});
+
+            if (onAddDatasetComplete && updatedComments.length > 0) {
+                onAddDatasetComplete(updatedComments);
+            }
+        } catch (error) {
+            console.error('Error processing dataset:', error);
             toast.error('Gagal!', {
-                description:
-                    error instanceof Error
-                        ? error.message
-                        : 'Terjadi kesalahan yang tidak diketahui',
+                description: 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.',
             });
         } finally {
-            setIsLoading(false);
+            setFinished(true);
         }
+    };
+
+    const handleProceed = () => {
+        fetchDataset();
+    };
+
+    const handleClose = () => {
+        setOpenDialog(false);
+        setTimeout(() => {
+            setLoadingDataset(false);
+            setProcessLogs([]);
+            setSuccessCount(0);
+            setErrorCount(0);
+            setFinished(false);
+        }, 300);
     };
 
     useEffect(() => {
@@ -364,18 +503,146 @@ export default function DataTableNonGambling({
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                     <div className="flex w-full gap-2 md:order-2 md:justify-end">
                         <div className="flex-1 md:flex-none">
-                            <Button
-                                variant="outline"
-                                onClick={fetchDataset}
-                                className="w-full"
-                                disabled={selectedCount === 0 || isLoading}
+                            <Dialog
+                                open={openDialog}
+                                onOpenChange={(open) => {
+                                    setOpenDialog(open);
+                                    if (!open) {
+                                        handleClose();
+                                    }
+                                }}
                             >
-                                {isLoading ? <Loader2 className="animate-spin" /> : <PlusIcon />}
-                                <span>
-                                    {isLoading ? 'Memproses...' : 'Tambah ke Dataset'}
-                                    {selectedCount > 0 && ` (${selectedCount} Komentar)`}
-                                </span>
-                            </Button>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" className='w-full' disabled={selectedCount === 0}>
+                                        <PlusIcon />
+                                        Tambah ke Dataset{' '}
+                                        {selectedCount > 0 && ` (${selectedCount} Komentar)`}
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="flex max-h-[80vh] flex-col overflow-hidden">
+                                    <DialogTitle>Tambah Komentar ke Dataset</DialogTitle>
+                                    <DialogDescription>
+                                        Komentar yang telah Anda pilih akan diproses dan ditambahkan
+                                        ke dataset.
+                                    </DialogDescription>
+
+                                    <div className="flex-1 overflow-hidden">
+                                        {loadingDataset ? (
+                                            <div className="flex w-full flex-col items-center justify-center">
+                                                {finished && successCount > 0 && errorCount > 0 ? (
+                                                    <>
+                                                        <AlertTriangle className="text-chart-3 mb-4 h-8 w-8" />
+                                                        <p className="text-center font-medium">
+                                                            {successCount} berhasil, {errorCount}{' '}
+                                                            gagal.
+                                                        </p>
+                                                        <p className="text-muted-foreground mt-1 text-center text-sm">
+                                                            Silakan tutup dialog jika tidak
+                                                            diperlukan lagi.
+                                                        </p>
+                                                    </>
+                                                ) : finished && successCount > 0 ? (
+                                                    <>
+                                                        <CircleCheck className="text-chart-4 mb-4 h-8 w-8" />
+                                                        <p className="text-center font-medium">
+                                                            {successCount} komentar berhasil
+                                                            diproses.
+                                                        </p>
+                                                        <p className="text-muted-foreground mt-1 text-center text-sm">
+                                                            Silakan tutup dialog jika tidak
+                                                            diperlukan lagi.
+                                                        </p>
+                                                    </>
+                                                ) : finished && errorCount > 0 ? (
+                                                    <>
+                                                        <CircleX className="text-chart-1 mb-4 h-8 w-8" />
+                                                        <p className="text-center font-medium">
+                                                            {errorCount} komentar gagal diproses.
+                                                        </p>
+                                                        <p className="text-muted-foreground mt-1 text-center text-sm">
+                                                            Silakan tutup dialog jika tidak
+                                                            diperlukan lagi.
+                                                        </p>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
+                                                        <p className="text-center font-medium">
+                                                            Memproses {selectedCount} komentar
+                                                        </p>
+                                                        <p className="text-muted-foreground mt-1 text-center text-sm">
+                                                            Mohon tunggu hingga proses selesai,
+                                                            jangan tinggalkan halaman atau menutup
+                                                            dialog ini.
+                                                        </p>
+                                                    </>
+                                                )}
+                                                <div className="bg-muted dark:bg-background mt-4 max-h-[170px] w-full overflow-y-auto rounded-md border p-4 pr-2">
+                                                    {processLogs.map((log, index) => (
+                                                        <div key={index} className="mb-2">
+                                                            {log.status === 'processing' && (
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    {log.message}
+                                                                </p>
+                                                            )}
+                                                            {log.status === 'success' && (
+                                                                <div className="flex items-center gap-2">
+                                                                    <CircleCheck className="text-chart-4 size-3 flex-shrink-0" />
+                                                                    <p className="text-chart-4 text-sm">
+                                                                        {log.message}
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                            {log.status === 'error' && (
+                                                                <div className="flex items-center gap-2">
+                                                                    <CircleX className="text-chart-1 size-3 flex-shrink-0" />
+                                                                    <p className="text-chart-1 text-sm">
+                                                                        {log.message}
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center py-12">
+                                                <div className="mb-4">
+                                                    <AlertCircle className="text-primary h-8 w-8" />
+                                                </div>
+                                                <div className="space-y-2 text-center">
+                                                    <p className="font-medium">
+                                                        {`${selectedCount} komentar dipilih`}
+                                                    </p>
+                                                    <p className="text-muted-foreground max-w-sm text-sm">
+                                                        Pastikan komentar yang Anda pilih sudah
+                                                        benar sebelum melanjutkan.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <DialogFooter className="gap-2 pt-4">
+                                        <Button
+                                            variant="secondary"
+                                            onClick={handleClose}
+                                            disabled={loadingDataset && !finished}
+                                        >
+                                            {finished ? 'Tutup' : 'Batal'}
+                                        </Button>
+
+                                        <Button
+                                            onClick={handleProceed}
+                                            disabled={loadingDataset}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <FileText className="h-4 w-4" />
+                                            Tambah ke Dataset
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         </div>
                     </div>
 
@@ -399,10 +666,6 @@ export default function DataTableNonGambling({
                                 Menampilkan {data.length} dari total {apiData.total_comments}{' '}
                                 komentar
                             </p>
-                            {/* <Progress
-                                value={(data.length / apiData.total_comments) * 100}
-                                className="h-2"
-                            /> */}
                         </AlertDescription>
                     </Alert>
                 )}
@@ -474,7 +737,7 @@ export default function DataTableNonGambling({
                         >
                             {data.length > 0 && (
                                 <>
-                                    {isLoadingMore ? (
+                                    {loadingMore ? (
                                         <div className="text-muted-foreground flex items-center gap-3">
                                             <Loader2 className="h-4 w-4 animate-spin" />
                                             <span className="text-sm">

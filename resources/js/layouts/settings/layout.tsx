@@ -45,7 +45,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                                 variant="ghost"
                                 asChild
                                 className={cn('w-full justify-start', {
-                                    'bg-muted': currentPath === item.url,
+                                    'bg-accent text-[oklch(1_0_0)]': currentPath === item.url,
                                 })}
                             >
                                 <Link href={item.url} prefetch>

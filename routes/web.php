@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\DatasetController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicVideoController;
 use App\Http\Controllers\VideoController;
@@ -38,6 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::resource('analysis', AnalysisController::class);
+    Route::resource('dataset', DatasetController::class);
 });
 
 

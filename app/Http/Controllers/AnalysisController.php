@@ -10,49 +10,34 @@ use Illuminate\Support\Facades\Log;
 
 class AnalysisController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+    public function index() {}
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+    public function create() {}
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'data.mergedData.video_id' => 'required|string',
-            'data.mergedData.title' => 'required|string',
-            'data.mergedData.description' => 'nullable|string',
-            'data.mergedData.published_at' => 'required|date',
-            'data.mergedData.thumbnail' => 'required|string',
-            'data.mergedData.channel_title' => 'required|string',
-            'data.mergedData.youtube_url' => 'required|string',
-            'data.mergedData.comments_path' => 'required|string',
-            'data.mergedData.comments_total' => 'required|integer',
+            'data.video.video_id' => 'required|string',
+            'data.video.title' => 'required|string',
+            'data.video.description' => 'nullable|string',
+            'data.video.published_at' => 'required|date',
+            'data.video.thumbnail' => 'required|string',
+            'data.video.channel_title' => 'required|string',
+            'data.video.youtube_url' => 'required|string',
+            'data.video.comments_path' => 'required|string',
+            'data.video.comments_total' => 'required|integer',
             'data.type' => 'required|in:public,your',
         ]);
 
         try {
             $user = Auth::user();
 
-            $mergedData = $request->input('data.mergedData');
+            $video = $request->input('data.video');
             $type = $request->input('data.type');
 
             $analysis = Analysis::create([
                 'user_id' => $user->id,
-                'video' => $mergedData,
+                'video' => $video,
                 'status' => 'queue',
                 'type' => $type,
                 'gambling_file_path' => null,
@@ -68,49 +53,25 @@ class AnalysisController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data analysis berhasil disimpan.',
-                'analysis' => $analysis,
-            ]);
+                'message' => 'Data analisis berhasil disimpan.',
+                'data' => $analysis,
+            ], 201);
         } catch (\Exception $e) {
             Log::error("Failed to store analysis data for user ID: {$user->id}. Error: " . $e->getMessage());
 
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat menyimpan data.',
-                'analysis' => null,
+                'data' => null,
             ], 500);
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Analysis $analysis)
-    {
-        //
-    }
+    public function show(Analysis $analysis) {}
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Analysis $analysis)
-    {
-        //
-    }
+    public function edit(Analysis $analysis) {}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Analysis $analysis)
-    {
-        //
-    }
+    public function update(Request $request, Analysis $analysis) {}
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Analysis $analysis)
-    {
-        //
-    }
+    public function destroy(Analysis $analysis) {}
 }

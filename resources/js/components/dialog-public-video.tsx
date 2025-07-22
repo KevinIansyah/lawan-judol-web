@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -163,7 +162,7 @@ export default function DialogPublicVideo() {
                 },
                 body: JSON.stringify({
                     data: {
-                        mergedData,
+                        video: mergedData,
                         type: 'public',
                     },
                 }),
@@ -249,7 +248,7 @@ export default function DialogPublicVideo() {
                         <span className="lg:hidden">Analisis</span>
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="flex min-h-[50vh] flex-col overflow-hidden sm:max-w-[425px] md:min-h-[40vh] lg:min-h-[45vh] xl:min-h-[65vh]">
+                <DialogContent className="flex min-h-[50vh] flex-col overflow-hidden md:min-h-[40vh] lg:min-h-[45vh] xl:min-h-[65vh]">
                     <DialogHeader>
                         <DialogTitle>Analisis Video</DialogTitle>
                         <DialogDescription>
@@ -265,76 +264,67 @@ export default function DialogPublicVideo() {
                             </a>
                         </DialogDescription>
                     </DialogHeader>
+
                     {!auth.user.youtube_permission_granted ? (
-                        <div className="flex flex-1 items-center overflow-hidden">
-                            <div className="flex w-full flex-col items-center justify-center text-center">
-                                <div className="mb-4">{getErrorIcon()}</div>
-                                <div className="space-y-2">
-                                    <p className="font-medium">Akses YouTube Belum Diberikan</p>
-                                    <p className="text-muted-foreground max-w-sm text-sm">
-                                        Untuk melanjutkan, Anda perlu memberikan izin akses ke akun
-                                        YouTube Anda terlebih dahulu.
-                                    </p>
-                                </div>
-                                <Button variant="outline" className="mt-6" asChild>
-                                    <Link href="/settings/youtube-access">Berikan Akses</Link>
-                                </Button>
+                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                            <div className="mb-4">{getErrorIcon()}</div>
+                            <div className="space-y-2 text-center">
+                                <p className="font-medium">Akses YouTube Belum Diberikan</p>
+                                <p className="text-muted-foreground max-w-sm text-sm">
+                                    Untuk melanjutkan, Anda perlu memberikan izin akses ke akun
+                                    YouTube Anda terlebih dahulu.
+                                </p>
                             </div>
+                            <Button variant="outline" className="mt-6" asChild>
+                                <Link href="/settings/youtube-access">Berikan Akses</Link>
+                            </Button>
                         </div>
                     ) : loadingVideo ? (
-                        <div className="flex flex-1 items-center overflow-hidden">
-                            <div className="flex w-full flex-col items-center justify-center">
+                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                            <div className="mb-4">
                                 <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
-                                <p className="text-center font-medium">
-                                    Memeriksa ketersediaan video...
-                                </p>
-                                <p className="text-muted-foreground mt-1 text-center text-sm">
+                            </div>
+                            <div className="space-y-2 text-center">
+                                <p className="font-medium">Memeriksa ketersediaan video</p>
+                                <p className="text-muted-foreground mt-1 text-sm">
                                     Mohon tunggu, proses ini mungkin memerlukan beberapa saat.
                                 </p>
                             </div>
                         </div>
                     ) : loadingComments ? (
-                        <div className="flex flex-1 items-center overflow-hidden">
-                            <div className="flex w-full flex-col items-center justify-center">
+                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                            <div className="mb-4">
                                 <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
-                                <p className="text-center font-medium">
-                                    Mengambil data komentar dari YouTube...
-                                </p>
-                                <p className="text-muted-foreground mt-1 text-center text-sm">
+                            </div>
+                            <div className="space-y-2 text-center">
+                                <p className="font-medium">Mengambil data komentar dari YouTube</p>
+                                <p className="text-muted-foreground mt-1 text-sm">
                                     Mohon tunggu, sistem sedang memuat komentar.
                                 </p>
                             </div>
                         </div>
                     ) : loadingAnalysis ? (
-                        <div className="flex flex-1 items-center overflow-hidden">
-                            <div className="flex w-full flex-col items-center justify-center">
+                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                            <div className="mb-4">
                                 <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
-                                <p className="text-center font-medium">
-                                    Menambahkan analisis ke dalam antrean...
-                                </p>
-                                <p className="text-muted-foreground mt-1 text-center text-sm">
+                            </div>
+                            <div className="space-y-2 text-center">
+                                <p className="font-medium">Menambahkan analisis ke dalam antrean</p>
+                                <p className="text-muted-foreground mt-1 text-sm">
                                     Mohon tunggu, permintaan Anda sedang diproses.
                                 </p>
                             </div>
                         </div>
                     ) : error ? (
-                        <div className="flex flex-1 items-center overflow-hidden">
-                            <div className="flex w-full flex-col items-center justify-center text-center">
-                                <div className="mb-4">{getErrorIcon()}</div>
-                                <div className="space-y-2">
-                                    <p className="font-medium">Oops! Ada masalah</p>
-                                    <p className="text-muted-foreground max-w-sm text-sm">
-                                        {error}
-                                    </p>
-                                </div>
-                                <Button
-                                    variant="outline"
-                                    className="mt-6"
-                                    onClick={() => resetForm()}
-                                >
-                                    {getRetryButtonText()}
-                                </Button>
+                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                            <div className="mb-4">{getErrorIcon()}</div>
+                            <div className="space-y-2 text-center">
+                                <p className="font-medium">Oops! Ada masalah</p>
+                                <p className="text-muted-foreground max-w-sm text-sm">{error}</p>
                             </div>
+                            <Button variant="outline" className="mt-6" onClick={() => resetForm()}>
+                                {getRetryButtonText()}
+                            </Button>
                         </div>
                     ) : (
                         <div className="flex-1 overflow-hidden">

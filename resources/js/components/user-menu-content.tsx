@@ -6,8 +6,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { type User } from '@/types';
-import { Link } from '@inertiajs/react';
+import { cn } from '@/lib/utils';
+import { SharedData, type User } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import { LogOut, Settings, ShieldCheck } from 'lucide-react';
 
 interface UserMenuContentProps {
@@ -15,6 +16,7 @@ interface UserMenuContentProps {
 }
 
 export function UserMenuContent({ user }: UserMenuContentProps) {
+    const page = usePage<SharedData>();
     const cleanup = useMobileNavigation();
 
     return (
@@ -28,13 +30,16 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
                     <Link
-                        className="block w-full"
+                        className={cn(
+                            'block w-full',
+                            page.url.startsWith('/settings') && 'bg-primary text-[oklch(1_0_0)]',
+                        )}
                         href={route('profile.edit')}
                         as="button"
                         prefetch
                         onClick={cleanup}
                     >
-                        <Settings className="mr-2 dark:text-white" />
+                        <Settings className="mr-2 dark:text-[oklch(1_0_0)]" />
                         Pengaturan
                     </Link>
                 </DropdownMenuItem>
@@ -42,13 +47,16 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
                     <Link
-                        className="block w-full"
+                        className={cn(
+                            'block w-full',
+                            page.url.startsWith('/guide') && 'bg-primary text-[oklch(1_0_0)]',
+                        )}
                         href={route('profile.edit')}
                         as="button"
                         prefetch
                         onClick={cleanup}
                     >
-                        <ShieldCheck className="mr-2 dark:text-white" />
+                        <ShieldCheck className="mr-2 dark:text-[oklch(1_0_0)]" />
                         Kebijakan Privasi
                     </Link>
                 </DropdownMenuItem>
@@ -62,7 +70,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                     as="button"
                     onClick={cleanup}
                 >
-                    <LogOut className="mr-2 dark:text-white" />
+                    <LogOut className="mr-2 dark:text-[oklch(1_0_0)]" />
                     Keluar
                 </Link>
             </DropdownMenuItem>

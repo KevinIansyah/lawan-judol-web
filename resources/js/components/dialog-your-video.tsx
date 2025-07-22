@@ -227,7 +227,7 @@ export default function DialogYourVideo() {
                 },
                 body: JSON.stringify({
                     data: {
-                        mergedData,
+                        video: mergedData,
                         type: 'your',
                     },
                 }),
@@ -286,7 +286,7 @@ export default function DialogYourVideo() {
             <DialogContent className="flex max-h-[80vh] flex-col overflow-hidden sm:max-w-[calc(100vw-32px)] xl:max-w-6xl">
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-between">
-                        <span>Analisis Video</span>
+                        Analisis Video
                     </DialogTitle>
                     <DialogDescription>
                         Pilih video YouTube Anda yang ingin dianalisis.
@@ -295,50 +295,54 @@ export default function DialogYourVideo() {
 
                 <div className="flex-1 overflow-hidden">
                     {!auth.user.youtube_permission_granted ? (
-                        <div className="flex flex-1 items-center overflow-hidden">
-                            <div className="flex w-full flex-col items-center justify-center text-center">
-                                <div className="mb-4">{getErrorIcon()}</div>
-                                <div className="space-y-2">
-                                    <p className="font-medium">Akses YouTube Belum Diberikan</p>
-                                    <p className="text-muted-foreground max-w-sm text-sm">
-                                        Untuk melanjutkan, Anda perlu memberikan izin akses ke akun
-                                        YouTube Anda terlebih dahulu.
-                                    </p>
-                                </div>
-                                <Button variant="outline" className="mt-6" asChild>
-                                    <Link href="/settings/youtube-access">Berikan Akses</Link>
-                                </Button>
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <div className="mb-4">{getErrorIcon()}</div>
+                            <div className="space-y-2 text-center">
+                                <p className="font-medium">Akses YouTube belum diberikan</p>
+                                <p className="text-muted-foreground max-w-sm text-sm">
+                                    Untuk melanjutkan, Anda perlu memberikan izin akses ke akun
+                                    YouTube Anda terlebih dahulu.
+                                </p>
                             </div>
+                            <Button variant="outline" className="mt-6" asChild>
+                                <Link href="/settings/youtube-access">Berikan Akses</Link>
+                            </Button>
                         </div>
                     ) : loadingVideo ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
-                            <p className="text-center font-medium">
-                                Memeriksa ketersediaan video...
-                            </p>
-                            <p className="text-muted-foreground mt-1 text-center text-sm">
-                                Mohon tunggu, proses ini mungkin memerlukan beberapa saat.
-                            </p>
+                            <div className="mb-4">
+                                <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                            </div>
+                            <div className="space-y-2 text-center">
+                                <p className="font-medium">Memeriksa ketersediaan video</p>
+                                <p className="text-muted-foreground max-w-sm text-sm">
+                                    Mohon tunggu, proses ini mungkin memerlukan beberapa saat.
+                                </p>
+                            </div>
                         </div>
                     ) : loadingComments ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
-                            <p className="text-center font-medium">
-                                Mengambil data komentar dari YouTube...
-                            </p>
-                            <p className="text-muted-foreground mt-1 text-center text-sm">
-                                Mohon tunggu, sistem sedang memuat komentar.
-                            </p>
+                            <div className="mb-4">
+                                <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                            </div>
+                            <div className="space-y-2 text-center">
+                                <p className="font-medium"> Mengambil data komentar dari YouTube</p>
+                                <p className="text-muted-foreground max-w-sm text-sm">
+                                    Mohon tunggu, sistem sedang memuat komentar.
+                                </p>
+                            </div>
                         </div>
                     ) : loadingAnalysis ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
-                            <p className="text-center font-medium">
-                                Menambahkan analisis ke dalam antrean...
-                            </p>
-                            <p className="text-muted-foreground mt-1 text-center text-sm">
-                                Mohon tunggu, permintaan Anda sedang diproses.
-                            </p>
+                            <div className="mb-4">
+                                <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                            </div>
+                            <div className="space-y-2 text-center">
+                                <p className="font-medium">Menambahkan analisis ke dalam antrean</p>
+                                <p className="text-muted-foreground max-w-sm text-sm">
+                                    Mohon tunggu, permintaan Anda sedang diproses.
+                                </p>
+                            </div>
                         </div>
                     ) : error ? (
                         <div className="flex flex-col items-center justify-center py-12">
@@ -360,14 +364,17 @@ export default function DialogYourVideo() {
                         </div>
                     ) : videos.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <p className="font-medium">Tidak ada video ditemukan</p>
-                            <p className="text-muted-foreground mt-1 text-sm">
-                                Pastikan Anda memiliki video di channel YouTube
-                            </p>
+                            <div className="mb-4">{getErrorIcon()}</div>
+                            <div className="space-y-2 text-center">
+                                <p className="font-medium">Video tidak ditemukan</p>
+                                <p className="text-muted-foreground max-w-sm text-sm">
+                                    Pastikan Anda memiliki video di channel YouTube.
+                                </p>
+                            </div>
                         </div>
                     ) : (
                         <div
-                            className="overflow-y-auto pr-2"
+                            className="overflow-y-auto"
                             style={{ maxHeight: 'calc(80vh - 200px)' }}
                         >
                             <div className="grid auto-rows-min gap-4 md:grid-cols-3 lg:grid-cols-4">

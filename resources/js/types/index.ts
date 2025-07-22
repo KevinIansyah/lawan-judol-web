@@ -172,3 +172,9 @@ export interface Paginator<T> {
     first_page_url: string;
     last_page_url: string;
 }
+
+export interface ProcessLog {
+    comment_id: string;
+    status: 'processing' | 'success' | 'error';
+    message: string;
+}

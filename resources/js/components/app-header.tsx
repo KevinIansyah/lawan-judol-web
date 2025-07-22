@@ -279,7 +279,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                             className={cn(
                                                                 page.url.startsWith(
                                                                     '/analysis/public-video',
-                                                                ) && 'bg-primary',
+                                                                ) && 'bg-primary text-[oklch(1_0_0)]',
                                                             )}
                                                         >
                                                             Video Publik
@@ -291,7 +291,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                             className={cn(
                                                                 page.url.startsWith(
                                                                     '/analysis/your-video',
-                                                                ) && 'bg-primary',
+                                                                ) && 'bg-primary text-[oklch(1_0_0)]',
                                                             )}
                                                         >
                                                             Video Saya
