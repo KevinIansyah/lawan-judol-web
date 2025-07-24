@@ -567,7 +567,7 @@ export default function DataTableGambling({
         <div className="flex w-full flex-col justify-start gap-4">
             <div className="relative flex flex-col gap-4 overflow-auto">
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-                    <div className="flex flex-col md:flex-row w-full gap-2 md:order-2 md:justify-end">
+                    <div className="flex w-full flex-col gap-2 md:order-2 md:flex-row md:justify-end">
                         <div className="flex-1 md:flex-none">
                             <Dialog
                                 open={openDialogDataset}
@@ -579,7 +579,11 @@ export default function DataTableGambling({
                                 }}
                             >
                                 <DialogTrigger asChild>
-                                    <Button variant="outline" className='w-full' disabled={selectedCount === 0}>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full"
+                                        disabled={selectedCount === 0}
+                                    >
                                         <PlusIcon />
                                         Tambah ke Dataset{' '}
                                         {selectedCount > 0 && ` (${selectedCount} Komentar)`}
@@ -765,11 +769,9 @@ export default function DataTableGambling({
                                     komentar
                                 </p>
                                 {draftCount > 0 && (
-                                    <div className="bg-chart-3 mt-2 rounded-md px-2">
-                                        <p className="text-black">
-                                            Ada {draftCount} komentar draft yang menunggu moderasi
-                                        </p>
-                                    </div>
+                                    <Badge className="bg-chart-3 mt-2 text-[oklch(0.2178_0_0)]">
+                                        Ada {draftCount} komentar draft yang menunggu moderasi
+                                    </Badge>
                                 )}
                             </div>
                         </AlertDescription>

@@ -46,6 +46,14 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user()
                     ? $request->user()->only(['id', 'name', 'email', 'avatar', 'youtube_permission_granted'])
                     : null,
+                'notifications' => $request->user()
+                    ? $request->user()
+                    ->notifications()
+                    ->latest()
+                    ->take(25)
+                    ->get()
+                    ->toArray()
+                    : [],
             ],
             'error' => fn() => $request->session()->get('error'),
             'success' => fn() => $request->session()->get('success'),

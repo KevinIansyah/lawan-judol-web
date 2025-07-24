@@ -2,6 +2,7 @@ import { LucideIcon } from 'lucide-react';
 
 export interface Auth {
     user: User;
+    notifications: Notification[];
 }
 
 export interface BreadcrumbItem {
@@ -43,11 +44,21 @@ export interface User {
     [key: string]: unknown;
 }
 
-export interface Payment {
+export interface Notification {
     id: string;
-    amount: number;
-    status: 'pending' | 'processing' | 'success' | 'failed';
-    email: string;
+    type: string;
+    notifiable_type: string;
+    notifiable_id: number;
+    data: {
+        title: string;
+        message: string;
+        url?: string | null;
+        status: 'queue' | 'on_process' | 'failed' | 'success';
+        [key: string]: unknown;
+    };
+    read_at: string | null;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Keyword {

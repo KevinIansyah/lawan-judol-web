@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Analysis;
+use App\Notifications\AnalysisNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
@@ -57,7 +58,7 @@ class CommentInferenceJob implements ShouldQueue
             @mkdir($nonJudolDir, 0755, true);
 
             $start = now();
-            
+
             Log::info("Downloading judol file to: " . storage_path("app/public/" . $judolPath));
             Http::timeout(300)
                 ->sink(storage_path("app/public/" . $judolPath))
@@ -72,15 +73,49 @@ class CommentInferenceJob implements ShouldQueue
             $this->analysis->gambling_file_path = $judolPath;
             $this->analysis->nongambling_file_path = $nonJudolPath;
             $this->analysis->status = 'success';
+            $this->sendNotification('success');
 
             Log::info("Inference completed for analysis id {$this->analysis->id}");
         } catch (\Throwable $e) {
             $this->analysis->status = 'failed';
             $this->analysis->save();
+            $this->sendNotification('failed');
 
             Log::error("Inference job error for analysis id {$this->analysis->id}: {$e->getMessage()}");
         }
 
         $this->analysis->save();
+    }
+
+    private function sendNotification(string $status)
+    {
+        $user = $this->analysis->user;
+        $url = null;
+        $analysis = $this->analysis;
+        $videoTitle = $analysis->video['title'] ?? 'Video Anda';
+
+        if ($status === 'success') {
+            $url = $analysis->type === 'public'
+                ? url('/analysis/public-video/' . $analysis->id)
+                : url('/analysis/your-video/' . $analysis->id);
+
+            $title = 'Analisis Selesai';
+            $message = "Proses analisis video berjudul '{$videoTitle}' telah berhasil diselesaikan.";
+        } elseif ($status === 'failed') {
+            $title = 'Analisis Gagal';
+            $message = "Proses analisis video berjudul '{$videoTitle}' gagal diproses. Silakan coba lagi.";
+        } else {
+            $title = 'Status Analisis';
+            $message = "Proses analisis video berjudul '{$videoTitle}' sedang diproses.";
+        }
+
+        $data = [
+            'title'   => $title,
+            'message' => $message,
+            'url'     => $url,
+            'status'  => $status,
+        ];
+
+        $user->notify(new AnalysisNotification($data));
     }
 }

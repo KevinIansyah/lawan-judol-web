@@ -40,6 +40,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('analysis', AnalysisController::class);
     Route::resource('dataset', DatasetController::class);
+
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/{id}/redirect', [NotificationController::class, 'redirect'])
+            ->name('redirect');
+
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])
+            ->name('read');
+
+        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])
+            ->name('read-all');
+    });
 });
 
 
