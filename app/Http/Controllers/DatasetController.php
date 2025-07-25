@@ -75,7 +75,12 @@ class DatasetController extends Controller
                 'true_label' => $trueLabel,
             ]);
 
-            Log::info("Comment data successfully stored for user ID: {$user->id}, Comment ID: {$comment['comment_id']}");
+            Log::info("Dataset comment stored successfully", [
+                'user_id' => $user->id,
+                'comment_id' => $comment['comment_id'],
+                'true_label' => $trueLabel,
+                'analysis_id' => $analysisId
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -86,7 +91,11 @@ class DatasetController extends Controller
                 ],
             ], 201);
         } catch (\Exception $e) {
-            Log::error("Failed to store comment data for user ID: {$user->id}. Error: " . $e->getMessage());
+            Log::error("Failed to store dataset comment", [
+                'user_id' => $user->id,
+                'comment_id' => $comment['comment_id'] ?? null,
+                'error' => $e->getMessage()
+            ]);
 
             return response()->json([
                 'success' => false,
@@ -107,22 +116,27 @@ class DatasetController extends Controller
     private function updateJsonFileStatus($filePath, $commentId, $newStatus)
     {
         try {
-            // Check if file exists
             if (!file_exists($filePath)) {
-                Log::warning("JSON file not found: {$filePath}");
+                Log::warning("JSON file not found", [
+                    'file_path' => $filePath,
+                    'comment_id' => $commentId
+                ]);
+
                 return false;
             }
 
-            // Read and decode JSON file
             $jsonContent = file_get_contents($filePath);
             $data = json_decode($jsonContent, true);
 
             if (!$data || !isset($data['chunks'])) {
-                Log::warning("Invalid JSON structure in file: {$filePath}");
+                Log::warning("Invalid JSON structure", [
+                    'file_path' => $filePath,
+                    'comment_id' => $commentId
+                ]);
+
                 return false;
             }
 
-            // Find and update the comment
             $updated = false;
             foreach ($data['chunks'] as &$chunk) {
                 if (isset($chunk['comments'])) {
@@ -130,29 +144,40 @@ class DatasetController extends Controller
                         if ($comment['comment_id'] === $commentId) {
                             $comment['status'] = $newStatus;
                             $updated = true;
-                            break 2; // Break out of both loops
+                            break 2;
                         }
                     }
                 }
             }
 
             if ($updated) {
-                // Write updated data back to file
                 $result = file_put_contents($filePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
                 if ($result === false) {
-                    Log::error("Failed to write updated JSON to file: {$filePath}");
+                    Log::error("Failed to write updated JSON", [
+                        'file_path' => $filePath,
+                        'comment_id' => $commentId
+                    ]);
+
                     return false;
                 }
 
-                Log::info("Successfully updated comment status in JSON file: {$filePath}, Comment ID: {$commentId}");
                 return true;
             } else {
-                Log::warning("Comment not found in JSON file: {$filePath}, Comment ID: {$commentId}");
+                Log::warning("Comment not found in JSON file", [
+                    'file_path' => $filePath,
+                    'comment_id' => $commentId
+                ]);
+
                 return false;
             }
         } catch (\Exception $e) {
-            Log::error("Error updating JSON file: {$filePath}. Error: " . $e->getMessage());
+            Log::error("Error updating JSON file", [
+                'file_path' => $filePath,
+                'comment_id' => $commentId,
+                'error' => $e->getMessage()
+            ]);
+
             return false;
         }
     }
