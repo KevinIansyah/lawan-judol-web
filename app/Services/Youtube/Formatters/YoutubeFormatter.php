@@ -4,10 +4,7 @@ namespace App\Services\YouTube\Formatters;
 
 class YoutubeFormatter
 {
-  /**
-   * Data dari endpoint videos?part=snippet&id=
-   */
-  public static function videoFromApiById(array $video): array
+  public static function formatVideoById(array $video): array
   {
     $snippet = $video['snippet'] ?? [];
     $videoId = $video['id'];
@@ -23,10 +20,7 @@ class YoutubeFormatter
     ];
   }
 
-  /**
-   * Data dari endpoint playlistItems?part=snippet&playlistId=
-   */
-  public static function videoFromChannelList(array $video): array
+  public static function formatVideoByPlaylist(array $video): array
   {
     $snippet = $video['snippet'] ?? [];
     $videoId = $snippet['resourceId']['videoId'];
@@ -42,10 +36,7 @@ class YoutubeFormatter
     ];
   }
 
-  /**
-   * Data dari endpoint channels?part=snippet,statistics&id=
-   */
-  public static function channelDetails(array $channel): array
+  public static function formatChannelDetails(array $channel): array
   {
     $snippet = $channel['snippet'] ?? [];
     $statistics = $channel['statistics'] ?? [];
@@ -59,7 +50,7 @@ class YoutubeFormatter
     ];
   }
 
-  public static function topLevelComment(array $comment, string $videoId): array
+  public static function formatTopLevelComment(array $comment, string $videoId): array
   {
     $topLevelComment = $comment['snippet']['topLevelComment'] ?? [];
     $snippet = $topLevelComment['snippet'] ?? [];

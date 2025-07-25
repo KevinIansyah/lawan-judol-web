@@ -6,7 +6,7 @@ use Illuminate\Http\Client\Response;
 
 class YouTubeErrorHelper
 {
-  public static function quotaError(Response $response): array
+  public static function checkQuotaError(Response $response): array
   {
     $reason = $response->json('error.errors.0.reason') ?? null;
 
@@ -23,7 +23,7 @@ class YouTubeErrorHelper
     ];
   }
 
-  public static function channelError(Response $response): array
+  public static function checkChannelError(Response $response): array
   {
     if ($response->successful()) {
       return ['reason' => false, 'message' => null];
@@ -51,7 +51,7 @@ class YouTubeErrorHelper
     };
   }
 
-  public static function videoError(Response $response): array
+  public static function checkVideoError(Response $response): array
   {
     $reason = $response->json('error.errors.0.reason') ?? null;
 
@@ -71,7 +71,7 @@ class YouTubeErrorHelper
     };
   }
 
-  public static function commentsError(Response $response): array
+  public static function checkCommentsError(Response $response): array
   {
     $reason = $response->json('error.errors.0.reason') ?? null;
 

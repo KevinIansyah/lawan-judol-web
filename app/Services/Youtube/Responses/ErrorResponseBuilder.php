@@ -4,10 +4,7 @@ namespace App\Services\YouTube\Responses;
 
 class ErrorResponseBuilder
 {
-  /**
-   * Menghasilkan response error untuk 1 video.
-   */
-  public static function videoErrorResponse(string $message): array
+  public static function buildVideoError(string $message): array
   {
     return [
       'success' => false,
@@ -17,10 +14,7 @@ class ErrorResponseBuilder
     ];
   }
 
-  /**
-   * Menghasilkan response error untuk daftar video milik user.
-   */
-  public static function userVideosErrorResponse(string $message): array
+  public static function buildUserVideosError(string $message): array
   {
     return [
       'success' => false,
@@ -32,10 +26,7 @@ class ErrorResponseBuilder
     ];
   }
 
-  /**
-   * Menghasilkan response error untuk daftar komentar.
-   */
-  public static function commentsErrorResponse(string $message): array
+  public static function buildCommentsError(string $message): array
   {
     return [
       'success' => false,

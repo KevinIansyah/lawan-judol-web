@@ -6,18 +6,7 @@ use App\Services\YouTube\Formatters\YoutubeFormatter;
 
 class SuccessResponseBuilder
 {
-  protected $youtubeFormatter;
-
-  public function __construct(
-    YoutubeFormatter $youtubeFormatter,
-  ) {
-    $this->youtubeFormatter = $youtubeFormatter;
-  }
-
-  /**
-   * Menghasilkan response success untuk 1 video.
-   */
-  public static function videoSuccessResponse(array $video): array
+  public static function buildVideoSuccess(array $video): array
   {
     return [
       'success' => true,
@@ -27,27 +16,21 @@ class SuccessResponseBuilder
     ];
   }
 
-  /**
-   * Menghasilkan response success untuk daftar video milik user.
-   */
-  public function userVideosSuccessResponse(array $allVideos, int $videoCount, array $channel, int $requestCount): array
+  public static function buildUserVideosSuccess(array $allVideos, int $videoCount, array $channel, int $requestCount): array
   {
     return [
       'success' => true,
       'message' => 'Data video berhasil diambil',
       'videos' => $allVideos,
       'total' => $videoCount,
-      'channel_info' => $this->youtubeFormatter->channelDetails($channel),
+      'channel_info' => YoutubeFormatter::formatChannelDetails($channel),
       'cached_at' => now()->toISOString(),
       'requests_made' => $requestCount,
       'from_cache' => false
     ];
   }
 
-  /**
-   * Menghasilkan response success untuk daftar komentar.
-   */
-  public static function commentsSuccessResponse(string $filename, int $commentCount, int $requestCount): array
+  public static function buildCommentsSuccess(string $filename, int $commentCount, int $requestCount): array
   {
     return [
       'success' => true,

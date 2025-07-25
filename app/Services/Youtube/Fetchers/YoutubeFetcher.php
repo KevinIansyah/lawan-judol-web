@@ -14,10 +14,7 @@ class YoutubeFetcher
     $this->baseUrl = config('youtube.api.base_url');
   }
 
-  /**
-   * Mengambil data video berdasarkan video ID
-   */
-  public function videoDetailsById(string $googleToken, string $videoId): Response
+  public function fetchVideoById(string $googleToken, string $videoId): Response
   {
     return Http::withHeaders([
       'Authorization' => 'Bearer ' . $googleToken,
@@ -27,10 +24,7 @@ class YoutubeFetcher
     ]);
   }
 
-  /**
-   * Mengambil channel milik pengguna (authenticated user)
-   */
-  public function authenticatedUserChannel(string $googleToken): Response
+  public function fetchAuthenticatedChannel(string $googleToken): Response
   {
     return Http::withHeaders([
       'Authorization' => 'Bearer ' . $googleToken,
@@ -40,15 +34,12 @@ class YoutubeFetcher
     ]);
   }
 
-  /**
-   * Mengambil daftar video dari playlist upload milik pengguna
-   */
-  public function videosFromUploadsPlaylist(string $googleToken, string $uploadsPlaylistId, ?string $nextPageToken = null): Response
+  public function fetchVideosFromPlaylist(string $googleToken, string $uploadsPlaylistId, ?string $nextPageToken = null): Response
   {
     $params = [
       'part' => 'snippet,contentDetails',
       'playlistId' => $uploadsPlaylistId,
-      'maxResults' => config('youtube.api.max_results_per_request'),
+      'maxResults' => config('youtube.api.videos_max_results_per_request'),
     ];
 
     if ($nextPageToken) {
@@ -60,15 +51,12 @@ class YoutubeFetcher
     ])->timeout(30)->get($this->baseUrl . '/playlistItems', $params);
   }
 
-  /**
-   * Mengambil komentar dari video tertentu
-   */
-  public function videoComments(string $googleToken, string $videoId, ?string $nextPageToken = null): Response
+  public function fetchComments(string $googleToken, string $videoId, ?string $nextPageToken = null): Response
   {
     $params = [
       'part' => 'snippet',
       'videoId' => $videoId,
-      'maxResults' =>  config('youtube.api.comments_max_results'),
+      'maxResults' =>  config('youtube.api.comments_max_results_per_request'),
     ];
 
     if ($nextPageToken) {

@@ -11,6 +11,8 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
     Table,
     TableBody,
@@ -230,6 +232,9 @@ export default function DataTableGambling({
     const [loadingDataset, setLoadingDataset] = useState(false);
     const [openDialogDataset, setOpenDialogDataset] = useState(false);
 
+    const [loadingModeration, setLoadingModeration] = useState(false);
+    const [openDialogModeration, setOpenDialogModeration] = useState(false);
+
     const [processLogs, setProcessLogs] = useState<ProcessLog[]>([]);
     const [successCount, setSuccessCount] = useState(0);
     const [errorCount, setErrorCount] = useState(0);
@@ -351,7 +356,6 @@ export default function DataTableGambling({
         const selectedComments = getSelectedComments();
         console.log('Selected Comment IDs:', selectedCommentIds);
         console.log('Selected Comments:', selectedComments);
-        console.log('Row Selection State:', rowSelection);
 
         if (selectedCommentIds.length === 0) {
             toast('Informasi!', {
@@ -399,6 +403,21 @@ export default function DataTableGambling({
         } finally {
             // setIsLoading(false);
         }
+    };
+
+    const handleProceedModeration = () => {
+        fetchModeration();
+    };
+
+    const handleCloseModeration = () => {
+        setOpenDialogModeration(false);
+        setTimeout(() => {
+            setLoadingModeration(false);
+            setProcessLogs([]);
+            setSuccessCount(0);
+            setErrorCount(0);
+            setFinished(false);
+        }, 300);
     };
 
     const fetchDataset = async (): Promise<void> => {
@@ -715,35 +734,175 @@ export default function DataTableGambling({
                             </Dialog>
                         </div>
                         <div className="flex-1 md:flex-none">
-                            {/* <Button
-                                variant="outline"
-                                onClick={fetchModeration}
-                                className="w-full"
-                                disabled={selectedCount === 0 || isLoading}
+                            <Dialog
+                                open={openDialogModeration}
+                                onOpenChange={(open) => {
+                                    setOpenDialogModeration(open);
+                                    if (!open) {
+                                        handleCloseModeration();
+                                    }
+                                }}
                             >
-                                {isLoading ? (
-                                    <Loader2 className="animate-spin" />
-                                ) : (
-                                    <ShieldEllipsis />
-                                )}
-                                <span>
-                                    {isLoading ? 'Memproses...' : 'Tindakan Moderasi'}
-                                    {selectedCount > 0 && ` (${selectedCount} Komentar)`}
-                                </span>
-                            </Button> */}
-                            <Button
-                                variant="outline"
-                                onClick={fetchModeration}
-                                className="w-full"
-                                disabled={selectedCount === 0}
-                            >
-                                <ShieldEllipsis />
+                                <DialogTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full"
+                                        disabled={selectedCount === 0}
+                                    >
+                                        <ShieldEllipsis />
+                                        Tindakan Moderasi{' '}
+                                        {selectedCount > 0 && ` (${selectedCount} Komentar)`}
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="flex max-h-[80vh] flex-col overflow-hidden">
+                                    <DialogTitle>Tindakan Moderasi Komentar</DialogTitle>
+                                    <DialogDescription>
+                                        Komentar yang telah Anda pilih akan diproses dan dilakukan
+                                        moderasi.
+                                    </DialogDescription>
 
-                                <span>
-                                    Tindakan Moderasi
-                                    {selectedCount > 0 && ` (${selectedCount} Komentar)`}
-                                </span>
-                            </Button>
+                                    <div className="flex-1 overflow-hidden">
+                                        {loadingDataset ? (
+                                            <div className="flex w-full flex-col items-center justify-center">
+                                                {finished && successCount > 0 && errorCount > 0 ? (
+                                                    <>
+                                                        <AlertTriangle className="text-chart-3 mb-4 h-8 w-8" />
+                                                        <p className="text-center font-medium">
+                                                            {successCount} berhasil, {errorCount}{' '}
+                                                            gagal.
+                                                        </p>
+                                                        <p className="text-muted-foreground mt-1 text-center text-sm">
+                                                            Silakan tutup dialog jika tidak
+                                                            diperlukan lagi.
+                                                        </p>
+                                                    </>
+                                                ) : finished && successCount > 0 ? (
+                                                    <>
+                                                        <CircleCheck className="text-chart-4 mb-4 h-8 w-8" />
+                                                        <p className="text-center font-medium">
+                                                            {successCount} komentar berhasil
+                                                            diproses.
+                                                        </p>
+                                                        <p className="text-muted-foreground mt-1 text-center text-sm">
+                                                            Silakan tutup dialog jika tidak
+                                                            diperlukan lagi.
+                                                        </p>
+                                                    </>
+                                                ) : finished && errorCount > 0 ? (
+                                                    <>
+                                                        <CircleX className="text-chart-1 mb-4 h-8 w-8" />
+                                                        <p className="text-center font-medium">
+                                                            {errorCount} komentar gagal diproses.
+                                                        </p>
+                                                        <p className="text-muted-foreground mt-1 text-center text-sm">
+                                                            Silakan tutup dialog jika tidak
+                                                            diperlukan lagi.
+                                                        </p>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
+                                                        <p className="text-center font-medium">
+                                                            Memproses {selectedCount} komentar
+                                                        </p>
+                                                        <p className="text-muted-foreground mt-1 text-center text-sm">
+                                                            Mohon tunggu hingga proses selesai,
+                                                            jangan tinggalkan halaman atau menutup
+                                                            dialog ini.
+                                                        </p>
+                                                    </>
+                                                )}
+                                                <div className="bg-muted dark:bg-background mt-4 max-h-[170px] w-full overflow-y-auto rounded-md border p-4 pr-2">
+                                                    {processLogs.map((log, index) => (
+                                                        <div key={index} className="mb-2">
+                                                            {log.status === 'processing' && (
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    {log.message}
+                                                                </p>
+                                                            )}
+                                                            {log.status === 'success' && (
+                                                                <div className="flex items-center gap-2">
+                                                                    <CircleCheck className="text-chart-4 size-3 flex-shrink-0" />
+                                                                    <p className="text-chart-4 text-sm">
+                                                                        {log.message}
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                            {log.status === 'error' && (
+                                                                <div className="flex items-center gap-2">
+                                                                    <CircleX className="text-chart-1 size-3 flex-shrink-0" />
+                                                                    <p className="text-chart-1 text-sm">
+                                                                        {log.message}
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center py-12">
+                                                <div className="mb-4">
+                                                    <AlertCircle className="text-primary h-8 w-8" />
+                                                </div>
+                                                <div className="mb-4 space-y-2 text-center">
+                                                    <p className="font-medium">
+                                                        {`${selectedCount} komentar dipilih`}
+                                                    </p>
+                                                    <p className="text-muted-foreground max-w-sm text-sm">
+                                                        Pastikan komentar yang Anda pilih sudah
+                                                        benar sebelum melanjutkan.
+                                                    </p>
+                                                </div>
+                                                <div className="w-full space-y-4">
+                                                    <p className="text-sm font-medium">
+                                                        Pilih tindakan moderasi
+                                                    </p>
+                                                    <RadioGroup defaultValue="option-one">
+                                                        <div className="flex items-center space-x-2">
+                                                            <RadioGroupItem
+                                                                value="option-one"
+                                                                id="option-one"
+                                                            />
+                                                            <Label htmlFor="option-one">
+                                                                HeldForReview
+                                                            </Label>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <RadioGroupItem
+                                                                value="option-two"
+                                                                id="option-two"
+                                                            />
+                                                            <Label htmlFor="option-two">
+                                                                Reject
+                                                            </Label>
+                                                        </div>
+                                                    </RadioGroup>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <DialogFooter className="gap-2 pt-4">
+                                        <Button
+                                            variant="secondary"
+                                            onClick={handleCloseModeration}
+                                            disabled={loadingModeration && !finished}
+                                        >
+                                            {finished ? 'Tutup' : 'Batal'}
+                                        </Button>
+
+                                        <Button
+                                            onClick={handleProceedModeration}
+                                            disabled={loadingModeration}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <FileText className="h-4 w-4" />
+                                            Moderasi Komentar
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         </div>
                     </div>
 

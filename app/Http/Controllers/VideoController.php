@@ -48,7 +48,8 @@ class VideoController extends Controller
             $result = $this->youtubeService->getVideoById($user, $videoId);
 
             if ($result['success']) {
-                Log::info("Successfully retrieved video for user: {$user->id}", [
+                Log::info("Video retrieved successfully", [
+                    'user_id' => $user->id,
                     'video_id' => $videoId,
                     'video_title' => $result['video']['title'] ?? 'Unknown'
                 ]);
@@ -56,10 +57,10 @@ class VideoController extends Controller
 
             return response()->json($result);
         } catch (\Exception $e) {
-            Log::error("Failed fetch video in getVideo(): " . $e->getMessage(), [
+            Log::error("Failed to fetch video", [
                 'user_id' => $user->id,
-                'video_id' => $videoId ?? null,
-                'trace' => $e->getTraceAsString(),
+                'video_id' => $videoId,
+                'error' => $e->getMessage()
             ]);
 
             return response()->json([
@@ -91,30 +92,22 @@ class VideoController extends Controller
         try {
             $shouldFetchFresh = $forceRefresh || !$this->cacheHandler->isVideosCached($user);
 
-            if ($forceRefresh) {
-                Log::info("Force refresh requested for user: {$user->id}");
-            } elseif (!$shouldFetchFresh) {
-                Log::info("Using cached data for user: {$user->id}");
-            } else {
-                Log::info("No cache found for user: {$user->id}, fetching fresh data");
-            }
-
             $result = $this->youtubeService->getUserVideos($user, $shouldFetchFresh);
 
             if ($result['success']) {
-                $source = $result['from_cache'] ? 'cache' : 'YouTube API';
-                Log::info("Successfully returned videos for user: {$user->id}", [
+                Log::info("Videos retrieved successfully", [
+                    'user_id' => $user->id,
                     'total_videos' => $result['total'],
-                    'source' => $source,
-                    'channel_title' => $result['channel_info']['title'] ?? 'Unknown'
+                    'from_cache' => $result['from_cache'] ?? false,
+                    'force_refresh' => $forceRefresh
                 ]);
             }
 
             return response()->json($result);
         } catch (\Exception $e) {
-            Log::error("Failed fetch videos in getVideos(): " . $e->getMessage(), [
+            Log::error("Failed to fetch videos", [
                 'user_id' => $user->id,
-                'trace' => $e->getTraceAsString(),
+                'error' => $e->getMessage()
             ]);
 
             return response()->json([
@@ -147,7 +140,8 @@ class VideoController extends Controller
             $result = $this->youtubeService->getCommentsByVideoId($user, $videoId);
 
             if ($result['success']) {
-                Log::info("Successfully retrieved comments for user: {$user->id}", [
+                Log::info("Comments retrieved successfully", [
+                    'user_id' => $user->id,
                     'video_id' => $videoId,
                     'total_comments' => $result['total'],
                     'requests_made' => $result['requests_made'] ?? 0
@@ -156,9 +150,10 @@ class VideoController extends Controller
 
             return response()->json($result);
         } catch (\Exception $e) {
-            Log::error("Failed fetch comments in getComments(): " . $e->getMessage(), [
+            Log::error("Failed to fetch comments", [
                 'user_id' => $user->id,
-                'trace' => $e->getTraceAsString(),
+                'video_id' => $videoId,
+                'error' => $e->getMessage()
             ]);
 
             return response()->json([
@@ -168,34 +163,6 @@ class VideoController extends Controller
                 'total' => 0,
             ], 500);
         }
-    }
-
-    public function clearCache(): JsonResponse
-    {
-        $user = Auth::user();
-
-        $this->cacheHandler->clearUserVideosCache($user);
-
-        Log::info("Cache cleared for user: {$user->id}");
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Cache berhasil dihapus.',
-        ]);
-    }
-
-    public function getCacheInfo(): JsonResponse
-    {
-        $user = Auth::user();
-
-        $cacheInfo = $this->cacheHandler->getCacheExpiry($user);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Informasi cache berhasil diambil.',
-            'cache_info' => $cacheInfo,
-            'is_cached' => $this->cacheHandler->isVideosCached($user)
-        ]);
     }
 
     private function isValidYouTubeVideoId(string $videoId): bool
