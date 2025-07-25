@@ -37,7 +37,7 @@ class CommentInferenceJob implements ShouldQueue
                 throw new \Exception("Comment file not found: $filePath");
             }
 
-            $response = Http::timeout(300)
+            $response = Http::timeout(600)
                 ->attach('file', file_get_contents($filePath), 'comments.json')
                 ->post("$url/predict-file");
 
@@ -56,11 +56,11 @@ class CommentInferenceJob implements ShouldQueue
             @mkdir($judolDir, 0755, true);
             @mkdir($nonJudolDir, 0755, true);
 
-            Http::timeout(300)
+            Http::timeout(600)
                 ->sink(storage_path("app/public/" . $judolPath))
                 ->get($url . '/download/' . $result['judol_result']);
 
-            Http::timeout(300)
+            Http::timeout(600)
                 ->sink(storage_path("app/public/" . $nonJudolPath))
                 ->get($url . '/download/' . $result['non_judol_result']);
 

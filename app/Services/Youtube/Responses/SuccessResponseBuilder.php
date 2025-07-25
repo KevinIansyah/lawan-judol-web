@@ -40,4 +40,13 @@ class SuccessResponseBuilder
       'requests_made' => $requestCount,
     ];
   }
+
+  public static function buildModerationCommentSuccess(string $commentId): array
+  {
+    return [
+      'success' => true,
+      'message' => 'Data komentar berhasil dimoderasi.',
+      'comment_id' => $commentId,
+    ];
+  }
 }

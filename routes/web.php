@@ -6,6 +6,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicVideoController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\YourVideoController;
+use App\Http\Controllers\YoutubeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -31,11 +32,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('your-video', YourVideoController::class);
     });
 
-    Route::prefix('video')->group(function () {
-        Route::get('/', [VideoController::class, 'getVideo'])->name('video');
-        Route::get('/all', [VideoController::class, 'getVideos'])->name('video.all');
-        Route::get('/comment', [VideoController::class, 'getComments'])->name('video.comment');
-        Route::post('/clear-cache', [VideoController::class, 'clearCache'])->name('video.clear-cache');
+    Route::prefix('youtube')->group(function () {
+        Route::get('/video', [YoutubeController::class, 'getVideo'])->name('video');
+        Route::get('/videos', [YoutubeController::class, 'getVideos'])->name('videos');
+        Route::get('/comments', [YoutubeController::class, 'getComments'])->name('comments');
+        Route::post('/clear-cache', [YoutubeController::class, 'clearCache'])->name('clear-cache');
     });
 
     Route::resource('analysis', AnalysisController::class);

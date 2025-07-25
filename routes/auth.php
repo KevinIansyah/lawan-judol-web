@@ -15,21 +15,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('auth/google/callback', [SocialiteController::class, 'callback'])->name('auth.google.callback');
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
-
-    Route::post('register', [RegisteredUserController::class, 'store']);
-
-    Route::prefix('auth')->group(function () {
-        Route::prefix('google')->group(function () {
-            Route::get('/redirect', [SocialiteController::class, 'redirect'])->name('auth.google.redirect');
-        });
-    });
-
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
-
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::get('auth/google/redirect', [SocialiteController::class, 'redirect'])->name('auth.google.redirect');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 
-class VideoController extends Controller
+class YoutubeController extends Controller
 {
     protected $youtubeService;
     protected $cacheHandler;
@@ -161,6 +161,54 @@ class VideoController extends Controller
                 'message' => 'Terjadi kesalahan saat mengambil komentar. Silakan coba lagi.',
                 'comments' => '',
                 'total' => 0,
+            ], 500);
+        }
+    }
+
+    public function postModerationComment(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user->google_token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Google belum terhubung. Silakan login ulang.',
+                'comment_id' => '',
+            ], 401);
+        }
+
+        $commentId = $request->input('comment_id');
+        $moderationStatus = $request->input('moderation_status');
+        $banAuthor = $request->boolean('ban_author', false);
+
+        try {
+            $result = $this->youtubeService->postModerationCommentById(
+                $user,
+                $commentId,
+                $moderationStatus,
+                $banAuthor
+            );
+
+            if ($result['success']) {
+                Log::info("Moderation comment action successful", [
+                    'user_id' => $user->id,
+                    'comment_id' => $commentId,
+                    'moderation_status' => $moderationStatus,
+                ]);
+            }
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            Log::error("Failed to moderate comment", [
+                'user_id' => $user->id,
+                'comment_id' => $commentId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memproses moderasi komentar. Silakan coba lagi.',
+                'comment_id' => $commentId,
             ], 500);
         }
     }

@@ -64,18 +64,18 @@ class YoutubeService
       if (!$response->successful()) {
         $checkQuotaError = $this->youtubeErrorHelper->checkQuotaError($response);
 
-        if ($checkQuotaError['reason']) {
+        if ($checkQuotaError['success']) {
           Log::critical("YouTube API quota exceeded", [
             'user_id' => $user->id,
             'action' => 'get_video_by_id'
           ]);
 
-          return $this->errorResponseBuilder->buildVideoError($checkQuotaError['message']);
+          return $this->errorResponseBuilder->buildVideoError($checkQuotaError['message'], true);
         }
 
         $checkVideoError = $this->youtubeErrorHelper->checkVideoError($response);
 
-        if ($checkVideoError['reason']) {
+        if ($checkVideoError['success']) {
           Log::warning("Video not found or forbidden", [
             'user_id' => $user->id,
             'video_id' => $videoId
@@ -140,17 +140,17 @@ class YoutubeService
       if (!$response->successful()) {
         $checkQuotaError = $this->youtubeErrorHelper->checkQuotaError($response);
 
-        if ($checkQuotaError['reason']) {
+        if ($checkQuotaError['success']) {
           Log::critical("YouTube API quota exceeded", [
             'user_id' => $user->id,
             'action' => 'get_user_channel'
           ]);
 
-          return $this->errorResponseBuilder->buildUserVideosError($checkQuotaError['message']);
+          return $this->errorResponseBuilder->buildUserVideosError($checkQuotaError['message'], true);
         }
 
         $checkChannelError = $this->youtubeErrorHelper->checkChannelError($response);
-        if ($checkChannelError['reason']) {
+        if ($checkChannelError['success']) {
           Log::warning("Channel not found or forbidden", [
             'user_id' => $user->id
           ]);
@@ -248,13 +248,13 @@ class YoutubeService
         } else {
           $checkQuotaError = $this->youtubeErrorHelper->checkQuotaError($response);
 
-          if ($checkQuotaError['reason']) {
+          if ($checkQuotaError['success']) {
             Log::critical("YouTube API quota exceeded", [
               'user_id' => $user->id,
               'action' => 'get_user_videos'
             ]);
 
-            return $this->errorResponseBuilder->buildUserVideosError($checkQuotaError['message']);
+            return $this->errorResponseBuilder->buildUserVideosError($checkQuotaError['message'], true);
           }
 
           Log::error("Failed to fetch videos batch", [
@@ -349,22 +349,24 @@ class YoutubeService
         } else {
           $checkQuotaError = $this->youtubeErrorHelper->checkQuotaError($response);
 
-          if ($checkQuotaError['reason']) {
+          if ($checkQuotaError['success']) {
             Log::critical("YouTube API quota exceeded", [
               'user_id' => $user->id,
               'action' => 'get_comments'
             ]);
-            return $this->errorResponseBuilder->buildVideoError($checkQuotaError['message']);
+
+            return $this->errorResponseBuilder->buildVideoError($checkQuotaError['message'], true);
           }
 
           $checkCommentsError = $this->youtubeErrorHelper->checkCommentsError($response);
 
-          if ($checkCommentsError['reason']) {
+          if ($checkCommentsError['success']) {
             Log::error("Comments fetch failed", [
               'user_id' => $user->id,
               'video_id' => $videoId,
               'error' => $checkCommentsError['message']
             ]);
+
             return $this->errorResponseBuilder->buildCommentsError($checkCommentsError['message']);
           }
 
@@ -373,7 +375,7 @@ class YoutubeService
             'video_id' => $videoId,
             'status' => $response->status()
           ]);
-          
+
           return $this->errorResponseBuilder->buildCommentsError('Terjadi kesalahan saat mengambil data komentar. Silakan coba beberapa saat lagi.');
         }
       } while ($nextPageToken);
@@ -424,6 +426,87 @@ class YoutubeService
       ]);
 
       return $this->errorResponseBuilder->buildCommentsError('Terjadi kesalahan saat mengambil data komentar. Silakan coba beberapa saat lagi.');
+    }
+  }
+
+
+  /**
+   * Post moderation (heldForReview or reject) comment by ID.
+   */
+  public function postModerationCommentById(User $user, string $commentId, string $moderationStatus, bool $banAuthor = false): array
+  {
+    try {
+      $initialResponse = $this->youtubeFetcher->fetchModerationComment($user->google_token, $commentId, $moderationStatus, $banAuthor);
+
+      $tokenResult = $this->tokenHandler->tokenRefresh($user, $initialResponse, function ($token) use ($commentId, $moderationStatus, $banAuthor) {
+        return $this->youtubeFetcher->fetchModerationComment($token, $commentId, $moderationStatus, $banAuthor);
+      });
+
+      if (!$tokenResult['success']) {
+        return $this->errorResponseBuilder->buildModerationCommentError($tokenResult['message'], $commentId);
+      }
+
+      $response = $tokenResult['response'];
+
+      if (!$response->successful()) {
+        $checkQuotaError = $this->youtubeErrorHelper->checkQuotaError($response);
+
+        if ($checkQuotaError['success']) {
+          Log::critical("YouTube API quota exceeded", [
+            'user_id' => $user->id,
+            'action' => 'moderate_comment'
+          ]);
+
+          return $this->errorResponseBuilder->buildModerationCommentError(
+            $checkQuotaError['message'],
+            $commentId,
+            true
+          );
+        }
+
+        $checkModerationCommentError = $this->youtubeErrorHelper->checkModerationCommentError($response);
+
+        if ($checkModerationCommentError['success']) {
+          Log::warning("Moderation failed for comment", [
+            'user_id' => $user->id,
+            'comment_id' => $commentId
+          ]);
+
+          return $this->errorResponseBuilder->buildModerationCommentError(
+            $checkModerationCommentError['message'],
+            $commentId
+          );
+        }
+
+        Log::error("Moderation request failed", [
+          'user_id' => $user->id,
+          'comment_id' => $commentId,
+          'status' => $response->status()
+        ]);
+
+        return $this->errorResponseBuilder->buildModerationCommentError(
+          'Terjadi kesalahan saat memproses moderasi komentar. Silakan coba beberapa saat lagi.',
+          $commentId
+        );
+      }
+
+      Log::info("Comment moderated successfully", [
+        'user_id' => $user->id,
+        'comment_id' => $commentId,
+      ]);
+
+      return $this->successResponseBuilder->buildModerationCommentSuccess($commentId);
+    } catch (\Exception $e) {
+      Log::error("Error during comment moderation", [
+        'user_id' => $user->id,
+        'comment_id' => $commentId,
+        'error' => $e->getMessage()
+      ]);
+
+      return $this->errorResponseBuilder->buildModerationCommentError(
+        'Terjadi kesalahan saat memproses moderasi komentar. Silakan coba beberapa saat lagi.',
+        $commentId
+      );
     }
   }
 }

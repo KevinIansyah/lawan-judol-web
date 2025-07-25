@@ -18,7 +18,7 @@ class YoutubeFetcher
   {
     return Http::withHeaders([
       'Authorization' => 'Bearer ' . $googleToken,
-    ])->timeout(30)->get($this->baseUrl . '/videos', [
+    ])->timeout(60)->get($this->baseUrl . '/videos', [
       'part' => 'id,snippet,contentDetails,statistics',
       'id' => $videoId,
     ]);
@@ -28,7 +28,7 @@ class YoutubeFetcher
   {
     return Http::withHeaders([
       'Authorization' => 'Bearer ' . $googleToken,
-    ])->timeout(30)->get($this->baseUrl . '/channels', [
+    ])->timeout(60)->get($this->baseUrl . '/channels', [
       'part' => 'id,snippet,contentDetails,statistics',
       'mine' => 'true'
     ]);
@@ -48,7 +48,7 @@ class YoutubeFetcher
 
     return Http::withHeaders([
       'Authorization' => 'Bearer ' . $googleToken,
-    ])->timeout(30)->get($this->baseUrl . '/playlistItems', $params);
+    ])->timeout(60)->get($this->baseUrl . '/playlistItems', $params);
   }
 
   public function fetchComments(string $googleToken, string $videoId, ?string $nextPageToken = null): Response
@@ -65,6 +65,22 @@ class YoutubeFetcher
 
     return Http::withHeaders([
       'Authorization' => 'Bearer ' . $googleToken,
-    ])->timeout(30)->get($this->baseUrl . '/commentThreads', $params);
+    ])->timeout(60)->get($this->baseUrl . '/commentThreads', $params);
+  }
+
+  public function fetchModerationComment(string $googleToken, string $commentId, string $moderationStatus, bool $banAuthor = false): Response
+  {
+    $params = [
+      'id' => $commentId,
+      'moderationStatus' => $moderationStatus,
+    ];
+
+    if ($moderationStatus === 'rejected' && $banAuthor !== null) {
+      $params['banAuthor'] = $banAuthor ? 'true' : 'false';
+    }
+
+    return Http::withHeaders([
+      'Authorization' => 'Bearer ' . $googleToken,
+    ])->timeout(60)->asForm()->post($this->baseUrl . '/comments/setModerationStatus', $params);
   }
 }

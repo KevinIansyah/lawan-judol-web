@@ -49,7 +49,7 @@ export default function DialogPublicVideo() {
                 .querySelector('meta[name="csrf-token"]')
                 ?.getAttribute('content');
 
-            const response = await fetch(`/video?${params.toString()}`, {
+            const response = await fetch(`/youtube/video?${params.toString()}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ export default function DialogPublicVideo() {
                 .querySelector('meta[name="csrf-token"]')
                 ?.getAttribute('content');
 
-            const response = await fetch(`/video/comment?${params.toString()}`, {
+            const response = await fetch(`/youtube/comments?${params.toString()}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
