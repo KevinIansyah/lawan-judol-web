@@ -8,7 +8,7 @@ import SettingsLayout from '@/layouts/settings/layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'YouTube Access Settings',
+        title: 'Pengaturan Izin',
         href: '/settings/youtube-access',
     },
 ];

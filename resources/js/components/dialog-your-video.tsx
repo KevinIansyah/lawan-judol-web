@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -218,7 +217,7 @@ export default function DialogYourVideo() {
                 .querySelector('meta[name="csrf-token"]')
                 ?.getAttribute('content');
 
-            const response = await fetch(`/analysis`, {
+            const response = await fetch(`/analyses`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

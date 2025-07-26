@@ -7,10 +7,36 @@ use App\Models\Dataset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class DatasetController extends Controller
 {
-    public function index() {}
+    public function index(Request $request)
+    {
+        $perPage = $request->get('per_page', 20);
+        $perPage = in_array($perPage, [20, 30, 40, 50]) ? $perPage : 20;
+
+        $search = $request->get('search');
+
+        $query = Dataset::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->Where('comment->text', 'like', '%' . $search . '%');
+            });
+        }
+
+        $datasets = $query->latest()->paginate($perPage);
+
+        $datasets->appends($request->query());
+
+        return Inertia::render('dataset', [
+            'datasets' => $datasets,
+            'filters' => [
+                'search' => $search,
+            ],
+        ]);
+    }
 
     public function create() {}
 

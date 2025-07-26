@@ -8,12 +8,12 @@ import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Public Video',
-        href: '/analysis/public-video',
+        title: 'Video Publik',
+        href: '/analysis/public-videos',
     },
 ];
 
-export default function PublicVideo() {
+export default function PublicVideos() {
     const { analyses } = usePage<{ analyses: Paginator<Analysis> }>().props;
     const { data, current_page, last_page, per_page, total } = analyses;
     const [pageIndex, setPageIndex] = useState(current_page - 1);
@@ -24,7 +24,7 @@ export default function PublicVideo() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Public Video" />
+            <Head title="Video Publik" />
             <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
                 <Heading
                     title="Analisis Video Publik"

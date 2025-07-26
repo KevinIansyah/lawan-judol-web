@@ -5,17 +5,17 @@ import { Head, Link, usePage } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Home',
+        title: 'Beranda',
         href: '/',
     },
 ];
 
-export default function Welcome() {
+export default function Home() {
     const { auth } = usePage<SharedData>().props;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Home" />
+            <Head title="Beranda" />
             <div className="flex min-h-[calc(100vh-70px)] w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0">
                 <main className="flex w-full max-w-[335px] flex-col-reverse lg:max-w-4xl lg:flex-row">
                     <div className="flex-1 flex-col justify-center rounded-br-lg rounded-bl-lg p-6 leading-[20px] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:flex lg:rounded-tl-lg lg:rounded-br-none lg:px-15 dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]">

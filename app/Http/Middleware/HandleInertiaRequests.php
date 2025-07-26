@@ -44,7 +44,7 @@ class HandleInertiaRequests extends Middleware
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user()
-                    ? $request->user()->only(['id', 'name', 'email', 'avatar', 'youtube_permission_granted'])
+                    ? $request->user()->only(['id', 'name', 'email', 'avatar', 'role', 'youtube_permission_granted'])
                     : null,
                 'notifications' => $request->user()
                     ? $request->user()

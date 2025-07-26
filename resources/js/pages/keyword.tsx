@@ -8,15 +8,15 @@ import dataKeyword from './analyses/data-keyword.json';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Keyword',
-        href: '/keyword',
+        title: 'Kata Kunci',
+        href: '/keywords',
     },
 ];
 
 export default function Keywords() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Keyword" />
+            <Head title="Kata Kunci" />
             <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
                 <Heading
                     title="Kamus Kata Kunci"

@@ -37,34 +37,12 @@ export interface User {
     name: string;
     email: string;
     avatar?: string;
+    role: 'user' | 'admin';
     youtube_permission_granted: boolean;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
     [key: string]: unknown;
-}
-
-export interface Notification {
-    id: string;
-    type: string;
-    notifiable_type: string;
-    notifiable_id: number;
-    data: {
-        title: string;
-        message: string;
-        url?: string | null;
-        status: 'queue' | 'on_process' | 'failed' | 'success';
-        [key: string]: unknown;
-    };
-    read_at: string | null;
-    created_at: string;
-    updated_at: string;
-}
-
-export interface Keyword {
-    id: number;
-    keyword: string;
-    label: 0 | 1;
 }
 
 export interface Video {
@@ -167,6 +145,39 @@ export interface ApiResponseAnalysis {
     success: boolean;
     analysis: Analysis;
     message: string;
+}
+
+export interface Notification {
+    id: string;
+    type: string;
+    notifiable_type: string;
+    notifiable_id: number;
+    data: {
+        title: string;
+        message: string;
+        url?: string | null;
+        status: 'queue' | 'on_process' | 'failed' | 'success';
+        [key: string]: unknown;
+    };
+    read_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Keyword {
+    id: number;
+    keyword: string;
+    label: 0 | 1;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Dataset {
+    id: number;
+    comment: Comment;
+    true_label: 'judol' | 'non_judol';
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Paginator<T> {

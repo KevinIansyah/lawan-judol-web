@@ -9,7 +9,7 @@ import SettingsLayout from '@/layouts/settings/layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Appearance Settings',
+        title: 'Pengaturan Tampilan',
         href: '/settings/appearance',
     },
 ];

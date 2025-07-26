@@ -153,7 +153,7 @@ export default function DialogPublicVideo() {
                 .querySelector('meta[name="csrf-token"]')
                 ?.getAttribute('content');
 
-            const response = await fetch(`/analysis`, {
+            const response = await fetch(`/analyses`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

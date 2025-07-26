@@ -27,16 +27,11 @@ export default function Detail() {
     const [activeTab, setActiveTab] = useState('summary');
 
     const isPublic = url.includes('public-video');
-    const isPrivate = url.includes('your-video');
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: isPublic ? 'Video Publik' : isPrivate ? 'Video Anda' : 'Video',
-            href: isPublic
-                ? '/analysis/public-video'
-                : isPrivate
-                  ? '/analysis/your-video'
-                  : '/analysis',
+            title: isPublic ? 'Video Publik' : 'Video Anda',
+            href: isPublic ? '/analysis/public-video' : '/analysis/your-video',
         },
         {
             title: 'Detail',
@@ -60,7 +55,7 @@ export default function Detail() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Public Video" />
+            <Head title="Detail" />
             <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
                 <Heading
                     title="Detail Analisis"

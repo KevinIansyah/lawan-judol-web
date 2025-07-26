@@ -4,32 +4,19 @@ use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\DatasetController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicVideoController;
-use App\Http\Controllers\VideoController;
 use App\Http\Controllers\YourVideoController;
 use App\Http\Controllers\YoutubeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Route::get('/clear', function () {
-//     Artisan::call('optimize');
-//     return "Success Optimize";
-// });
-
-// Route::get('/notifications/read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-
-
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+Route::get('/', fn() => Inertia::render('home'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', fn() =>  Inertia::render('dashboard'))->name('dashboard');
 
     Route::prefix('analysis')->group(function () {
-        Route::resource('public-video', PublicVideoController::class);
-        Route::resource('your-video', YourVideoController::class);
+        Route::resource('public-videos', PublicVideoController::class);
+        Route::resource('your-videos', YourVideoController::class);
     });
 
     Route::prefix('youtube')->group(function () {
@@ -39,29 +26,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/clear-cache', [YoutubeController::class, 'clearCache'])->name('clear-cache');
     });
 
-    Route::resource('analysis', AnalysisController::class);
-    Route::resource('dataset', DatasetController::class);
+    Route::resource('analyses', AnalysisController::class);
+    Route::resource('datasets', DatasetController::class);
 
     Route::prefix('notifications')->name('notifications.')->group(function () {
-        Route::get('/{id}/redirect', [NotificationController::class, 'redirect'])
-            ->name('redirect');
-
-        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])
-            ->name('read');
-
-        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])
-            ->name('read-all');
+        Route::get('/{id}/redirect', [NotificationController::class, 'redirect'])->name('redirect');
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
     });
 });
 
-
-Route::get('/keyword', function () {
-    return Inertia::render('keywords');
-})->name('keyword');
-
-Route::get('/guide', function () {
-    return Inertia::render('guides');
-})->name('guide');
+Route::get('/keywords', fn() => Inertia::render('keyword'))->name('keywords');
+Route::get('/guides', fn() => Inertia::render('guide'))->name('guides');
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

@@ -26,6 +26,7 @@ import {
     ChevronDown,
     ChevronRight,
     FileKey,
+    FileText,
     LayoutGrid,
     Menu,
     ShieldCheck,
@@ -130,11 +131,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 {isMobileAnalysisOpen && (
                                                     <div className="mt-2 ml-8 flex flex-col space-y-1">
                                                         <Link
-                                                            href="/analysis/public-video"
+                                                            href="/analysis/public-videos"
                                                             className={cn(
                                                                 'rounded-md px-3 py-2 text-sm',
                                                                 page.url.startsWith(
-                                                                    '/analysis/public-video',
+                                                                    '/analysis/public-videos',
                                                                 )
                                                                     ? 'bg-primary text-white'
                                                                     : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
@@ -144,11 +145,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                             Video Publik
                                                         </Link>
                                                         <Link
-                                                            href="/analysis/your-video"
+                                                            href="/analysis/your-videos"
                                                             className={cn(
                                                                 'rounded-md px-3 py-2 text-sm',
                                                                 page.url.startsWith(
-                                                                    '/analysis/your-video',
+                                                                    '/analysis/your-videos',
                                                                 )
                                                                     ? 'bg-primary text-white'
                                                                     : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
@@ -162,10 +163,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             </div>
 
                                             <Link
-                                                href="/keyword"
+                                                href="/keywords"
                                                 className={cn(
                                                     'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
-                                                    page.url === '/keyword'
+                                                    page.url === '/keywords'
                                                         ? 'bg-primary text-white'
                                                         : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                 )}
@@ -176,10 +177,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             </Link>
 
                                             <Link
-                                                href="/guide"
+                                                href="/guides"
                                                 className={cn(
                                                     'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
-                                                    page.url === '/guide'
+                                                    page.url === '/guides'
                                                         ? 'bg-primary text-white'
                                                         : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                 )}
@@ -188,14 +189,30 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 <BookOpen className="h-4 w-4" />
                                                 <span>Panduan</span>
                                             </Link>
+
+                                            {auth.user.role === 'admin' && (
+                                                <Link
+                                                    href="/datasets"
+                                                    className={cn(
+                                                        'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
+                                                        page.url === '/datasets'
+                                                            ? 'bg-primary text-white'
+                                                            : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
+                                                    )}
+                                                    onClick={closeMobileMenu}
+                                                >
+                                                    <FileText className="h-4 w-4" />
+                                                    <span>Dataset</span>
+                                                </Link>
+                                            )}
                                         </nav>
                                     ) : (
                                         <nav className="flex flex-col space-y-2">
                                             <Link
-                                                href="/keyword"
+                                                href="/keywords"
                                                 className={cn(
                                                     'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
-                                                    page.url === '/keyword'
+                                                    page.url === '/keywords'
                                                         ? 'bg-primary text-white'
                                                         : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                 )}
@@ -206,10 +223,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             </Link>
 
                                             <Link
-                                                href="/guide"
+                                                href="/guides"
                                                 className={cn(
                                                     'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
-                                                    page.url === '/guide'
+                                                    page.url === '/guides'
                                                         ? 'bg-primary text-white'
                                                         : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                 )}
@@ -223,7 +240,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 href="#"
                                                 className={cn(
                                                     'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
-                                                    page.url === '/guide'
+                                                    page.url === '/guides'
                                                         ? 'bg-primary text-white'
                                                         : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
                                                 )}
@@ -275,11 +292,12 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 <li>
                                                     <NavigationMenuLink asChild>
                                                         <Link
-                                                            href="/analysis/public-video"
+                                                            href="/analysis/public-videos"
                                                             className={cn(
                                                                 page.url.startsWith(
-                                                                    '/analysis/public-video',
-                                                                ) && 'bg-primary text-[oklch(1_0_0)]',
+                                                                    '/analysis/public-videos',
+                                                                ) &&
+                                                                    'bg-primary text-[oklch(1_0_0)]',
                                                             )}
                                                         >
                                                             Video Publik
@@ -287,11 +305,12 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                     </NavigationMenuLink>
                                                     <NavigationMenuLink asChild>
                                                         <Link
-                                                            href="/analysis/your-video"
+                                                            href="/analysis/your-videos"
                                                             className={cn(
                                                                 page.url.startsWith(
-                                                                    '/analysis/your-video',
-                                                                ) && 'bg-primary text-[oklch(1_0_0)]',
+                                                                    '/analysis/your-videos',
+                                                                ) &&
+                                                                    'bg-primary text-[oklch(1_0_0)]',
                                                             )}
                                                         >
                                                             Video Saya
@@ -304,38 +323,57 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                                     <NavigationMenuItem className="relative flex h-full items-center">
                                         <Link
-                                            href="/keyword"
+                                            href="/keywords"
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
-                                                page.url === '/keyword' && activeItemStyles,
+                                                page.url === '/keywords' && activeItemStyles,
                                                 'h-9 px-3',
                                             )}
                                         >
                                             <FileKey className="mr-2 h-4 w-4" />
                                             Kata Kunci
                                         </Link>
-                                        {page.url === '/keyword' && (
+                                        {page.url === '/keywords' && (
                                             <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
                                         )}
                                     </NavigationMenuItem>
 
                                     <NavigationMenuItem className="relative flex h-full items-center">
                                         <Link
-                                            href="/guide"
+                                            href="/guides"
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
-                                                page.url === '/guide' && activeItemStyles,
+                                                page.url === '/guides' && activeItemStyles,
                                                 'h-9 px-3',
                                             )}
                                         >
                                             <BookOpen className="mr-2 h-4 w-4" />
                                             Panduan
                                         </Link>
-                                        {page.url === '/guide' && (
+                                        {page.url === '/guides' && (
                                             <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
                                         )}
                                     </NavigationMenuItem>
-                                </NavigationMenuList>{' '}
+
+                                    {auth.user.role === 'admin' && (
+                                        <NavigationMenuItem className="relative flex h-full items-center">
+                                            <Link
+                                                href="/datasets"
+                                                className={cn(
+                                                    navigationMenuTriggerStyle(),
+                                                    page.url === '/datasets' && activeItemStyles,
+                                                    'h-9 px-3',
+                                                )}
+                                            >
+                                                <FileText className="mr-2 h-4 w-4" />
+                                                Dataset
+                                            </Link>
+                                            {page.url === '/datasets' && (
+                                                <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
+                                            )}
+                                        </NavigationMenuItem>
+                                    )}
+                                </NavigationMenuList>
                             </NavigationMenu>
                         </div>
                     ) : (
@@ -344,34 +382,34 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 <NavigationMenuList className="flex h-full items-stretch space-x-2">
                                     <NavigationMenuItem className="relative flex h-full items-center">
                                         <Link
-                                            href="/keyword"
+                                            href="/keywords"
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
-                                                page.url === '/keyword' && activeItemStyles,
+                                                page.url === '/keywords' && activeItemStyles,
                                                 'h-9 px-3',
                                             )}
                                         >
                                             <FileKey className="mr-2 h-4 w-4" />
                                             Kata Kunci
                                         </Link>
-                                        {page.url === '/keyword' && (
+                                        {page.url === '/keywords' && (
                                             <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
                                         )}
                                     </NavigationMenuItem>
 
                                     <NavigationMenuItem className="relative flex h-full items-center">
                                         <Link
-                                            href="/guide"
+                                            href="/guides"
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
-                                                page.url === '/guide' && activeItemStyles,
+                                                page.url === '/guides' && activeItemStyles,
                                                 'h-9 px-3',
                                             )}
                                         >
                                             <BookOpen className="mr-2 h-4 w-4" />
                                             Panduan
                                         </Link>
-                                        {page.url === '/guide' && (
+                                        {page.url === '/guides' && (
                                             <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
                                         )}
                                     </NavigationMenuItem>
@@ -381,7 +419,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             href="#"
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
-                                                page.url === '/guide' && activeItemStyles,
+                                                page.url === '#' && activeItemStyles,
                                                 'h-9 px-3',
                                             )}
                                         >

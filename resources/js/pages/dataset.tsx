@@ -1,20 +1,20 @@
-import DataTableAnalysis from '@/components/data-table-analysis';
+import DataTableDataset from '@/components/data-table-dataset';
 import Heading from '@/components/heading';
 import AppLayout from '@/layouts/app-layout';
-import { Analysis, Paginator, type BreadcrumbItem } from '@/types';
+import { Dataset, Paginator, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Video Anda',
-        href: '/analysis/your-videos',
+        title: 'Dataset',
+        href: '/datasets',
     },
 ];
 
-export default function YourVideos() {
-    const { analyses } = usePage<{ analyses: Paginator<Analysis> }>().props;
-    const { data, current_page, last_page, per_page, total } = analyses;
+export default function Datasets() {
+    const { datasets } = usePage<{ datasets: Paginator<Dataset> }>().props;
+    const { data, current_page, last_page, per_page, total } = datasets;
     const [pageIndex, setPageIndex] = useState(current_page - 1);
 
     useEffect(() => {
@@ -23,14 +23,13 @@ export default function YourVideos() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Video Anda" />
-
+            <Head title="Dataset" />
             <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
                 <Heading
-                    title="Analisis Video Saya"
-                    description="Lihat riwayat analisis video dan mulai analisis baru kapan saja."
+                    title="Daftar Dataset"
+                    description="Lihat daftar dataset yang telah diunggah dan dikelola."
                 />
-                <DataTableAnalysis
+                <DataTableDataset
                     data={data}
                     pageIndex={pageIndex}
                     setPageIndex={setPageIndex}

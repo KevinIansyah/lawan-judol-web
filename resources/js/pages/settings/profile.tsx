@@ -14,7 +14,7 @@ import SettingsLayout from '@/layouts/settings/layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Profile Settings',
+        title: 'Pengaturan Profil',
         href: '/settings/profile',
     },
 ];

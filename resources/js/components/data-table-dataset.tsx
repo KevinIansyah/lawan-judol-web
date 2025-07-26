@@ -1,6 +1,5 @@
 import DialogPublicVideo from '@/components/dialog-public-video';
 import DialogYourVideo from '@/components/dialog-your-video';
-import { TableCellViewer } from '@/components/table-cell-viewer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,8 +27,8 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { formatDate } from '@/lib/utils';
-import { Analysis } from '@/types';
-import { Link, router, usePage } from '@inertiajs/react';
+import { Dataset } from '@/types';
+import { router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
     VisibilityState,
@@ -37,6 +36,9 @@ import {
     getCoreRowModel,
     useReactTable,
 } from '@tanstack/react-table';
+import dayjs from 'dayjs';
+import 'dayjs/locale/id';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import {
     CheckCircle2Icon,
     ChevronDownIcon,
@@ -44,16 +46,17 @@ import {
     ChevronRightIcon,
     ChevronsLeftIcon,
     ChevronsRightIcon,
-    CircleX,
     ColumnsIcon,
-    LoaderIcon,
     MoreVerticalIcon,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 
+dayjs.extend(relativeTime);
+dayjs.locale('id');
+
 type DataTableProps = {
-    data: Analysis[];
+    data: Dataset[];
     pageIndex: number;
     setPageIndex: React.Dispatch<React.SetStateAction<number>>;
     totalPages: number;
@@ -64,7 +67,7 @@ type DataTableProps = {
     };
 };
 
-export default function DataTableAnalysis({
+export default function DataTableDataset({
     data,
     pageIndex,
     setPageIndex,
@@ -93,40 +96,47 @@ export default function DataTableAnalysis({
         setSearchValue(newSearchValue);
     }, [initialFilters.search]);
 
-    const columns: ColumnDef<Analysis>[] = [
+    const columns: ColumnDef<Dataset>[] = [
         {
-            accessorKey: 'title',
-            header: 'Judul',
+            accessorKey: 'text',
+            header: () => <div className="w-full text-left">Teks Komentar</div>,
             cell: ({ row }) => {
-                return <TableCellViewer item={row.original} />;
+                const text = row.original.comment.text as string;
+                const timestamp = row.original.comment.timestamp;
+                const user = row.original.comment.user_metadata;
+
+                return (
+                    <div className="flex items-start gap-3">
+                        <img
+                            src={user.profile_url}
+                            alt={user.username}
+                            className="h-6 w-6 flex-shrink-0 rounded-full object-cover"
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/default-avatar.png';
+                            }}
+                        />
+                        <div className="min-w-0 flex-1 space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <div className="truncate text-xs font-medium">
+                                    {user.username.replace(/^@/, '')}
+                                </div>
+                                <div className="text-muted-foreground truncate text-xs font-medium">
+                                    {dayjs(timestamp).fromNow()}
+                                </div>
+                            </div>
+                            <div
+                                className="text-sm break-words whitespace-normal"
+                                dangerouslySetInnerHTML={{ __html: text }}
+                            />
+                        </div>
+                    </div>
+                );
             },
             enableHiding: false,
         },
         {
-            accessorKey: 'channel',
-            header: 'Channel',
-            cell: ({ row }) => {
-                return (
-                    <div className="text-foreground text-left">
-                        {row.original.video?.channel_title || '-'}
-                    </div>
-                );
-            },
-        },
-        {
-            accessorKey: 'komentar utama',
-            header: 'Komentar Utama',
-            cell: ({ row }) => {
-                return (
-                    <div className="text-foreground text-left">
-                        {row.original.video?.comments_total || 0}
-                    </div>
-                );
-            },
-        },
-        {
-            accessorKey: 'tanggal analisis',
-            header: 'Tanggal Analisis',
+            accessorKey: 'tanggal ditambahkan',
+            header: 'Tanggal Ditambahkan',
             cell: ({ row }) => {
                 return (
                     <div className="text-foreground text-left">
@@ -136,43 +146,35 @@ export default function DataTableAnalysis({
             },
         },
         {
-            accessorKey: 'status',
-            header: 'Status',
+            accessorKey: 'label',
+            header: 'Label',
             cell: ({ row }) => (
                 <Badge
-                    className={`flex gap-1 px-1.5 [&_svg]:size-3 ${
-                        ['success', 'on_process'].includes(row.original.status)
+                    className={`flex gap-1 px-1.5 whitespace-nowrap [&_svg]:size-3 ${
+                        ['non_judol'].includes(row.original.true_label)
                             ? 'text-[oklch(0.2178_0_0)]'
-                            : 'text-white'
+                            : 'text-[oklch(1_0_0)]'
                     }`}
                     style={{
                         backgroundColor:
-                            row.original.status === 'success'
-                                ? 'var(--chart-4)'
-                                : row.original.status === 'on_process'
-                                  ? 'var(--chart-3)'
-                                  : row.original.status === 'failed'
-                                    ? 'var(--chart-1)'
-                                    : row.original.status === 'queue'
-                                      ? 'var(--muted)'
-                                      : undefined,
+                            row.original.true_label === 'judol'
+                                ? 'var(--chart-1)'
+                                : row.original.true_label === 'non_judol'
+                                  ? 'var(--chart-4)'
+                                  : undefined,
                     }}
                 >
-                    {row.original.status === 'success' && (
+                    {row.original.true_label === 'judol' && (
+                        <CheckCircle2Icon className="text-[oklch(1_0_0)]" />
+                    )}
+                    {row.original.true_label === 'non_judol' && (
                         <CheckCircle2Icon className="text-[oklch(0.2178_0_0)]" />
                     )}
-                    {row.original.status === 'on_process' && (
-                        <LoaderIcon className="animate-spin text-[oklch(0.2178_0_0)]" />
-                    )}
-                    {row.original.status === 'failed' && <CircleX className="text-white" />}
-                    {row.original.status === 'queue' && <LoaderIcon className="text-white" />}
                     {
                         {
-                            success: 'Selesai',
-                            on_process: 'Sedang Diproses',
-                            failed: 'Gagal',
-                            queue: 'Antrian',
-                        }[row.original.status]
+                            judol: 'Judi Online',
+                            non_judol: 'Non Judi Online',
+                        }[row.original.true_label]
                     }
                 </Badge>
             ),
@@ -180,7 +182,7 @@ export default function DataTableAnalysis({
         {
             id: 'actions',
             header: 'Aksi',
-            cell: ({ row }) => (
+            cell: () => (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
@@ -193,30 +195,8 @@ export default function DataTableAnalysis({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-32">
-                        <DropdownMenuItem
-                            asChild
-                            disabled={['failed', 'on_process', 'queue'].includes(
-                                row.original.status,
-                            )}
-                        >
-                            {url.startsWith('/analysis/your-videos') ? (
-                                <Link href={`/analysis/your-videos/${row.original.id}`}>
-                                    Detail
-                                </Link>
-                            ) : url.startsWith('/analysis/public-videos') ? (
-                                <Link href={`/analysis/public-videos/${row.original.id}`}>
-                                    Detail
-                                </Link>
-                            ) : (
-                                <span>Detail</span>
-                            )}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem disabled={row.original.status !== 'failed'}>
-                            Ulang
-                        </DropdownMenuItem>
-                        <DropdownMenuItem disabled={row.original.status !== 'success'}>
-                            Hapus
-                        </DropdownMenuItem>
+                        <DropdownMenuItem>Ulang</DropdownMenuItem>
+                        <DropdownMenuItem>Hapus</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
@@ -246,7 +226,7 @@ export default function DataTableAnalysis({
         router.visit(url, {
             preserveState: true,
             preserveScroll: true,
-            only: ['analyses'],
+            only: ['datasets'],
         });
     }, 500);
 
@@ -261,7 +241,7 @@ export default function DataTableAnalysis({
         router.visit(url, {
             preserveState: true,
             preserveScroll: true,
-            only: ['analyses'],
+            only: ['datasets'],
         });
     };
 
@@ -276,7 +256,7 @@ export default function DataTableAnalysis({
         router.visit(url, {
             preserveState: true,
             preserveScroll: true,
-            only: ['analyses'],
+            only: ['datasets'],
         });
     };
 
@@ -351,7 +331,7 @@ export default function DataTableAnalysis({
                     </div>
 
                     <Input
-                        placeholder="Cari judul, channel, atau status..."
+                        placeholder="Cari komentar..."
                         value={searchValue}
                         onChange={handleSearchChange}
                         className="max-w-sm md:order-1"
