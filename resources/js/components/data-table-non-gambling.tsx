@@ -372,7 +372,7 @@ export default function DataTableNonGambling({
                 );
 
                 try {
-                    const response = await fetch('/dataset', {
+                    const response = await fetch('/datasets', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -623,15 +623,7 @@ export default function DataTableNonGambling({
                                         )}
                                     </div>
 
-                                    <DialogFooter className="gap-2 pt-4">
-                                        <Button
-                                            variant="secondary"
-                                            onClick={handleClose}
-                                            disabled={loadingDataset && !finished}
-                                        >
-                                            {finished ? 'Tutup' : 'Batal'}
-                                        </Button>
-
+                                    <DialogFooter className="border-t pt-4">
                                         <Button
                                             onClick={handleProceed}
                                             disabled={loadingDataset}

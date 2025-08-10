@@ -4,7 +4,6 @@ import {
     DialogContent,
     DialogDescription,
     DialogFooter,
-    DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
@@ -31,13 +30,40 @@ export default function DialogPublicVideo() {
     const [loadingVideo, setLoadingVideo] = useState(false);
     const [loadingComments, setLoadingComments] = useState(false);
     const [loadingAnalysis, setLoadingAnalysis] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const handleProceed = (): void => {
         setError(null);
         setErrorType(null);
         setLoadingVideo(true);
         fetchVideo();
+    };
+
+    const resetForm = () => {
+        setVideoId('');
+        setError(null);
+        setErrorType(null);
+        setLoadingVideo(false);
+        setLoadingComments(false);
+        setLoadingAnalysis(false);
+    };
+
+    const getErrorIcon = () => {
+        switch (errorType) {
+            case 'network':
+                return <WifiOff className="text-primary h-8 w-8" />;
+            default:
+                return <AlertCircle className="text-primary h-8 w-8" />;
+        }
+    };
+
+    const getRetryButtonText = () => {
+        switch (errorType) {
+            case 'network':
+                return 'Periksa Koneksi & Coba Lagi';
+            default:
+                return 'Coba Lagi';
+        }
     };
 
     const fetchVideo = async (): Promise<void> => {
@@ -181,7 +207,7 @@ export default function DialogPublicVideo() {
 
             if (analysisData.success) {
                 setVideoId('');
-                setIsOpen(false);
+                setIsDialogOpen(false);
 
                 router.reload();
 
@@ -203,163 +229,132 @@ export default function DialogPublicVideo() {
         }
     };
 
-    const resetForm = () => {
-        setVideoId('');
-        setError(null);
-        setErrorType(null);
-        setLoadingVideo(false);
-        setLoadingComments(false);
-        setLoadingAnalysis(false);
-    };
-
-    const getErrorIcon = () => {
-        switch (errorType) {
-            case 'network':
-                return <WifiOff className="text-primary h-8 w-8" />;
-            default:
-                return <AlertCircle className="text-primary h-8 w-8" />;
-        }
-    };
-
-    const getRetryButtonText = () => {
-        switch (errorType) {
-            case 'network':
-                return 'Periksa Koneksi & Coba Lagi';
-            default:
-                return 'Coba Lagi';
-        }
-    };
-
     return (
         <Dialog
-            open={isOpen}
+            open={isDialogOpen}
             onOpenChange={(open) => {
-                setIsOpen(open);
+                setIsDialogOpen(open);
                 if (!open) {
                     resetForm();
                 }
             }}
         >
-            <form>
-                <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full">
-                        <PlusIcon />
-                        <span className="hidden lg:inline">Tambah Analisis</span>
-                        <span className="lg:hidden">Analisis</span>
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="flex min-h-[50vh] flex-col overflow-hidden md:min-h-[40vh] lg:min-h-[45vh] xl:min-h-[65vh]">
-                    <DialogHeader>
-                        <DialogTitle>Analisis Video</DialogTitle>
-                        <DialogDescription>
-                            Masukkan ID video YouTube yang ingin dianalisis. Pelajari cara menemukan
-                            ID video{' '}
-                            <a
-                                href="https://support.google.com/youtube/answer/171780?hl=id"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary underline"
-                            >
-                                di sini!
-                            </a>
-                        </DialogDescription>
-                    </DialogHeader>
+            <DialogTrigger asChild>
+                <Button variant="outline" className="w-full">
+                    <PlusIcon />
+                    <span className="hidden lg:inline">Tambah Analisis</span>
+                    <span className="lg:hidden">Analisis</span>
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="flex min-h-[50vh] flex-col overflow-hidden md:min-h-[40vh] lg:min-h-[45vh] xl:min-h-[65vh]">
+                <DialogTitle>Analisis Video</DialogTitle>
+                <DialogDescription>
+                    Masukkan ID video YouTube yang ingin dianalisis. Pelajari cara menemukan ID
+                    video{' '}
+                    <a
+                        href="https://support.google.com/youtube/answer/171780?hl=id"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline"
+                    >
+                        di sini!
+                    </a>
+                </DialogDescription>
 
-                    {!auth.user.youtube_permission_granted ? (
-                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
-                            <div className="mb-4">{getErrorIcon()}</div>
-                            <div className="space-y-2 text-center">
-                                <p className="font-medium">Akses YouTube Belum Diberikan</p>
-                                <p className="text-muted-foreground max-w-sm text-sm">
-                                    Untuk melanjutkan, Anda perlu memberikan izin akses ke akun
-                                    YouTube Anda terlebih dahulu.
-                                </p>
-                            </div>
-                            <Button variant="outline" className="mt-6" asChild>
-                                <Link href="/settings/youtube-access">Berikan Akses</Link>
-                            </Button>
+                {!auth.user.youtube_permission_granted ? (
+                    <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                        <div className="mb-4">{getErrorIcon()}</div>
+                        <div className="space-y-2 text-center">
+                            <p className="font-medium">Akses YouTube Belum Diberikan</p>
+                            <p className="text-muted-foreground max-w-sm text-sm">
+                                Untuk melanjutkan, Anda perlu memberikan izin akses ke akun YouTube
+                                Anda terlebih dahulu.
+                            </p>
                         </div>
-                    ) : loadingVideo ? (
-                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
-                            <div className="mb-4">
-                                <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
-                            </div>
-                            <div className="space-y-2 text-center">
-                                <p className="font-medium">Memeriksa ketersediaan video</p>
-                                <p className="text-muted-foreground mt-1 text-sm">
-                                    Mohon tunggu, proses ini mungkin memerlukan beberapa saat.
-                                </p>
-                            </div>
+                        <Button variant="outline" className="mt-6" asChild>
+                            <Link href="/settings/youtube-access">Berikan Akses</Link>
+                        </Button>
+                    </div>
+                ) : loadingVideo ? (
+                    <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                        <div className="mb-4">
+                            <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
                         </div>
-                    ) : loadingComments ? (
-                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
-                            <div className="mb-4">
-                                <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
-                            </div>
-                            <div className="space-y-2 text-center">
-                                <p className="font-medium">Mengambil data komentar dari YouTube</p>
-                                <p className="text-muted-foreground mt-1 text-sm">
-                                    Mohon tunggu, sistem sedang memuat komentar.
-                                </p>
-                            </div>
+                        <div className="space-y-2 text-center">
+                            <p className="font-medium">Memeriksa ketersediaan video</p>
+                            <p className="text-muted-foreground mt-1 text-sm">
+                                Mohon tunggu, proses ini mungkin memerlukan beberapa saat.
+                            </p>
                         </div>
-                    ) : loadingAnalysis ? (
-                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
-                            <div className="mb-4">
-                                <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
-                            </div>
-                            <div className="space-y-2 text-center">
-                                <p className="font-medium">Menambahkan analisis ke dalam antrean</p>
-                                <p className="text-muted-foreground mt-1 text-sm">
-                                    Mohon tunggu, permintaan Anda sedang diproses.
-                                </p>
-                            </div>
+                    </div>
+                ) : loadingComments ? (
+                    <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                        <div className="mb-4">
+                            <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
                         </div>
-                    ) : error ? (
-                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
-                            <div className="mb-4">{getErrorIcon()}</div>
-                            <div className="space-y-2 text-center">
-                                <p className="font-medium">Oops! Ada masalah</p>
-                                <p className="text-muted-foreground max-w-sm text-sm">{error}</p>
-                            </div>
-                            <Button variant="outline" className="mt-6" onClick={() => resetForm()}>
-                                {getRetryButtonText()}
-                            </Button>
+                        <div className="space-y-2 text-center">
+                            <p className="font-medium">Mengambil data komentar dari YouTube</p>
+                            <p className="text-muted-foreground mt-1 text-sm">
+                                Mohon tunggu, sistem sedang memuat komentar.
+                            </p>
                         </div>
-                    ) : (
-                        <div className="flex-1 overflow-hidden">
-                            <div className="grid gap-3">
-                                <Label htmlFor="video-id">ID Video Youtube</Label>
-                                <Input
-                                    id="video-id"
-                                    name="video_id"
-                                    placeholder="9UEFQ90AhE"
-                                    onChange={(e) => setVideoId(e.target.value)}
-                                    value={videoId}
-                                />
-                            </div>
+                    </div>
+                ) : loadingAnalysis ? (
+                    <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                        <div className="mb-4">
+                            <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
                         </div>
-                    )}
-                    <DialogFooter className="border-t pt-4">
-                        <div className="flex w-full justify-end">
-                            <Button
-                                onClick={handleProceed}
-                                disabled={
-                                    !videoId.trim() ||
-                                    loadingVideo ||
-                                    loadingComments ||
-                                    loadingAnalysis ||
-                                    !!error
-                                }
-                                className="flex items-center gap-2"
-                            >
-                                <Play className="h-4 w-4" />
-                                Analisis Video
-                            </Button>
+                        <div className="space-y-2 text-center">
+                            <p className="font-medium">Menambahkan analisis ke dalam antrean</p>
+                            <p className="text-muted-foreground mt-1 text-sm">
+                                Mohon tunggu, permintaan Anda sedang diproses.
+                            </p>
                         </div>
-                    </DialogFooter>
-                </DialogContent>
-            </form>
+                    </div>
+                ) : error ? (
+                    <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                        <div className="mb-4">{getErrorIcon()}</div>
+                        <div className="space-y-2 text-center">
+                            <p className="font-medium">Oops! Ada masalah</p>
+                            <p className="text-muted-foreground max-w-sm text-sm">{error}</p>
+                        </div>
+                        <Button variant="outline" className="mt-6" onClick={() => resetForm()}>
+                            {getRetryButtonText()}
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="flex-1 overflow-hidden">
+                        <div className="grid gap-3">
+                            <Label htmlFor="video-id">ID Video Youtube</Label>
+                            <Input
+                                id="video-id"
+                                name="video_id"
+                                placeholder="9UEFQ90AhE"
+                                onChange={(e) => setVideoId(e.target.value)}
+                                value={videoId}
+                            />
+                        </div>
+                    </div>
+                )}
+                <DialogFooter className="border-t pt-4">
+                    <div className="flex w-full justify-end">
+                        <Button
+                            onClick={handleProceed}
+                            disabled={
+                                !videoId.trim() ||
+                                loadingVideo ||
+                                loadingComments ||
+                                loadingAnalysis ||
+                                !!error
+                            }
+                            className="flex items-center gap-2"
+                        >
+                            <Play className="h-4 w-4" />
+                            Analisis Video
+                        </Button>
+                    </div>
+                </DialogFooter>
+            </DialogContent>
         </Dialog>
     );
 }

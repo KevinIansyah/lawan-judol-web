@@ -311,6 +311,11 @@ export default function DataTableAnalysis({
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                     <div className="flex w-full justify-center gap-2 md:order-2 md:justify-end">
                         <div className="flex-1 md:flex-none">
+                            {url.startsWith('/analysis/your-videos') && <DialogYourVideo />}
+                            {url.startsWith('/analysis/public-videos') && <DialogPublicVideo />}
+                        </div>
+
+                        <div className="flex-1 md:flex-none">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" className="w-full md:w-auto">
@@ -342,11 +347,6 @@ export default function DataTableAnalysis({
                                         ))}
                                 </DropdownMenuContent>
                             </DropdownMenu>
-                        </div>
-
-                        <div className="flex-1 md:flex-none">
-                            {url.startsWith('/analysis/your-videos') && <DialogYourVideo />}
-                            {url.startsWith('/analysis/public-videos') && <DialogPublicVideo />}
                         </div>
                     </div>
 

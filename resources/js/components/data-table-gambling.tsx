@@ -454,7 +454,7 @@ export default function DataTableGambling({
                 );
 
                 try {
-                    const response = await fetch('/dataset', {
+                    const response = await fetch('/datasets', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -712,15 +712,7 @@ export default function DataTableGambling({
                                         )}
                                     </div>
 
-                                    <DialogFooter className="gap-2 pt-4">
-                                        <Button
-                                            variant="secondary"
-                                            onClick={handleCloseDataset}
-                                            disabled={loadingDataset && !finished}
-                                        >
-                                            {finished ? 'Tutup' : 'Batal'}
-                                        </Button>
-
+                                    <DialogFooter className="border-t pt-4">
                                         <Button
                                             onClick={handleProceedDataset}
                                             disabled={loadingDataset}
@@ -883,15 +875,7 @@ export default function DataTableGambling({
                                         )}
                                     </div>
 
-                                    <DialogFooter className="gap-2 pt-4">
-                                        <Button
-                                            variant="secondary"
-                                            onClick={handleCloseModeration}
-                                            disabled={loadingModeration && !finished}
-                                        >
-                                            {finished ? 'Tutup' : 'Batal'}
-                                        </Button>
-
+                                    <DialogFooter className="border-t pt-4">
                                         <Button
                                             onClick={handleProceedModeration}
                                             disabled={loadingModeration}

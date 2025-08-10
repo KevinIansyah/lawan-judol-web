@@ -1,7 +1,14 @@
-import DialogPublicVideo from '@/components/dialog-public-video';
-import DialogYourVideo from '@/components/dialog-your-video';
+import { DatePicker } from '@/components/date-picker';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -11,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
     Select,
     SelectContent,
@@ -26,9 +34,10 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { usePreventScroll } from '@/hooks/use-prevent-scroll';
 import { formatDate } from '@/lib/utils';
 import { Dataset } from '@/types';
-import { router, usePage } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import {
     ColumnDef,
     VisibilityState,
@@ -47,7 +56,10 @@ import {
     ChevronsLeftIcon,
     ChevronsRightIcon,
     ColumnsIcon,
+    Download,
+    Filter,
     MoreVerticalIcon,
+    SlidersHorizontal,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
@@ -76,25 +88,11 @@ export default function DataTableDataset({
     perPage,
     initialFilters = {},
 }: DataTableProps) {
-    const getSearchFromUrl = () => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('search') || '';
-        }
-        return '';
-    };
-    const [searchValue, setSearchValue] = useState(() => {
-        const urlSearch = getSearchFromUrl();
-        return urlSearch || initialFilters.search || '';
-    });
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-    const { url } = usePage();
-
-    useEffect(() => {
-        const urlSearch = getSearchFromUrl();
-        const newSearchValue = urlSearch || initialFilters.search || '';
-        setSearchValue(newSearchValue);
-    }, [initialFilters.search]);
+    const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+    const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    usePreventScroll(isDialogOpen);
 
     const columns: ColumnDef<Dataset>[] = [
         {
@@ -173,7 +171,7 @@ export default function DataTableDataset({
                     {
                         {
                             judol: 'Judi Online',
-                            non_judol: 'Non Judi Online',
+                            non_judol: 'Bukan Judi',
                         }[row.original.true_label]
                     }
                 </Badge>
@@ -202,6 +200,25 @@ export default function DataTableDataset({
             ),
         },
     ];
+
+    const getSearchFromUrl = () => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('search') || '';
+        }
+        return '';
+    };
+
+    const [searchValue, setSearchValue] = useState(() => {
+        const urlSearch = getSearchFromUrl();
+        return urlSearch || initialFilters.search || '';
+    });
+
+    useEffect(() => {
+        const urlSearch = getSearchFromUrl();
+        const newSearchValue = urlSearch || initialFilters.search || '';
+        setSearchValue(newSearchValue);
+    }, [initialFilters.search]);
 
     const buildUrlWithParams = (params: Record<string, string | number | undefined>) => {
         const currentUrl = new URL(window.location.href);
@@ -291,6 +308,89 @@ export default function DataTableDataset({
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                     <div className="flex w-full justify-center gap-2 md:order-2 md:justify-end">
                         <div className="flex-1 md:flex-none">
+                            <Dialog
+                                modal={false}
+                                open={isDialogOpen}
+                                onOpenChange={setIsDialogOpen}
+                            >
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" className="w-full">
+                                        <SlidersHorizontal />
+                                        Filter atau Unduh
+                                    </Button>
+                                </DialogTrigger>
+
+                                {isDialogOpen && (
+                                    <div
+                                        className="animate-in fade-in-0 fixed inset-0 z-50 bg-black/80"
+                                        onClick={() => setIsDialogOpen(false)}
+                                    />
+                                )}
+
+                                <DialogContent className="flex min-h-[50vh] flex-col overflow-hidden md:min-h-[40vh] lg:min-h-[45vh] xl:min-h-[65vh]">
+                                    <DialogTitle>Tindakan Moderasi Komentar</DialogTitle>
+                                    <DialogDescription>
+                                        Komentar yang telah Anda pilih akan diproses dan dilakukan
+                                        moderasi.
+                                    </DialogDescription>
+
+                                    <div className="flex-1 space-y-4 overflow-hidden">
+                                        <div className="grid w-full gap-3">
+                                            <Label htmlFor="start-date">Tanggal Ditambahkan</Label>
+                                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                                <DatePicker
+                                                    placeholder="Pilih tanggal awal"
+                                                    value={startDate}
+                                                    onChange={setStartDate}
+                                                    id="start-date"
+                                                />
+                                                <DatePicker
+                                                    placeholder="Pilih tanggal akhir"
+                                                    value={endDate}
+                                                    onChange={setEndDate}
+                                                    id="end-date"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid w-full gap-3">
+                                            <Label htmlFor="start-date">Label</Label>
+                                            <RadioGroup
+                                                defaultValue="option-one"
+                                                className="grid grid-cols-1 gap-3 md:grid-cols-2"
+                                            >
+                                                <div className="flex items-center space-x-2">
+                                                    <RadioGroupItem value="judol" id="judol" />
+                                                    <Label htmlFor="option-one">Judi Online</Label>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <RadioGroupItem
+                                                        value="non_judol"
+                                                        id="non_judol"
+                                                    />
+                                                    <Label htmlFor="option-two">Bukan Judi</Label>
+                                                </div>
+                                            </RadioGroup>
+                                        </div>
+                                    </div>
+
+                                    <DialogFooter className="border-t pt-4">
+                                        <div className="flex w-full justify-end gap-2">
+                                            <Button className="flex items-center gap-2">
+                                                <Filter className="h-4 w-4" />
+                                                Filter
+                                            </Button>
+                                            <Button className="flex items-center gap-2">
+                                                <Download className="h-4 w-4" />
+                                                Unduh
+                                            </Button>
+                                        </div>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+
+                        <div className="flex-1 md:flex-none">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" className="w-full md:w-auto">
@@ -322,11 +422,6 @@ export default function DataTableDataset({
                                         ))}
                                 </DropdownMenuContent>
                             </DropdownMenu>
-                        </div>
-
-                        <div className="flex-1 md:flex-none">
-                            {url.startsWith('/analysis/your-videos') && <DialogYourVideo />}
-                            {url.startsWith('/analysis/public-videos') && <DialogPublicVideo />}
                         </div>
                     </div>
 

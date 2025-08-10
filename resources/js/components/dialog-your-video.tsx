@@ -4,7 +4,6 @@ import {
     DialogContent,
     DialogDescription,
     DialogFooter,
-    DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
@@ -24,7 +23,7 @@ import { toast } from 'sonner';
 
 export default function DialogYourVideo() {
     const { auth } = usePage<SharedData>().props;
-    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
     const [videos, setVideos] = useState<Video[]>([]);
     const [loadingVideo, setLoadingVideo] = useState<boolean>(false);
     const [loadingComments, setLoadingComments] = useState<boolean>(false);
@@ -35,26 +34,8 @@ export default function DialogYourVideo() {
     const [errorType, setErrorType] = useState<'network' | 'server' | 'validation' | null>(null);
     const [hasInitialLoad, setHasInitialLoad] = useState<boolean>(false);
 
-    const getErrorIcon = () => {
-        switch (errorType) {
-            case 'network':
-                return <WifiOff className="text-primary h-8 w-8" />;
-            default:
-                return <AlertCircle className="text-primary h-8 w-8" />;
-        }
-    };
-
-    const getRetryButtonText = () => {
-        switch (errorType) {
-            case 'network':
-                return 'Periksa Koneksi & Coba Lagi';
-            default:
-                return 'Coba Lagi';
-        }
-    };
-
     const handleModalOpen = (): void => {
-        setIsOpen(true);
+        setIsDialogOpen(true);
 
         if (!hasInitialLoad || videos.length === 0) {
             console.log('First time opening dialog or no videos cached, fetching from API...');
@@ -88,6 +69,24 @@ export default function DialogYourVideo() {
         setLoadingVideo(false);
         setLoadingComments(false);
         setLoadingAnalysis(false);
+    };
+
+    const getErrorIcon = () => {
+        switch (errorType) {
+            case 'network':
+                return <WifiOff className="text-primary h-8 w-8" />;
+            default:
+                return <AlertCircle className="text-primary h-8 w-8" />;
+        }
+    };
+
+    const getRetryButtonText = () => {
+        switch (errorType) {
+            case 'network':
+                return 'Periksa Koneksi & Coba Lagi';
+            default:
+                return 'Coba Lagi';
+        }
     };
 
     const fetchVideos = async (forceRefresh: boolean = false): Promise<void> => {
@@ -244,7 +243,7 @@ export default function DialogYourVideo() {
             const analysisData: ApiResponseAnalysis = await response.json();
 
             if (analysisData.success) {
-                setIsOpen(false);
+                setIsDialogOpen(false);
                 router.reload();
 
                 toast.success('Berhasil!', {
@@ -267,9 +266,9 @@ export default function DialogYourVideo() {
 
     return (
         <Dialog
-            open={isOpen}
+            open={isDialogOpen}
             onOpenChange={(open) => {
-                setIsOpen(open);
+                setIsDialogOpen(open);
                 if (!open) {
                     resetForm();
                 }
@@ -283,14 +282,12 @@ export default function DialogYourVideo() {
                 </Button>
             </DialogTrigger>
             <DialogContent className="flex max-h-[80vh] flex-col overflow-hidden sm:max-w-[calc(100vw-32px)] xl:max-w-6xl">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center justify-between">
-                        Analisis Video
-                    </DialogTitle>
-                    <DialogDescription>
-                        Pilih video YouTube Anda yang ingin dianalisis.
-                    </DialogDescription>
-                </DialogHeader>
+                <DialogTitle className="flex items-center justify-between">
+                    Analisis Video
+                </DialogTitle>
+                <DialogDescription>
+                    Pilih video YouTube Anda yang ingin dianalisis.
+                </DialogDescription>
 
                 <div className="flex-1 overflow-hidden">
                     {!auth.user.youtube_permission_granted ? (
