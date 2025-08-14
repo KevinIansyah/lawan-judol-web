@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Analysis;
 use App\Models\Dataset;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class DatasetController extends Controller
@@ -138,6 +140,107 @@ class DatasetController extends Controller
     public function update(Request $request, Dataset $dataset) {}
 
     public function destroy(Dataset $dataset) {}
+
+    public function download(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user->google_token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Google belum terhubung. Silakan login ulang.',
+                'comments' => '',
+                'total' => 0,
+            ], 401);
+        }
+
+
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $label = $request->input('label');
+
+        try {
+            if (empty($startDate) && empty($endDate) && empty($label)) {
+                return response()->json([
+                    'success'  => true,
+                    'message'  => 'Minimal salah satu filter (label, tanggal awal, atau tanggal akhir) harus diisi.',
+                    'comments' => '',
+                    'total'    => 0,
+                ], 422);
+            }
+
+            if ($startDate && $endDate && Carbon::parse($endDate)->lessThanOrEqualTo(Carbon::parse($startDate))) {
+                return response()->json([
+                    'success'  => true,
+                    'message'  => 'Tanggal akhir harus setelah tanggal awal.',
+                    'comments' => '',
+                    'total'    => 0,
+                ], 422);
+            }
+
+            $query = Dataset::query();
+
+            if ($label) {
+                $query->where('true_label', $label);
+            }
+
+            if ($startDate) {
+                $query->whereDate('created_at', '>=', $startDate);
+            }
+
+            if ($endDate) {
+                $query->whereDate('created_at', '<=', $endDate);
+            }
+
+            $datasets = $query->get();
+
+            $timestamp = now()->format('Ymd_His');
+            $filename = "datasets/{$timestamp}.json";
+
+            $comments = $datasets->pluck('comment')->map(function ($c) {
+                return $c;
+            })->toArray();
+
+            Storage::disk('public')->put($filename,   json_encode($comments, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            $downloadUrl = Storage::url($filename);
+
+            Log::info("Dataset download generated", [
+                'user_id' => $user->id,
+                'filters'        => [
+                    'label'      => $label,
+                    'start_date' => $startDate,
+                    'end_date'   => $endDate,
+                ],
+                'total_comments' => $datasets->count(),
+                'file_path'      => $filename,
+            ]);
+
+            return response()->json([
+                'success'  => true,
+                'message'  => 'Data dataset berhasil diambil.',
+                'datasets' => '',
+                'total'    => $datasets->count(),
+                'link'     => url($downloadUrl),
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Failed to generate dataset download", [
+                'user_id' => $user->id,
+                'filters' => [
+                    'label'      => $label,
+                    'start_date' => $startDate,
+                    'end_date'   => $endDate,
+                ],
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil komentar. Silakan coba lagi.',
+                'datasets' => '',
+                'total' => 0,
+            ], 500);
+        }
+    }
 
     private function updateJsonFileStatus($filePath, $commentId, $newStatus)
     {

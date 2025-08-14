@@ -35,8 +35,8 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { usePreventScroll } from '@/hooks/use-prevent-scroll';
-import { formatDate } from '@/lib/utils';
-import { Dataset } from '@/types';
+import { formatDate, getUserFriendlyError } from '@/lib/utils';
+import { ApiResponseDataset, Dataset } from '@/types';
 import { router } from '@inertiajs/react';
 import {
     ColumnDef,
@@ -49,6 +49,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import {
+    AlertCircle,
     CheckCircle2Icon,
     ChevronDownIcon,
     ChevronLeftIcon,
@@ -58,8 +59,10 @@ import {
     ColumnsIcon,
     Download,
     Filter,
+    Loader2,
     MoreVerticalIcon,
     SlidersHorizontal,
+    WifiOff,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
@@ -89,8 +92,11 @@ export default function DataTableDataset({
     initialFilters = {},
 }: DataTableProps) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-    const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-    const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+    // const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+    // const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+    // const [error, setError] = useState<string | null>(null);
+    // const [errorType, setErrorType] = useState<'network' | 'server' | 'validation' | null>(null);
+    // const [loadingDownload, setLoadingDownload] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     usePreventScroll(isDialogOpen);
 
@@ -193,7 +199,7 @@ export default function DataTableDataset({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-32">
-                        <DropdownMenuItem>Ulang</DropdownMenuItem>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
                         <DropdownMenuItem>Hapus</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -302,6 +308,111 @@ export default function DataTableDataset({
     const canPreviousPage = pageIndex > 0;
     const canNextPage = pageIndex < totalPages - 1;
 
+    const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+    const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+    const [label, setLabel] = useState<string | null>(null);
+    const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [errorType, setErrorType] = useState<'network' | 'server' | 'validation' | null>(null);
+    const [loadingDownload, setLoadingDownload] = useState(false);
+
+    const handleDownload = (): void => {
+        setError(null);
+        setErrorType(null);
+        setLoadingDownload(true);
+        fetchDownload();
+    };
+
+    const resetForm = () => {
+        setStartDate(undefined);
+        setEndDate(undefined);
+        setLabel(null);
+        setSuccess(false);
+        setDownloadUrl(null);
+        setError(null);
+        setErrorType(null);
+        setLoadingDownload(false);
+    };
+
+    const getErrorIcon = () => {
+        switch (errorType) {
+            case 'network':
+                return <WifiOff className="text-primary h-8 w-8" />;
+            default:
+                return <AlertCircle className="text-primary h-8 w-8" />;
+        }
+    };
+
+    const getRetryButtonText = () => {
+        switch (errorType) {
+            case 'network':
+                return 'Periksa Koneksi & Coba Lagi';
+            default:
+                return 'Coba Lagi';
+        }
+    };
+
+    const fetchDownload = async (): Promise<void> => {
+        try {
+            const params = new URLSearchParams();
+
+            if (startDate) {
+                params.append('start_date', startDate.toISOString().split('T')[0]);
+            }
+            if (endDate) {
+                params.append('end_date', endDate.toISOString().split('T')[0]);
+            }
+            if (label) {
+                params.append('label', label);
+            }
+
+            const csrfToken = document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute('content');
+
+            const response = await fetch(`/dataset/download?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...(csrfToken && { 'X-CSRF-TOKEN': csrfToken }),
+                },
+                credentials: 'same-origin',
+            });
+
+            if (!response.ok) {
+                const errorResponse = await response.json().catch(() => ({}));
+                console.log(errorResponse);
+                const friendlyError = getUserFriendlyError(errorResponse.message, response.status);
+                setError(friendlyError.message);
+                setErrorType(friendlyError.type);
+                return;
+            }
+
+            const datasetData: ApiResponseDataset = await response.json();
+
+            if (datasetData.success) {
+                setDownloadUrl(datasetData.link ?? null);
+                setSuccess(true);
+            } else {
+                const friendlyError = getUserFriendlyError(datasetData.message);
+                setError(friendlyError.message);
+                setErrorType(friendlyError.type);
+            }
+
+            return console.log(datasetData);
+        } catch (err) {
+            console.log(err);
+            console.error('Error fetching dataset:', err);
+            const friendlyError = getUserFriendlyError(err);
+            setError(friendlyError.message);
+            setErrorType(friendlyError.type);
+        } finally {
+            setLoadingDownload(false);
+        }
+    };
+
     return (
         <div className="flex w-full flex-col justify-start gap-4">
             <div className="relative flex flex-col gap-4 overflow-auto">
@@ -311,7 +422,12 @@ export default function DataTableDataset({
                             <Dialog
                                 modal={false}
                                 open={isDialogOpen}
-                                onOpenChange={setIsDialogOpen}
+                                onOpenChange={(open) => {
+                                    setIsDialogOpen(open);
+                                    if (!open) {
+                                        resetForm();
+                                    }
+                                }}
                             >
                                 <DialogTrigger asChild>
                                     <Button variant="outline" className="w-full">
@@ -328,59 +444,139 @@ export default function DataTableDataset({
                                 )}
 
                                 <DialogContent className="flex min-h-[50vh] flex-col overflow-hidden md:min-h-[40vh] lg:min-h-[45vh] xl:min-h-[65vh]">
-                                    <DialogTitle>Tindakan Moderasi Komentar</DialogTitle>
+                                    <DialogTitle>Filter & Unduh Komentar</DialogTitle>
                                     <DialogDescription>
-                                        Komentar yang telah Anda pilih akan diproses dan dilakukan
-                                        moderasi.
+                                        Pilih rentang tanggal dan kategori komentar sebelum
+                                        melakukan filter atau mengunduh data.
                                     </DialogDescription>
 
-                                    <div className="flex-1 space-y-4 overflow-hidden">
-                                        <div className="grid w-full gap-3">
-                                            <Label htmlFor="start-date">Tanggal Ditambahkan</Label>
-                                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                                                <DatePicker
-                                                    placeholder="Pilih tanggal awal"
-                                                    value={startDate}
-                                                    onChange={setStartDate}
-                                                    id="start-date"
-                                                />
-                                                <DatePicker
-                                                    placeholder="Pilih tanggal akhir"
-                                                    value={endDate}
-                                                    onChange={setEndDate}
-                                                    id="end-date"
-                                                />
+                                    {loadingDownload ? (
+                                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                                            <div className="mb-4">
+                                                <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
+                                            </div>
+                                            <div className="space-y-2 text-center">
+                                                <p className="font-medium">Mengunduh Komentar</p>
+                                                <p className="text-muted-foreground mt-1 text-sm">
+                                                    Mohon tunggu, proses ini mungkin memerlukan
+                                                    beberapa saat.
+                                                </p>
                                             </div>
                                         </div>
-
-                                        <div className="grid w-full gap-3">
-                                            <Label htmlFor="start-date">Label</Label>
-                                            <RadioGroup
-                                                defaultValue="option-one"
-                                                className="grid grid-cols-1 gap-3 md:grid-cols-2"
-                                            >
-                                                <div className="flex items-center space-x-2">
-                                                    <RadioGroupItem value="judol" id="judol" />
-                                                    <Label htmlFor="option-one">Judi Online</Label>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <RadioGroupItem
-                                                        value="non_judol"
-                                                        id="non_judol"
-                                                    />
-                                                    <Label htmlFor="option-two">Bukan Judi</Label>
-                                                </div>
-                                            </RadioGroup>
+                                    ) : success ? (
+                                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                                            <div className="mb-4">
+                                                <CheckCircle2Icon className="h-8 w-8 text-green-500" />
+                                            </div>
+                                            <div className="space-y-2 text-center">
+                                                <p className="font-medium">
+                                                    Berhasil Mengambil Data
+                                                </p>
+                                                <p className="text-muted-foreground max-w-sm text-sm">
+                                                    Data dataset berhasil diambil. Silakan klik
+                                                    tombol di bawah untuk mengunduh file.
+                                                </p>
+                                            </div>
+                                            <div className="mt-6 flex gap-3">
+                                                <Button variant="outline" asChild>
+                                                    <a href={downloadUrl ?? '#'} download>
+                                                        Unduh Data
+                                                    </a>
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={() => resetForm()}
+                                                >
+                                                    Kembali
+                                                </Button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    ) : error ? (
+                                        <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
+                                            <div className="mb-4">{getErrorIcon()}</div>
+                                            <div className="space-y-2 text-center">
+                                                <p className="font-medium">Oops! Ada masalah</p>
+                                                <p className="text-muted-foreground max-w-sm text-sm">
+                                                    {error}
+                                                </p>
+                                            </div>
+                                            <Button
+                                                variant="outline"
+                                                className="mt-6"
+                                                onClick={() => resetForm()}
+                                            >
+                                                {getRetryButtonText()}
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex-1 space-y-4 overflow-hidden">
+                                            <div className="grid gap-3">
+                                                <Label htmlFor="start-date">
+                                                    Tanggal Ditambahkan
+                                                </Label>
+                                                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                                    <DatePicker
+                                                        placeholder="Pilih tanggal awal"
+                                                        value={startDate}
+                                                        onChange={setStartDate}
+                                                        id="start-date"
+                                                    />
+                                                    <DatePicker
+                                                        placeholder="Pilih tanggal akhir"
+                                                        value={endDate}
+                                                        onChange={setEndDate}
+                                                        id="end-date"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="grid gap-3">
+                                                <Label htmlFor="start-date">Label</Label>
+                                                <RadioGroup
+                                                    value={label || ''}
+                                                    onValueChange={setLabel}
+                                                    className="grid grid-cols-1 gap-3 md:grid-cols-2"
+                                                >
+                                                    <div className="flex items-center space-x-2">
+                                                        <RadioGroupItem value="judol" id="judol" />
+                                                        <Label
+                                                            htmlFor="judol"
+                                                            className="font-normal"
+                                                        >
+                                                            Judi Online
+                                                        </Label>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <RadioGroupItem
+                                                            value="non_judol"
+                                                            id="non_judol"
+                                                        />
+                                                        <Label
+                                                            htmlFor="non-judol"
+                                                            className="font-normal"
+                                                        >
+                                                            Bukan Judi
+                                                        </Label>
+                                                    </div>
+                                                </RadioGroup>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <DialogFooter className="border-t pt-4">
                                         <div className="flex w-full justify-end gap-2">
-                                            <Button className="flex items-center gap-2">
+                                            <Button
+                                                disabled={loadingDownload || !!error || success}
+                                                className="flex items-center gap-2"
+                                            >
                                                 <Filter className="h-4 w-4" />
                                                 Filter
                                             </Button>
-                                            <Button className="flex items-center gap-2">
+                                            <Button
+                                                onClick={handleDownload}
+                                                disabled={loadingDownload || !!error || success}
+                                                className="flex items-center gap-2"
+                                            >
                                                 <Download className="h-4 w-4" />
                                                 Unduh
                                             </Button>

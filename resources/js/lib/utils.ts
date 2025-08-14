@@ -56,11 +56,20 @@ export function getUserFriendlyError(error: unknown, statusCode?: number): Frien
     if (typeof error === 'string') {
         const lower = error.toLowerCase();
         const isSensitive =
-            lower.includes('exception') ||
-            lower.includes('call to') ||
-            lower.includes('undefined') ||
-            lower.includes('sql') ||
-            lower.includes('stack');
+            lower.includes('exception') || // pesan error dari PHP/Laravel/Node
+            lower.includes('call to') || // error method/function tidak ditemukan
+            lower.includes('undefined') || // error JS/TS runtime
+            lower.includes('sql') || // query atau error database
+            lower.includes('stack') || // stack trace
+            lower.includes('trace') || // trace detail error
+            lower.includes('not found') || // resource atau route hilang
+            lower.includes('could not') || // indikasi internal error
+            lower.includes('failed') || // indikasi internal error
+            lower.includes('permission') || // info izin yang sensitif
+            lower.includes('forbidden') || // status 403
+            lower.includes('internal server') || // status 500
+            lower.includes('route') || // info route Laravel
+            lower.includes('file'); // info file path server
 
         if (!isSensitive) {
             message = error;
@@ -72,7 +81,16 @@ export function getUserFriendlyError(error: unknown, statusCode?: number): Frien
             msg.includes('call to') ||
             msg.includes('undefined') ||
             msg.includes('sql') ||
-            msg.includes('stack');
+            msg.includes('stack') ||
+            msg.includes('trace') ||
+            msg.includes('not found') ||
+            msg.includes('could not') ||
+            msg.includes('failed') ||
+            msg.includes('permission') ||
+            msg.includes('forbidden') ||
+            msg.includes('internal server') ||
+            msg.includes('route') ||
+            msg.includes('file');
 
         if (!isSensitive) {
             message = error.message;

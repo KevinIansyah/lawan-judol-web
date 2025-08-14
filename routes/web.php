@@ -27,6 +27,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::resource('analyses', AnalysisController::class);
+
+    Route::prefix('dataset')->group(function () {
+        Route::get('/download', [DatasetController::class, 'download'])->name('download');
+    });
     Route::resource('datasets', DatasetController::class);
 
     Route::prefix('notifications')->name('notifications.')->group(function () {

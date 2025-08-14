@@ -116,7 +116,7 @@ export interface ApiResponseComment {
     message?: string;
 }
 
-export interface MergedVideoData {
+export interface MergeVideoData {
     video_id: string;
     title: string;
     description: string;
@@ -131,7 +131,7 @@ export interface MergedVideoData {
 export interface Analysis {
     id: number;
     user_id: number;
-    video: MergedVideoData;
+    video: MergeVideoData;
     status: 'queue' | 'on_process' | 'failed' | 'success';
     type: 'public' | 'your';
     gambling_file_path: string | null;
@@ -144,7 +144,7 @@ export interface Analysis {
 export interface ApiResponseAnalysis {
     success: boolean;
     analysis: Analysis;
-    message: string;
+    message?: string;
 }
 
 export interface Notification {
@@ -178,6 +178,14 @@ export interface Dataset {
     true_label: 'judol' | 'non_judol';
     created_at: string;
     updated_at: string;
+}
+
+export interface ApiResponseDataset {
+    success: boolean;
+    datasets: string;
+    total: number;
+    link?: string;
+    message?: string;
 }
 
 export interface Paginator<T> {

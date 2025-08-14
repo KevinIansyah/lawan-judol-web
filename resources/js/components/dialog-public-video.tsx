@@ -14,7 +14,7 @@ import {
     ApiResponseAnalysis,
     ApiResponseComment,
     ApiResponseVideo,
-    MergedVideoData,
+    MergeVideoData,
     SharedData,
 } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
@@ -173,7 +173,7 @@ export default function DialogPublicVideo() {
         }
     };
 
-    const fetchAnalysis = async (mergedData: MergedVideoData): Promise<void> => {
+    const fetchAnalysis = async (mergedData: MergeVideoData): Promise<void> => {
         try {
             const csrfToken = document
                 .querySelector('meta[name="csrf-token"]')
