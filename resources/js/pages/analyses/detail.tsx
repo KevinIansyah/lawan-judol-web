@@ -10,7 +10,6 @@ import AppLayout from '@/layouts/app-layout';
 import { Analysis, CommentChunk, Keyword, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import dataKeyword from './data-keyword.json';
 
 interface DetailProps {
     analysis: Analysis;
@@ -18,12 +17,22 @@ interface DetailProps {
     gamblingCount: number;
     nonGambling: CommentChunk;
     nonGamblingCount: number;
+    keyword: Keyword[];
+    keywordCount: number;
     [key: string]: unknown;
 }
 
 export default function Detail() {
     const { props, url } = usePage<DetailProps>();
-    const { analysis, gambling, gamblingCount, nonGambling, nonGamblingCount } = props;
+    const {
+        analysis,
+        gambling,
+        gamblingCount,
+        nonGambling,
+        nonGamblingCount,
+        keyword,
+        keywordCount,
+    } = props;
     const [activeTab, setActiveTab] = useState('summary');
 
     const isPublic = url.includes('public-video');
@@ -31,7 +40,7 @@ export default function Detail() {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: isPublic ? 'Video Publik' : 'Video Anda',
-            href: isPublic ? '/analysis/public-video' : '/analysis/your-video',
+            href: isPublic ? '/analysis/public-videos' : '/analysis/your-videos',
         },
         {
             title: 'Detail',
@@ -88,7 +97,7 @@ export default function Detail() {
                                     title="Distribusi Kata Kunci"
                                     description="Jumlah kata kunci judi online yang terdeteksi"
                                     data="keywords"
-                                    keywordCount={10}
+                                    keywordCount={keywordCount}
                                 />
                             </div>
                         </div>
@@ -101,7 +110,7 @@ export default function Detail() {
                     </TabsContent>
                     <TabsContent value="keyword">
                         <KeywordList
-                            data={dataKeyword as Keyword[]}
+                            data={keyword}
                             ActionButtons={({ onCopy, onReset, onSave, onUpload }) => (
                                 <KeywordActions
                                     onCopy={onCopy}

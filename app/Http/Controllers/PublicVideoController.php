@@ -58,13 +58,16 @@ class PublicVideoController extends Controller
 
         $gamblingPath = storage_path('app/public/' . $analysis->gambling_file_path);
         $nonGamblingPath = storage_path('app/public/' . $analysis->nongambling_file_path);
+        $keywordPath = storage_path('app/public/' . $analysis->keyword_file_path);
 
         $gambling = [];
         $gamblingCount = 0;
         $nonGambling = [];
         $nonGamblingCount = 0;
+        $keyword = [];
+        $keywordCount = 0;
 
-        if (file_exists($gamblingPath) || file_exists($nonGamblingPath)) {
+        if (file_exists($gamblingPath) || file_exists($nonGamblingPath) || file_exists($keywordPath)) {
             if (file_exists($gamblingPath)) {
                 $gambling = json_decode(file_get_contents($gamblingPath), true);
                 $gamblingCount = $gambling['total_comments'] ?? 0;
@@ -74,10 +77,16 @@ class PublicVideoController extends Controller
                 $nonGambling = json_decode(file_get_contents($nonGamblingPath), true);
                 $nonGamblingCount = $nonGambling['total_comments'] ?? 0;
             }
+
+            if (file_exists($keywordPath)) {
+                $keyword = json_decode(file_get_contents($keywordPath), true);
+                $keywordCount = count($keyword) ?? 0;
+            }
         } else {
-            Log::warning('Kedua file tidak ditemukan', [
+            Log::warning('Ketiga file tidak ditemukan', [
                 'gamblingPath' => $gamblingPath,
-                'nonGamblingPath' => $nonGamblingPath
+                'nonGamblingPath' => $nonGamblingPath,
+                'keywordPath' => $keywordPath
             ]);
         }
 
@@ -87,6 +96,8 @@ class PublicVideoController extends Controller
             'gamblingCount' => $gamblingCount,
             'nonGambling' => $nonGambling,
             'nonGamblingCount' => $nonGamblingCount,
+            'keyword' => $keyword,
+            'keywordCount' => $keywordCount,
         ]);
     }
 

@@ -49,12 +49,15 @@ class CommentInferenceJob implements ShouldQueue
 
             $judolPath = "comments/judol/judol_{$this->analysis->id}.json";
             $nonJudolPath = "comments/nonjudol/nonjudol_{$this->analysis->id}.json";
+            $keywordPath = "comments/keyword/keyword_{$this->analysis->id}.json";
 
             $judolDir = storage_path('app/public/comments/judol');
             $nonJudolDir = storage_path('app/public/comments/nonjudol');
+            $keywordDir = storage_path('app/public/comments/keyword');
 
             @mkdir($judolDir, 0755, true);
             @mkdir($nonJudolDir, 0755, true);
+            @mkdir($keywordDir, 0755, true);
 
             Http::timeout(600)
                 ->sink(storage_path("app/public/" . $judolPath))
@@ -64,8 +67,13 @@ class CommentInferenceJob implements ShouldQueue
                 ->sink(storage_path("app/public/" . $nonJudolPath))
                 ->get($url . '/download/' . $result['non_judol_result']);
 
+            Http::timeout(600)
+                ->sink(storage_path("app/public/" . $keywordPath))
+                ->get($url . '/download/' . $result['keyword_result']);
+
             $this->analysis->gambling_file_path = $judolPath;
             $this->analysis->nongambling_file_path = $nonJudolPath;
+            $this->analysis->keyword_file_path = $keywordPath;
             $this->analysis->status = 'success';
             $this->sendNotification('success');
 

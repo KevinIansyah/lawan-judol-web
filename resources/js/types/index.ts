@@ -168,8 +168,8 @@ export interface Keyword {
     id: number;
     keyword: string;
     label: 0 | 1;
-    created_at: string;
-    updated_at: string;
+    // created_at: string;
+    // updated_at: string;
 }
 
 export interface Dataset {
