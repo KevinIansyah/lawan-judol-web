@@ -1,4 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
+import { AlertCircle, WifiOff } from 'lucide-react';
+import React, { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
@@ -101,4 +103,22 @@ export function getUserFriendlyError(error: unknown, statusCode?: number): Frien
         message,
         type: 'server',
     };
+}
+
+export function getErrorIcon(errorType: string | null): ReactNode {
+    switch (errorType) {
+        case 'network':
+            return React.createElement(WifiOff, { className: 'text-primary h-8 w-8' });
+        default:
+            return React.createElement(AlertCircle, { className: 'text-primary h-8 w-8' });
+    }
+}
+
+export function getRetryButtonText(errorType: string | null) {
+    switch (errorType) {
+        case 'network':
+            return 'Periksa Koneksi & Coba Lagi';
+        default:
+            return 'Coba Lagi';
+    }
 }

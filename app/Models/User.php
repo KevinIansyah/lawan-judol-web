@@ -63,4 +63,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Dataset::class);
     }
+
+    public function keywords()
+    {
+        return $this->hasMany(Keyword::class);
+    }
 }

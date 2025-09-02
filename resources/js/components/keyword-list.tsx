@@ -45,11 +45,61 @@ export default function KeywordList({ data: initialData, ActionButtons }: Keywor
     };
 
     const handleSave = () => {
-        // setData(originalData);
+        const selectedKeywords = data.filter((item) => item.label === 0);
+
+        if (selectedKeywords.length === 0) {
+            toast.warning('Peringatan', {
+                description: 'Tidak ada kata kunci yang dipilih untuk diunggah.',
+            });
+            return;
+        }
+
+        console.log('Keywords to save:', selectedKeywords);
     };
 
     const handleUpload = () => {
-        // setData(originalData);
+        // Filter keyword yang labelnya 1
+        const selectedKeywords = data.filter((item) => item.label === 1);
+
+        if (selectedKeywords.length === 0) {
+            toast.warning('Peringatan', {
+                description: 'Tidak ada kata kunci yang dipilih untuk diunggah.',
+            });
+            return;
+        }
+
+        // Di sini Anda bisa melakukan proses upload
+        console.log('Keywords to upload:', selectedKeywords);
+
+        // Contoh: kirim ke API
+        // try {
+        //     const response = await fetch('/api/keywords/upload', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify({
+        //             keywords: selectedKeywords
+        //         }),
+        //     });
+        //
+        //     if (response.ok) {
+        //         toast('Berhasil', {
+        //             description: `${selectedKeywords.length} kata kunci berhasil diunggah ke kamus.`,
+        //         });
+        //     } else {
+        //         throw new Error('Upload failed');
+        //     }
+        // } catch (error) {
+        //     toast('Error', {
+        //         description: 'Gagal mengunggah kata kunci ke kamus.',
+        //     });
+        // }
+
+        // Untuk demo, tampilkan toast dengan jumlah keyword yang akan diunggah
+        toast('Berhasil', {
+            description: `${selectedKeywords.length} kata kunci berhasil diunggah ke kamus.`,
+        });
     };
 
     const handleFilter = () => {

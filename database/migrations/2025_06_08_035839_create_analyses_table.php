@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('analyses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->json('video');
             $table->enum('status', ['queue', 'on_process', 'failed', 'success']);
             $table->enum('type', ['public', 'your']);

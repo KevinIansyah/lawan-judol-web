@@ -1,24 +1,11 @@
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { getUserFriendlyError } from '@/lib/utils';
-import {
-    ApiResponseAnalysis,
-    ApiResponseComment,
-    ApiResponseVideo,
-    MergeVideoData,
-    SharedData,
-} from '@/types';
+import { getErrorIcon, getRetryButtonText, getUserFriendlyError } from '@/lib/utils';
+import { ApiResponseAnalysis, ApiResponseComment, ApiResponseVideo, MergeVideoData, SharedData } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
-import { AlertCircle, Loader2, Play, PlusIcon, WifiOff } from 'lucide-react';
+import { Loader2, Play, PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -48,32 +35,12 @@ export default function DialogPublicVideo() {
         setLoadingAnalysis(false);
     };
 
-    const getErrorIcon = () => {
-        switch (errorType) {
-            case 'network':
-                return <WifiOff className="text-primary h-8 w-8" />;
-            default:
-                return <AlertCircle className="text-primary h-8 w-8" />;
-        }
-    };
-
-    const getRetryButtonText = () => {
-        switch (errorType) {
-            case 'network':
-                return 'Periksa Koneksi & Coba Lagi';
-            default:
-                return 'Coba Lagi';
-        }
-    };
-
     const fetchVideo = async (): Promise<void> => {
         try {
             const params = new URLSearchParams();
             params.append('video_id', videoId);
 
-            const csrfToken = document
-                .querySelector('meta[name="csrf-token"]')
-                ?.getAttribute('content');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
             const response = await fetch(`/youtube/video?${params.toString()}`, {
                 method: 'GET',
@@ -119,9 +86,7 @@ export default function DialogPublicVideo() {
             const params = new URLSearchParams();
             params.append('video_id', videoId);
 
-            const csrfToken = document
-                .querySelector('meta[name="csrf-token"]')
-                ?.getAttribute('content');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
             const response = await fetch(`/youtube/comments?${params.toString()}`, {
                 method: 'GET',
@@ -175,9 +140,7 @@ export default function DialogPublicVideo() {
 
     const fetchAnalysis = async (mergedData: MergeVideoData): Promise<void> => {
         try {
-            const csrfToken = document
-                .querySelector('meta[name="csrf-token"]')
-                ?.getAttribute('content');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
             const response = await fetch(`/analyses`, {
                 method: 'POST',
@@ -249,27 +212,18 @@ export default function DialogPublicVideo() {
             <DialogContent className="flex min-h-[50vh] flex-col overflow-hidden md:min-h-[40vh] lg:min-h-[45vh] xl:min-h-[65vh]">
                 <DialogTitle>Analisis Video</DialogTitle>
                 <DialogDescription>
-                    Masukkan ID video YouTube yang ingin dianalisis. Pelajari cara menemukan ID
-                    video{' '}
-                    <a
-                        href="https://support.google.com/youtube/answer/171780?hl=id"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary underline"
-                    >
+                    Masukkan ID video YouTube yang ingin dianalisis. Pelajari cara menemukan ID video{' '}
+                    <a href="https://support.google.com/youtube/answer/171780?hl=id" target="_blank" rel="noopener noreferrer" className="text-primary underline">
                         di sini!
                     </a>
                 </DialogDescription>
 
                 {!auth.user.youtube_permission_granted ? (
                     <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
-                        <div className="mb-4">{getErrorIcon()}</div>
+                        <div className="mb-4">{getErrorIcon(errorType)}</div>
                         <div className="space-y-2 text-center">
                             <p className="font-medium">Akses YouTube Belum Diberikan</p>
-                            <p className="text-muted-foreground max-w-sm text-sm">
-                                Untuk melanjutkan, Anda perlu memberikan izin akses ke akun YouTube
-                                Anda terlebih dahulu.
-                            </p>
+                            <p className="text-muted-foreground max-w-sm text-sm">Untuk melanjutkan, Anda perlu memberikan izin akses ke akun YouTube Anda terlebih dahulu.</p>
                         </div>
                         <Button variant="outline" className="mt-6" asChild>
                             <Link href="/settings/youtube-access">Berikan Akses</Link>
@@ -282,9 +236,7 @@ export default function DialogPublicVideo() {
                         </div>
                         <div className="space-y-2 text-center">
                             <p className="font-medium">Memeriksa ketersediaan video</p>
-                            <p className="text-muted-foreground mt-1 text-sm">
-                                Mohon tunggu, proses ini mungkin memerlukan beberapa saat.
-                            </p>
+                            <p className="text-muted-foreground mt-1 text-sm">Mohon tunggu, proses ini mungkin memerlukan beberapa saat.</p>
                         </div>
                     </div>
                 ) : loadingComments ? (
@@ -294,9 +246,7 @@ export default function DialogPublicVideo() {
                         </div>
                         <div className="space-y-2 text-center">
                             <p className="font-medium">Mengambil data komentar dari YouTube</p>
-                            <p className="text-muted-foreground mt-1 text-sm">
-                                Mohon tunggu, sistem sedang memuat komentar.
-                            </p>
+                            <p className="text-muted-foreground mt-1 text-sm">Mohon tunggu, sistem sedang memuat komentar.</p>
                         </div>
                     </div>
                 ) : loadingAnalysis ? (
@@ -306,49 +256,31 @@ export default function DialogPublicVideo() {
                         </div>
                         <div className="space-y-2 text-center">
                             <p className="font-medium">Menambahkan analisis ke dalam antrean</p>
-                            <p className="text-muted-foreground mt-1 text-sm">
-                                Mohon tunggu, permintaan Anda sedang diproses.
-                            </p>
+                            <p className="text-muted-foreground mt-1 text-sm">Mohon tunggu, permintaan Anda sedang diproses.</p>
                         </div>
                     </div>
                 ) : error ? (
                     <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
-                        <div className="mb-4">{getErrorIcon()}</div>
+                        <div className="mb-4">{getErrorIcon(errorType)}</div>
                         <div className="space-y-2 text-center">
                             <p className="font-medium">Oops! Ada masalah</p>
                             <p className="text-muted-foreground max-w-sm text-sm">{error}</p>
                         </div>
                         <Button variant="outline" className="mt-6" onClick={() => resetForm()}>
-                            {getRetryButtonText()}
+                            {getRetryButtonText(errorType)}
                         </Button>
                     </div>
                 ) : (
                     <div className="flex-1 overflow-hidden">
                         <div className="grid gap-3">
                             <Label htmlFor="video-id">ID Video Youtube</Label>
-                            <Input
-                                id="video-id"
-                                name="video_id"
-                                placeholder="9UEFQ90AhE"
-                                onChange={(e) => setVideoId(e.target.value)}
-                                value={videoId}
-                            />
+                            <Input id="video-id" name="video_id" placeholder="9UEFQ90AhE" onChange={(e) => setVideoId(e.target.value)} value={videoId} />
                         </div>
                     </div>
                 )}
                 <DialogFooter className="border-t pt-4">
                     <div className="flex w-full justify-end">
-                        <Button
-                            onClick={handleProceed}
-                            disabled={
-                                !videoId.trim() ||
-                                loadingVideo ||
-                                loadingComments ||
-                                loadingAnalysis ||
-                                !!error
-                            }
-                            className="flex items-center gap-2"
-                        >
+                        <Button onClick={handleProceed} disabled={!videoId.trim() || loadingVideo || loadingComments || loadingAnalysis || !!error} className="flex items-center gap-2">
                             <Play className="h-4 w-4" />
                             Analisis Video
                         </Button>

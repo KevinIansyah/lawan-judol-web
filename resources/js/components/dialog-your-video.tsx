@@ -7,17 +7,17 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { formatDate, getUserFriendlyError } from '@/lib/utils';
+import { formatDate, getErrorIcon, getRetryButtonText, getUserFriendlyError } from '@/lib/utils';
 import {
     ApiResponseAnalysis,
     ApiResponseComment,
     ApiResponseVideos,
-    MergedVideoData,
+    MergeVideoData,
     SharedData,
     Video,
 } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
-import { AlertCircle, Check, Loader2, Play, PlusIcon, RefreshCw, WifiOff } from 'lucide-react';
+import { Check, Loader2, Play, PlusIcon, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -69,24 +69,6 @@ export default function DialogYourVideo() {
         setLoadingVideo(false);
         setLoadingComments(false);
         setLoadingAnalysis(false);
-    };
-
-    const getErrorIcon = () => {
-        switch (errorType) {
-            case 'network':
-                return <WifiOff className="text-primary h-8 w-8" />;
-            default:
-                return <AlertCircle className="text-primary h-8 w-8" />;
-        }
-    };
-
-    const getRetryButtonText = () => {
-        switch (errorType) {
-            case 'network':
-                return 'Periksa Koneksi & Coba Lagi';
-            default:
-                return 'Coba Lagi';
-        }
     };
 
     const fetchVideos = async (forceRefresh: boolean = false): Promise<void> => {
@@ -181,7 +163,7 @@ export default function DialogYourVideo() {
             const commentData: ApiResponseComment = await response.json();
 
             if (commentData.success) {
-                const mergedData = {
+                const mergeData = {
                     video_id: selectedVideo.video_id,
                     title: selectedVideo.title,
                     description: selectedVideo.description,
@@ -194,7 +176,7 @@ export default function DialogYourVideo() {
                 };
 
                 setLoadingAnalysis(true);
-                fetchAnalysis(mergedData);
+                fetchAnalysis(mergeData);
             } else {
                 const friendlyError = getUserFriendlyError(commentData.message);
                 setError(friendlyError.message);
@@ -210,7 +192,7 @@ export default function DialogYourVideo() {
         }
     };
 
-    const fetchAnalysis = async (mergedData: MergedVideoData): Promise<void> => {
+    const fetchAnalysis = async (mergeData: MergeVideoData): Promise<void> => {
         try {
             const csrfToken = document
                 .querySelector('meta[name="csrf-token"]')
@@ -225,7 +207,7 @@ export default function DialogYourVideo() {
                 },
                 body: JSON.stringify({
                     data: {
-                        video: mergedData,
+                        video: mergeData,
                         type: 'your',
                     },
                 }),
@@ -292,7 +274,7 @@ export default function DialogYourVideo() {
                 <div className="flex-1 overflow-hidden">
                     {!auth.user.youtube_permission_granted ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <div className="mb-4">{getErrorIcon()}</div>
+                            <div className="mb-4">{getErrorIcon(errorType)}</div>
                             <div className="space-y-2 text-center">
                                 <p className="font-medium">Akses YouTube belum diberikan</p>
                                 <p className="text-muted-foreground max-w-sm text-sm">
@@ -342,7 +324,7 @@ export default function DialogYourVideo() {
                         </div>
                     ) : error ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <div className="mb-4">{getErrorIcon()}</div>
+                            <div className="mb-4">{getErrorIcon(errorType)}</div>
                             <div className="space-y-2 text-center">
                                 <p className="font-medium">Oops! Ada masalah</p>
                                 <p className="text-muted-foreground max-w-sm text-sm">{error}</p>
@@ -355,12 +337,12 @@ export default function DialogYourVideo() {
                                     fetchVideos();
                                 }}
                             >
-                                {getRetryButtonText()}
+                                {getRetryButtonText(errorType)}
                             </Button>
                         </div>
                     ) : videos.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <div className="mb-4">{getErrorIcon()}</div>
+                            <div className="mb-4">{getErrorIcon(errorType)}</div>
                             <div className="space-y-2 text-center">
                                 <p className="font-medium">Video tidak ditemukan</p>
                                 <p className="text-muted-foreground max-w-sm text-sm">
