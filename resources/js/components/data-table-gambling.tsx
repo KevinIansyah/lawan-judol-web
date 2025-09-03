@@ -92,7 +92,16 @@ const columns: ColumnDef<Comment>[] = [
                             <div className="truncate text-xs font-medium">{user.username.replace(/^@/, '')}</div>
                             <div className="text-muted-foreground truncate text-xs font-medium">{dayjs(timestamp).fromNow()}</div>
                         </div>
-                        <div className="text-sm break-words whitespace-normal" dangerouslySetInnerHTML={{ __html: text }} />
+                        <div
+                            className="text-sm break-words whitespace-normal"
+                            style={{
+                                fontFamily: '"Segoe UI", "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif',
+                                whiteSpace: 'nowrap',
+                                textRendering: 'optimizeLegibility',
+                                unicodeBidi: 'normal',
+                            }}
+                            dangerouslySetInnerHTML={{ __html: text }}
+                        />
                     </div>
                 </div>
             );
@@ -318,7 +327,7 @@ export default function DataTableGambling({ analysis_id, data: apiData, onAddDat
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={columns.length} className="h-24 text-center">
-                                        Tidak ada hasil.
+                                        Tidak ditemukan komentar judi online.
                                     </TableCell>
                                 </TableRow>
                             )}

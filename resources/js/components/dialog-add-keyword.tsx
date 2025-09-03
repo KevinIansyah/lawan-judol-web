@@ -1,34 +1,29 @@
-import { ProcessStatusComment } from '@/components/process-status-comment';
+import { ProcessStatusKeyword } from '@/components/process-status-keyword';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useProcessLogs } from '@/hooks/use-process-logs';
-import { Comment } from '@/types';
-import { AlertCircle, FileText, PlusIcon } from 'lucide-react';
+import { Keyword } from '@/types';
+import { AlertCircle, ArrowUpFromLine, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-interface DialogAddDatasetProps {
+interface DialogAddKeywordProps {
     selectedCount: number;
-    analysisId: number;
-    trueLabel: string;
-    getSelectedComments: () => Comment[];
-    onComplete?: (updatedComments: Comment[]) => void;
-    onDataUpdate: (updater: (prevData: Comment[]) => Comment[]) => void;
-    onRowSelectionReset: () => void;
+    getSelectedKeyword: Keyword[];
 }
 
-export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSelectedComments, onComplete, onDataUpdate, onRowSelectionReset }: DialogAddDatasetProps) => {
+export const DialogAddKeyword = ({ selectedCount, getSelectedKeyword }: DialogAddKeywordProps) => {
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
 
     const { processLogs, successCount, errorCount, finished, setSuccessCount, setErrorCount, setFinished, addLogEntry, updateLogEntry, resetLogs } = useProcessLogs();
 
-    const fetchDataset = async (): Promise<void> => {
-        const selectedComments = getSelectedComments();
+    const fetchKeyword = async (): Promise<void> => {
+        const selectedKeywords = getSelectedKeyword;
 
-        if (selectedComments.length === 0) {
+        if (selectedKeywords.length === 0) {
             toast('Informasi!', {
-                description: 'Silakan pilih minimal satu komentar untuk melanjutkan.',
+                description: 'Silakan pilih minimal satu kata kunci untuk melanjutkan.',
             });
             return;
         }
@@ -41,13 +36,12 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
 
         try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            const updatedComments: Comment[] = [];
 
-            for (const selectedComment of selectedComments) {
-                addLogEntry(selectedComment.comment_id, 'processing', `Memproses komentar dengan ID ${selectedComment.comment_id}`);
+            for (const selectedKeyword of selectedKeywords) {
+                addLogEntry(`${selectedKeyword.id}`, 'processing', `Memproses kata kunci ${selectedKeyword.keyword}`);
 
                 try {
-                    const response = await fetch('/datasets', {
+                    const response = await fetch('/keywords', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -56,9 +50,7 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
                         },
                         body: JSON.stringify({
                             data: {
-                                analysis_id: analysisId,
-                                comment: selectedComment,
-                                true_label: trueLabel,
+                                keyword: selectedKeyword.keyword,
                             },
                         }),
                     });
@@ -72,16 +64,13 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
 
                     if (result.success) {
                         success++;
-                        updateLogEntry(selectedComment.comment_id, 'success', `Komentar dengan ID ${selectedComment.comment_id} berhasil ditambahkan ke dataset.`);
-
-                        const updatedComment = { ...selectedComment, status: 'dataset' as const };
-                        updatedComments.push(updatedComment);
+                        updateLogEntry(`${selectedKeyword.id}`, 'success', `Kata kunci ${selectedKeyword.keyword} berhasil ditambahkan ke kamus.`);
                     } else {
                         throw new Error(result.message || 'Unknown error');
                     }
                 } catch (error) {
                     failed++;
-                    console.error(`Error processing comment ${selectedComment.comment_id}:`, error);
+                    console.error(`Error processing keyword ${selectedKeyword.id}:`, error);
 
                     let message = 'Terjadi kesalahan saat menyimpan data.';
                     if (error instanceof Error) {
@@ -90,19 +79,10 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
                         message = error;
                     }
 
-                    updateLogEntry(selectedComment.comment_id, 'error', `Komentar dengan ID ${selectedComment.comment_id} gagal ditambahkan ke dataset. ${message}`);
+                    updateLogEntry(`${selectedKeyword.id}`, 'error', `Kata kunci ${selectedKeyword.keyword} gagal ditambahkan ke kamus. ${message}`);
                 }
 
                 await new Promise((resolve) => setTimeout(resolve, 300));
-            }
-
-            if (updatedComments.length > 0) {
-                onDataUpdate((prevData) =>
-                    prevData.map((comment) => {
-                        const updatedComment = updatedComments.find((updated) => updated.comment_id === comment.comment_id);
-                        return updatedComment || comment;
-                    }),
-                );
             }
 
             setSuccessCount(success);
@@ -110,25 +90,19 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
 
             if (failed === 0) {
                 toast.success('Berhasil!', {
-                    description: `${success} komentar berhasil ditambahkan ke dataset.`,
+                    description: `${success} Kata kunci berhasil ditambahkan ke kamus.`,
                 });
             } else if (success === 0) {
                 toast.error('Gagal!', {
-                    description: `${failed} komentar gagal ditambahkan ke dataset.`,
+                    description: `${failed} Kata kunci gagal ditambahkan ke kamus.`,
                 });
             } else {
                 toast.warning('Sebagian Berhasil!', {
-                    description: `${success} berhasil, ${failed} gagal ditambahkan ke dataset.`,
+                    description: `${success} berhasil, ${failed} gagal ditambahkan ke kamus.`,
                 });
             }
-
-            onRowSelectionReset();
-
-            if (onComplete && updatedComments.length > 0) {
-                onComplete(updatedComments);
-            }
         } catch (error) {
-            console.error('Error processing dataset:', error);
+            console.error('Error processing kamus:', error);
             toast.error('Gagal!', {
                 description: 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.',
             });
@@ -156,35 +130,35 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
             }}
         >
             <DialogTrigger asChild>
-                <Button variant="outline" className="w-full" disabled={selectedCount === 0}>
-                    <PlusIcon />
-                    Tambah ke Dataset {selectedCount > 0 && ` (${selectedCount} Komentar)`}
+                <Button variant="outline" disabled={selectedCount === 0}>
+                    {selectedCount === 0 ? 'Unggah' : `Unggah (${selectedCount})`}
+                    <ArrowUpFromLine className="ml-1 size-4" />
                 </Button>
             </DialogTrigger>
             <DialogContent className="flex max-h-[80vh] flex-col overflow-hidden">
-                <DialogTitle>Tambah Komentar ke Dataset</DialogTitle>
-                <DialogDescription>Komentar yang telah Anda pilih akan diproses dan ditambahkan ke dataset.</DialogDescription>
+                <DialogTitle>Tambah Kata Kunci ke Kamus</DialogTitle>
+                <DialogDescription>Kata kunci yang telah Anda pilih akan diproses dan ditambahkan ke kamus.</DialogDescription>
 
                 <div className="flex-1 overflow-hidden">
                     {loading ? (
-                        <ProcessStatusComment finished={finished} successCount={successCount} errorCount={errorCount} selectedCount={selectedCount} processLogs={processLogs} />
+                        <ProcessStatusKeyword finished={finished} successCount={successCount} errorCount={errorCount} selectedCount={selectedCount} processLogs={processLogs} />
                     ) : (
                         <div className="flex flex-col items-center justify-center py-12">
                             <div className="mb-4">
                                 <AlertCircle className="text-primary h-8 w-8" />
                             </div>
                             <div className="space-y-2 text-center">
-                                <p className="font-medium">{`${selectedCount} komentar dipilih`}</p>
-                                <p className="text-muted-foreground max-w-sm text-sm">Pastikan komentar yang Anda pilih sudah benar sebelum melanjutkan.</p>
+                                <p className="font-medium">{`${selectedCount} kata kunci dipilih`}</p>
+                                {selectedCount === 0 ? <p className="text-muted-foreground max-w-sm text-sm">Silakan pilih minimal satu kata kunci untuk melanjutkan.</p> : <p className="text-muted-foreground max-w-sm text-sm">Pastikan kata kunci yang Anda pilih sudah benar sebelum melanjutkan.</p>}
                             </div>
                         </div>
                     )}
                 </div>
 
                 <DialogFooter className="border-t pt-4">
-                    <Button onClick={fetchDataset} disabled={loading} className="flex items-center gap-2">
+                    <Button onClick={fetchKeyword} disabled={loading || selectedCount === 0} className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
-                        Tambah ke Dataset
+                        Tambah ke Kamus
                     </Button>
                 </DialogFooter>
             </DialogContent>

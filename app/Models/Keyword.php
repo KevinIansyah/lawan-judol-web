@@ -12,6 +12,7 @@ class Keyword extends Model
     protected $fillable = [
         'user_id',
         'keyword',
+        'label',
     ];
 
     public function user()

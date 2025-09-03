@@ -96,7 +96,7 @@ export default function NotificationDropdown() {
                                 }`}
                             >
                                 <a
-                                    href={route('notifications.redirect', notif.id)}
+                                    href={route('notification.redirect', notif.id)}
                                     className="flex w-full items-center gap-2"
                                 >
                                     <div

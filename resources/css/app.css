@@ -244,10 +244,6 @@ body {
     letter-spacing: var(--tracking-normal);
 }
 
-/* [data-sonner-toast][data-type='default'] [data-close-button]:hover {
-    background-color: transparent !important;
-} */
-
 [data-sonner-toast][data-type='warning'] {
     background-color: oklch(0.968 0.211 109.7692) !important;
     border: 1px solid oklch(0.968 0.211 109.7692) !important;

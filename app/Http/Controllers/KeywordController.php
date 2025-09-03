@@ -5,15 +5,41 @@ namespace App\Http\Controllers;
 use App\Models\Analysis;
 use App\Models\Keyword;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
 
 class KeywordController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $perPage = $request->get('per_page', 100);
+        $perPage = in_array($perPage, [100, 150, 200, 250]) ? $perPage : 100;
+
+        $search = $request->get('search');
+
+        $query = Keyword::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('keyword', 'like', '%' . $search . '%');
+            });
+        }
+
+        $keywords = $query->latest()->paginate($perPage);
+
+        $keywords->appends($request->query());
+
+        return Inertia::render('keyword', [
+            'keywords' => $keywords,
+            'filters' => [
+                'search' => $search,
+            ],
+        ]);
     }
 
     public function create()
@@ -34,6 +60,7 @@ class KeywordController extends Controller
             $keyword = Keyword::create([
                 'user_id' => $user->id,
                 'keyword' => $text,
+                'label' => 1,
             ]);
 
             Log::info("Keyword stored successfully", [
@@ -95,7 +122,7 @@ class KeywordController extends Controller
     public function updateJsonFile(Request $request)
     {
         $request->validate([
-            'data.keyword.keyword_id' => 'required|string',
+            'data.keyword.id' => 'required|integer',
             'data.keyword.label' => 'required|integer',
             'data.analysis_id' => 'required|integer',
         ]);
@@ -103,7 +130,7 @@ class KeywordController extends Controller
         try {
             $keyword = $request->input('data.keyword');
             $analysisId = $request->input('data.analysis_id');
-            $keywordId = $keyword['keyword_id'];
+            $keywordId = $keyword['id'];
             $newLabel = $keyword['label'];
 
             $analysis = Analysis::find($analysisId);

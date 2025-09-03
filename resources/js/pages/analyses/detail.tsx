@@ -2,7 +2,6 @@ import { ChartClasification } from '@/components/chart-clasification';
 import DataTableGambling from '@/components/data-table-gambling';
 import DataTableNonGambling from '@/components/data-table-non-gambling';
 import Heading from '@/components/heading';
-import KeywordActions from '@/components/keyword-action';
 import KeywordList from '@/components/keyword-list';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VideoMetadata from '@/components/video-metadata';
@@ -24,15 +23,7 @@ interface DetailProps {
 
 export default function Detail() {
     const { props, url } = usePage<DetailProps>();
-    const {
-        analysis,
-        gambling,
-        gamblingCount,
-        nonGambling,
-        nonGamblingCount,
-        keyword,
-        keywordCount,
-    } = props;
+    const { analysis, gambling, gamblingCount, nonGambling, nonGamblingCount, keyword, keywordCount } = props;
     const [activeTab, setActiveTab] = useState('summary');
 
     const isPublic = url.includes('public-video');
@@ -66,10 +57,7 @@ export default function Detail() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Detail" />
             <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
-                <Heading
-                    title="Detail Analisis"
-                    description="Detail hasil analisis komentar pada video yang dipilih."
-                />
+                <Heading title="Detail Analisis" description="Detail hasil analisis komentar pada video yang dipilih." />
 
                 <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full gap-4">
                     <TabsList className="grid grid-cols-4 gap-1 md:w-[60%] lg:w-[40%]">
@@ -84,21 +72,10 @@ export default function Detail() {
                                 <VideoMetadata analysis={analysis} />
                             </div>
                             <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
-                                <ChartClasification
-                                    title="Distribusi Komentar"
-                                    description="Perbandingan komentar judi online dan bukan judi"
-                                    data="comments"
-                                    gamblingCount={gamblingCount}
-                                    nonGamblingCount={nonGamblingCount}
-                                />
+                                <ChartClasification title="Distribusi Komentar" description="Perbandingan komentar judi online dan bukan judi" data="comments" gamblingCount={gamblingCount} nonGamblingCount={nonGamblingCount} />
                             </div>
                             <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
-                                <ChartClasification
-                                    title="Distribusi Kata Kunci"
-                                    description="Jumlah kata kunci judi online yang terdeteksi"
-                                    data="keywords"
-                                    keywordCount={keywordCount}
-                                />
+                                <ChartClasification title="Distribusi Kata Kunci" description="Jumlah kata kunci judi online yang terdeteksi" data="keywords" keywordCount={keywordCount} />
                             </div>
                         </div>
                     </TabsContent>
@@ -109,17 +86,7 @@ export default function Detail() {
                         <DataTableNonGambling analysis_id={analysis.id} data={nonGambling} />
                     </TabsContent>
                     <TabsContent value="keyword">
-                        <KeywordList
-                            data={keyword}
-                            ActionButtons={({ onCopy, onReset, onSave, onUpload }) => (
-                                <KeywordActions
-                                    onCopy={onCopy}
-                                    onReset={onReset}
-                                    onSave={onSave}
-                                    onUpload={onUpload}
-                                />
-                            )}
-                        />
+                        <KeywordList analysis_id={analysis.id} data={keyword} />
                     </TabsContent>
                 </Tabs>
             </div>

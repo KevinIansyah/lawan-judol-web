@@ -1,30 +1,74 @@
 import KeywordBadge from '@/components/keyword-badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { Keyword } from '@/types';
-import { useState } from 'react';
+import { usePage } from '@inertiajs/react';
+import { Copy, Filter, Info, RotateCcw } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
+import { DialogAddKeyword } from './dialog-add-keyword';
+import { DialogUpdateKeyword } from './dialog-update-keyword';
 
 type KeywordListProps = {
+    analysis_id: number;
     data: Keyword[];
-    ActionButtons?: (utils: {
-        onCopy: () => void;
-        onReset: () => void;
-        onSave: () => void;
-        onUpload: () => void;
-        onFilter: () => void;
-    }) => React.ReactNode;
 };
 
-export default function KeywordList({ data: initialData, ActionButtons }: KeywordListProps) {
+export default function KeywordList({ analysis_id, data: initialData }: KeywordListProps) {
     const [data, setData] = useState<Keyword[]>(() => initialData);
     const [originalData] = useState<Keyword[]>(() => initialData);
+    const [changedItems, setChangedItems] = useState<Set<number>>(new Set());
+
+    const { url } = usePage();
+    const isAnalysisPage = url.startsWith('/analysis');
 
     const toggleLabel = (id: number) => {
-        setData((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, label: item.label === 1 ? 0 : 1 } : item,
-            ),
-        );
+        setData((prev) => {
+            const newData = prev.map((item) => {
+                if (item.id === id) {
+                    const newLabel: 0 | 1 = item.label === 1 ? 0 : 1;
+                    return { ...item, label: newLabel };
+                }
+                return item;
+            });
+
+            const updatedItem = newData.find((item) => item.id === id);
+            if (updatedItem) {
+                setChangedItems((prevChanged) => {
+                    const newChanged = new Set(prevChanged);
+                    const originalItem = originalData.find((orig) => orig.id === id);
+
+                    if (originalItem && originalItem.label !== updatedItem.label) {
+                        newChanged.add(id);
+                    } else {
+                        newChanged.delete(id);
+                    }
+
+                    return newChanged;
+                });
+            }
+
+            return newData;
+        });
     };
+
+    const getChangedData = useCallback((): Keyword[] => {
+        return data.filter((item) => changedItems.has(item.id));
+    }, [data, changedItems]);
+
+    const getChangeStats = useCallback(() => {
+        const changedData = getChangedData();
+        const totalChanged = changedData.length;
+        const changedToActive = changedData.filter((item) => item.label === 1).length;
+        const changedToInactive = changedData.filter((item) => item.label === 0).length;
+
+        return {
+            totalChanged,
+            changedToActive,
+            changedToInactive,
+            changedData,
+        };
+    }, [getChangedData]);
 
     const handleCopy = () => {
         const copiedText = data
@@ -32,97 +76,84 @@ export default function KeywordList({ data: initialData, ActionButtons }: Keywor
             .map((item) => item.keyword)
             .join(', ');
         navigator.clipboard.writeText(copiedText);
-        toast('Berhasil', {
+        toast.success('Berhasil', {
             description: 'Semua kata kunci dengan label aktif telah disalin ke clipboard.',
         });
     };
 
     const handleReset = () => {
         setData(originalData);
-        toast('Berhasil', {
+        setChangedItems(new Set());
+        toast.success('Berhasil', {
             description: 'Semua perubahan label telah dikembalikan ke kondisi semula.',
         });
     };
 
-    const handleSave = () => {
-        const selectedKeywords = data.filter((item) => item.label === 0);
-
-        if (selectedKeywords.length === 0) {
-            toast.warning('Peringatan', {
-                description: 'Tidak ada kata kunci yang dipilih untuk diunggah.',
-            });
-            return;
-        }
-
-        console.log('Keywords to save:', selectedKeywords);
-    };
-
-    const handleUpload = () => {
-        // Filter keyword yang labelnya 1
-        const selectedKeywords = data.filter((item) => item.label === 1);
-
-        if (selectedKeywords.length === 0) {
-            toast.warning('Peringatan', {
-                description: 'Tidak ada kata kunci yang dipilih untuk diunggah.',
-            });
-            return;
-        }
-
-        // Di sini Anda bisa melakukan proses upload
-        console.log('Keywords to upload:', selectedKeywords);
-
-        // Contoh: kirim ke API
-        // try {
-        //     const response = await fetch('/api/keywords/upload', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({
-        //             keywords: selectedKeywords
-        //         }),
-        //     });
-        //
-        //     if (response.ok) {
-        //         toast('Berhasil', {
-        //             description: `${selectedKeywords.length} kata kunci berhasil diunggah ke kamus.`,
-        //         });
-        //     } else {
-        //         throw new Error('Upload failed');
-        //     }
-        // } catch (error) {
-        //     toast('Error', {
-        //         description: 'Gagal mengunggah kata kunci ke kamus.',
-        //     });
-        // }
-
-        // Untuk demo, tampilkan toast dengan jumlah keyword yang akan diunggah
-        toast('Berhasil', {
-            description: `${selectedKeywords.length} kata kunci berhasil diunggah ke kamus.`,
-        });
-    };
-
     const handleFilter = () => {
-        // setData(originalData);
+        // Implementasi filter
     };
+
+    const getSelectedKeywords = data.filter((item) => item.label === 1);
+    const selectedCount = Object.keys(getSelectedKeywords).length;
+    const changeStats = getChangeStats();
 
     return (
-        <div className="rounded-xl border p-4">
-            <div className="mb-4 flex flex-wrap gap-2">
-                {ActionButtons?.({
-                    onCopy: handleCopy,
-                    onReset: handleReset,
-                    onSave: handleSave,
-                    onUpload: handleUpload,
-                    onFilter: handleFilter,
-                })}
-            </div>
+        <>
+            {data.length > 0 ? (
+                <div className="rounded-xl border p-4">
+                    <div className="mb-4 flex flex-wrap gap-2">
+                        <Button variant="outline" onClick={handleCopy}>
+                            Salin
+                            <Copy className="ml-1 size-4" />
+                        </Button>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-                {data.map((item) => (
-                    <KeywordBadge key={item.id} item={item} onToggle={() => toggleLabel(item.id)} />
-                ))}
-            </div>
-        </div>
+                        <Button variant="outline" onClick={handleReset}>
+                            Reset
+                            <RotateCcw className="ml-1 size-4" />
+                        </Button>
+
+                        {isAnalysisPage ? (
+                            <>
+                                <DialogUpdateKeyword analysisId={analysis_id} selectedCount={changeStats.totalChanged} getSelectedKeyword={changeStats.changedData} />
+
+                                <DialogAddKeyword selectedCount={selectedCount} getSelectedKeyword={getSelectedKeywords} />
+                            </>
+                        ) : (
+                            <Button variant="outline" onClick={handleFilter}>
+                                Filter
+                                <Filter className="ml-1 size-4" />
+                            </Button>
+                        )}
+                    </div>
+
+                    {changeStats.totalChanged > 0 && (
+                        <Alert>
+                            <Info />
+                            <AlertTitle>Perubahan</AlertTitle>
+                            <AlertDescription>
+                                <div>
+                                    <p>
+                                        {changeStats.totalChanged} item diubah ({changeStats.changedToActive} diaktifkan, {changeStats.changedToInactive} dinonaktifkan)
+                                    </p>
+                                </div>
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        {data.map((item) => (
+                            <div key={item.id} className="relative">
+                                <KeywordBadge item={item} onToggle={() => toggleLabel(item.id)} />
+                                {changedItems.has(item.id) && <div className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-orange-500"></div>}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <div className="flex h-24 items-center justify-center rounded-xl border p-4">
+                    <span className="text-center text-sm">Tidak ditemukan kata kunci judi online.</span>
+                </div>
+            )}
+        </>
     );
 }

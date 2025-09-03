@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button';
+import { Keyword } from '@/types';
 import { ArrowUpFromLine, Copy, Filter, RotateCcw, Save } from 'lucide-react';
 
 type KeywordActionsProps = {
+    data: Keyword[];
     onCopy?: () => void;
     onReset?: () => void;
     onSave?: () => void;
@@ -9,13 +11,7 @@ type KeywordActionsProps = {
     onFilter?: () => void;
 };
 
-export default function KeywordActions({
-    onCopy,
-    onReset,
-    onSave,
-    onUpload,
-    onFilter,
-}: KeywordActionsProps) {
+export default function KeywordActions({ data, onCopy, onReset, onSave, onUpload, onFilter }: KeywordActionsProps) {
     return (
         <div className="mb-4 flex flex-wrap gap-2">
             {onCopy && (
@@ -36,8 +32,16 @@ export default function KeywordActions({
                     <Save className="ml-1 size-4" />
                 </Button>
             )}
+
+            {/* {onUpload && <DialogAddKeyword data={data} selectedCount={selectedCount} getSelectedKeyword={getSelectedKeyword} onComplete={onComplete} onDataUpdate={onDataUpdate} onRowSelectionReset={onRowSelectionReset} />} */}
             {onUpload && (
-                <Button variant="outline" onClick={onUpload}>
+                <Button
+                    variant="outline"
+                    onClick={() => {
+                        console.log('🔖 Save clicked!', data);
+                        onUpload();
+                    }}
+                >
                     Unggah
                     <ArrowUpFromLine className="ml-1 size-4" />
                 </Button>

@@ -105,8 +105,8 @@ class CommentInferenceJob implements ShouldQueue
 
         if ($status === 'success') {
             $url = $analysis->type === 'public'
-                ? url('/analysis/public-video/' . $analysis->id)
-                : url('/analysis/your-video/' . $analysis->id);
+                ? url('/analysis/public-videos/' . $analysis->id)
+                : url('/analysis/your-videos/' . $analysis->id);
 
             $title = 'Analisis Selesai';
             $message = "Proses analisis video berjudul '{$videoTitle}' telah berhasil diselesaikan.";

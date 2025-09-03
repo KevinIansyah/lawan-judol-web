@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('keywords', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('keyword')->unique();
+            $table->string('keyword')->collation('utf8mb4_bin')->unique();
+            $table->unsignedTinyInteger('label')->default(1);
             $table->timestamps();
         });
     }

@@ -8,14 +8,16 @@ export default function KeywordBadge({ item, onToggle }: { item: Keyword; onTogg
         <Badge
             variant={item.label === 1 ? 'secondary' : 'destructive'}
             className="flex items-center py-0 transition-colors duration-200"
+            style={{
+                fontFamily: '"Segoe UI", "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif',
+                whiteSpace: 'nowrap',
+                textRendering: 'optimizeLegibility',
+                unicodeBidi: 'normal',
+            }}
         >
             {item.keyword}
             <Button variant="link" size="icon" className="ml-2" onClick={onToggle}>
-                {item.label === 1 ? (
-                    <CircleX className="dark:text-white" />
-                ) : (
-                    <CircleCheck className="text-white" />
-                )}
+                {item.label === 1 ? <CircleX className="dark:text-white" /> : <CircleCheck className="text-white" />}
             </Button>
         </Badge>
     );

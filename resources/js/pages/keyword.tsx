@@ -1,10 +1,9 @@
 import Heading from '@/components/heading';
-import KeywordActions from '@/components/keyword-action';
-import KeywordList from '@/components/keyword-list';
+import KeywordDataTable from '@/components/keyword-data-table';
 import AppLayout from '@/layouts/app-layout';
-import { Keyword, type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-import dataKeyword from './analyses/data-keyword.json';
+import { Keyword, Paginator, type BreadcrumbItem } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -14,6 +13,14 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Keywords() {
+    const { keywords } = usePage<{ keywords: Paginator<Keyword> }>().props;
+    const { data, current_page, last_page, per_page, total } = keywords;
+    const [pageIndex, setPageIndex] = useState(current_page - 1);
+
+    useEffect(() => {
+        setPageIndex(current_page - 1);
+    }, [current_page]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Kata Kunci" />
@@ -23,12 +30,7 @@ export default function Keywords() {
                     description={
                         <>
                             Filter komentar promosi judi online dengan kata kunci. Pelajari caranya{' '}
-                            <a
-                                href="https://support.google.com/youtube/answer/100178"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary underline"
-                            >
+                            <a href="https://support.google.com/youtube/answer/100178" target="_blank" rel="noopener noreferrer" className="text-primary underline">
                                 di sini!
                             </a>
                             .
@@ -36,12 +38,7 @@ export default function Keywords() {
                     }
                 />
 
-                <KeywordList
-                    data={dataKeyword as Keyword[]}
-                    ActionButtons={({ onCopy, onReset, onFilter }) => (
-                        <KeywordActions onCopy={onCopy} onReset={onReset} onFilter={onFilter} />
-                    )}
-                />
+                <KeywordDataTable data={data} pageIndex={pageIndex} setPageIndex={setPageIndex} totalPages={last_page} totalItems={total} perPage={per_page} />
             </div>
         </AppLayout>
     );

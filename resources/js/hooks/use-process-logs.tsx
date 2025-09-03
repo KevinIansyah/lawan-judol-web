@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export interface ProcessLog {
-    comment_id: string;
+    id: string;
     status: 'processing' | 'success' | 'error';
     message: string;
 }
@@ -12,12 +12,12 @@ export const useProcessLogs = () => {
     const [errorCount, setErrorCount] = useState(0);
     const [finished, setFinished] = useState(false);
 
-    const addLogEntry = (comment_id: string, status: ProcessLog['status'], message: string) => {
-        setProcessLogs((prev) => [...prev, { comment_id, status, message }]);
+    const addLogEntry = (id: string, status: ProcessLog['status'], message: string) => {
+        setProcessLogs((prev) => [...prev, { id, status, message }]);
     };
 
-    const updateLogEntry = (comment_id: string, status: ProcessLog['status'], message: string) => {
-        setProcessLogs((prev) => prev.map((log) => (log.comment_id === comment_id ? { ...log, status, message } : log)));
+    const updateLogEntry = (id: string, status: ProcessLog['status'], message: string) => {
+        setProcessLogs((prev) => prev.map((log) => (log.id === id ? { ...log, status, message } : log)));
     };
 
     const resetLogs = () => {

@@ -1,4 +1,4 @@
-import { ProcessStatusDisplay } from '@/components/process-status-display';
+import { ProcessStatusComment } from '@/components/process-status-comment';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -131,7 +131,7 @@ export const DialogModeration = ({ selectedCount, getSelectedCommentIds, getSele
 
                 <div className="flex-1 overflow-hidden">
                     {loading ? (
-                        <ProcessStatusDisplay finished={finished} successCount={successCount} errorCount={errorCount} selectedCount={selectedCount} processLogs={processLogs} />
+                        <ProcessStatusComment finished={finished} successCount={successCount} errorCount={errorCount} selectedCount={selectedCount} processLogs={processLogs} />
                     ) : (
                         <div className="flex flex-col items-center justify-center py-12">
                             <div className="mb-4">
