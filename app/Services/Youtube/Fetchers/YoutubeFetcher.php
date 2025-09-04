@@ -70,6 +70,10 @@ class YoutubeFetcher
 
   public function fetchModerationComment(string $googleToken, string $commentId, string $moderationStatus, bool $banAuthor = false): Response
   {
+    if ($moderationStatus === 'reject') {
+      $moderationStatus = 'rejected';
+    }
+
     $params = [
       'id' => $commentId,
       'moderationStatus' => $moderationStatus,

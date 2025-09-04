@@ -94,7 +94,6 @@ const columns: ColumnDef<Comment>[] = [
                             className="text-sm break-words whitespace-normal"
                             style={{
                                 fontFamily: '"Segoe UI", "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif',
-                                whiteSpace: 'nowrap',
                                 textRendering: 'optimizeLegibility',
                                 unicodeBidi: 'normal',
                             }}

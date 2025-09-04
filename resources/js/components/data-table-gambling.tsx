@@ -12,6 +12,7 @@ import { ArrowUpDown, CheckCircle2Icon, FileTextIcon, Info, Loader2 } from 'luci
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import { usePage } from '@inertiajs/react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -96,7 +97,6 @@ const columns: ColumnDef<Comment>[] = [
                             className="text-sm break-words whitespace-normal"
                             style={{
                                 fontFamily: '"Segoe UI", "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif',
-                                whiteSpace: 'nowrap',
                                 textRendering: 'optimizeLegibility',
                                 unicodeBidi: 'normal',
                             }}
@@ -141,6 +141,7 @@ const columns: ColumnDef<Comment>[] = [
 
 export default function DataTableGambling({ analysis_id, data: apiData, onAddDatasetComplete, onModerationComplete }: DataTableProps) {
     const [data, setData] = useState<Comment[]>([]);
+    const { url } = usePage();
     const [globalFilter, setGlobalFilter] = useState('');
     const [rowSelection, setRowSelection] = useState({});
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -240,11 +241,6 @@ export default function DataTableGambling({ analysis_id, data: apiData, onAddDat
         getFacetedUniqueValues: getFacetedUniqueValues(),
     });
 
-    const getSelectedCommentIds = useCallback((): string[] => {
-        const selectedRows = table.getFilteredSelectedRowModel().rows;
-        return selectedRows.map((row) => row.original.comment_id.toString());
-    }, [table]);
-
     const getSelectedComments = useCallback((): Comment[] => {
         const selectedRows = table.getFilteredSelectedRowModel().rows;
         return selectedRows.map((row) => row.original);
@@ -273,9 +269,11 @@ export default function DataTableGambling({ analysis_id, data: apiData, onAddDat
                         <div className="flex-1 md:flex-none">
                             <DialogAddDataset selectedCount={selectedCount} analysisId={analysis_id} trueLabel="non_judol" getSelectedComments={getSelectedComments} onComplete={onAddDatasetComplete} onDataUpdate={handleDataUpdate} onRowSelectionReset={handleRowSelectionReset} />
                         </div>
-                        <div className="flex-1 md:flex-none">
-                            <DialogModeration selectedCount={selectedCount} getSelectedCommentIds={getSelectedCommentIds} getSelectedComments={getSelectedComments} onComplete={onModerationComplete} onRowSelectionReset={handleRowSelectionReset} />
-                        </div>
+                        {url.startsWith('/analysis/your-videos') && (
+                            <div className="flex-1 md:flex-none">
+                                <DialogModeration selectedCount={selectedCount} analysisId={analysis_id} getSelectedComments={getSelectedComments} onComplete={onModerationComplete} onDataUpdate={handleDataUpdate} onRowSelectionReset={handleRowSelectionReset} />
+                            </div>
+                        )}
                     </div>
 
                     <Input placeholder="Cari teks komentar atau status..." value={globalFilter} onChange={(event) => setGlobalFilter(event.target.value)} className="max-w-sm md:order-1" />
@@ -292,7 +290,8 @@ export default function DataTableGambling({ analysis_id, data: apiData, onAddDat
                                 <p>
                                     Menampilkan {data.length} dari total {apiData.total_comments} komentar
                                 </p>
-                                {draftCount > 0 && <Badge className="bg-chart-3 mt-2 text-[oklch(0.2178_0_0)]">Ada {draftCount} komentar draft yang menunggu moderasi</Badge>}
+                                
+                                {url.startsWith('/analysis/your-videos') && draftCount > 0 && <Badge className="bg-chart-3 mt-2 text-[oklch(0.2178_0_0)]">Ada {draftCount} komentar pending yang menunggu moderasi</Badge>}
                             </div>
                         </AlertDescription>
                     </Alert>

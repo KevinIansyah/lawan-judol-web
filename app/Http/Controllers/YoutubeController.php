@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Analysis;
 use App\Services\YouTube\Handlers\CacheHandler;
 use App\Services\Youtube\YoutubeService;
 use Illuminate\Http\Request;
@@ -177,16 +178,27 @@ class YoutubeController extends Controller
             ], 401);
         }
 
-        $commentId = $request->input('comment_id');
-        $moderationStatus = $request->input('moderation_status');
-        $banAuthor = $request->boolean('ban_author', false);
+        $commentId = $request->input('data.comment_id');
+        $moderationStatus = $request->input('data.moderation_status');
+        $banAuthor = $request->boolean('data.ban_author', false);
+        $analysisId = $request->input('data.analysis_id');
+
+        $analysis = Analysis::find($analysisId);
+        if (!$analysis) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Analysis tidak ditemukan.',
+                'comment_id' => '',
+            ], 404);
+        }
+        $filePath = storage_path('app/public/' . $analysis->gambling_file_path);
 
         try {
             $result = $this->youtubeService->postModerationCommentById(
                 $user,
                 $commentId,
                 $moderationStatus,
-                $banAuthor
+                $banAuthor,
             );
 
             if ($result['success']) {
@@ -196,6 +208,8 @@ class YoutubeController extends Controller
                     'moderation_status' => $moderationStatus,
                 ]);
             }
+
+            $this->updateJsonFileStatus($filePath, $commentId, $moderationStatus);
 
             return response()->json($result);
         } catch (\Exception $e) {
@@ -216,5 +230,74 @@ class YoutubeController extends Controller
     private function isValidYouTubeVideoId(string $videoId): bool
     {
         return preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId);
+    }
+
+    private function updateJsonFileStatus($filePath, $commentId, $newStatus)
+    {
+        try {
+            if (!file_exists($filePath)) {
+                Log::warning("JSON file not found", [
+                    'file_path' => $filePath,
+                    'comment_id' => $commentId
+                ]);
+
+                return false;
+            }
+
+            $jsonContent = file_get_contents($filePath);
+            $data = json_decode($jsonContent, true);
+
+            if (!$data || !isset($data['chunks'])) {
+                Log::warning("Invalid JSON structure", [
+                    'file_path' => $filePath,
+                    'comment_id' => $commentId
+                ]);
+
+                return false;
+            }
+
+            $updated = false;
+            foreach ($data['chunks'] as &$chunk) {
+                if (isset($chunk['comments'])) {
+                    foreach ($chunk['comments'] as &$comment) {
+                        if ($comment['comment_id'] === $commentId) {
+                            $comment['status'] = $newStatus;
+                            $updated = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+
+            if ($updated) {
+                $result = file_put_contents($filePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+                if ($result === false) {
+                    Log::error("Failed to write updated JSON", [
+                        'file_path' => $filePath,
+                        'comment_id' => $commentId
+                    ]);
+
+                    return false;
+                }
+
+                return true;
+            } else {
+                Log::warning("Comment not found in JSON file", [
+                    'file_path' => $filePath,
+                    'comment_id' => $commentId
+                ]);
+
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error("Error updating JSON file", [
+                'file_path' => $filePath,
+                'comment_id' => $commentId,
+                'error' => $e->getMessage()
+            ]);
+
+            return false;
+        }
     }
 }

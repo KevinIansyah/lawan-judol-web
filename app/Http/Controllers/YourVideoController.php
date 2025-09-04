@@ -50,7 +50,7 @@ class YourVideoController extends Controller
     {
         $analysis = Analysis::findOrFail($id);
 
-        if ($analysis->status_analysis !== 'success') {
+        if ($analysis->status !== 'success') {
             return redirect()->back()->with('error', 'Mohon tunggu hingga proses analisis selesai sebelum melihat hasil.');
         }
 

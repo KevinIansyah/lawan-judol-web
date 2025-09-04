@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/video', [YoutubeController::class, 'getVideo'])->name('video');
         Route::get('/videos', [YoutubeController::class, 'getVideos'])->name('videos');
         Route::get('/comments', [YoutubeController::class, 'getComments'])->name('comments');
-        Route::post('/clear-cache', [YoutubeController::class, 'clearCache'])->name('clear-cache');
+        Route::post('/moderation', [YoutubeController::class, 'postModerationComment'])->name('moderation');
     });
 
     Route::prefix('dataset')->middleware('is_admin')->group(function () {

@@ -494,7 +494,7 @@ class YoutubeService
         'user_id' => $user->id,
         'comment_id' => $commentId,
       ]);
-
+      
       return $this->successResponseBuilder->buildModerationCommentSuccess($commentId);
     } catch (\Exception $e) {
       Log::error("Error during comment moderation", [
@@ -507,6 +507,75 @@ class YoutubeService
         'Terjadi kesalahan saat memproses moderasi komentar. Silakan coba beberapa saat lagi.',
         $commentId
       );
+    }
+  }
+
+  private function updateJsonFileStatus($filePath, $commentId, $newStatus)
+  {
+    try {
+      if (!file_exists($filePath)) {
+        Log::warning("JSON file not found", [
+          'file_path' => $filePath,
+          'comment_id' => $commentId
+        ]);
+
+        return false;
+      }
+
+      $jsonContent = file_get_contents($filePath);
+      $data = json_decode($jsonContent, true);
+
+      if (!$data || !isset($data['chunks'])) {
+        Log::warning("Invalid JSON structure", [
+          'file_path' => $filePath,
+          'comment_id' => $commentId
+        ]);
+
+        return false;
+      }
+
+      $updated = false;
+      foreach ($data['chunks'] as &$chunk) {
+        if (isset($chunk['comments'])) {
+          foreach ($chunk['comments'] as &$comment) {
+            if ($comment['comment_id'] === $commentId) {
+              $comment['status'] = $newStatus;
+              $updated = true;
+              break 2;
+            }
+          }
+        }
+      }
+
+      if ($updated) {
+        $result = file_put_contents($filePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        if ($result === false) {
+          Log::error("Failed to write updated JSON", [
+            'file_path' => $filePath,
+            'comment_id' => $commentId
+          ]);
+
+          return false;
+        }
+
+        return true;
+      } else {
+        Log::warning("Comment not found in JSON file", [
+          'file_path' => $filePath,
+          'comment_id' => $commentId
+        ]);
+
+        return false;
+      }
+    } catch (\Exception $e) {
+      Log::error("Error updating JSON file", [
+        'file_path' => $filePath,
+        'comment_id' => $commentId,
+        'error' => $e->getMessage()
+      ]);
+
+      return false;
     }
   }
 }

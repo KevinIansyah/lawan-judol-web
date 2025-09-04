@@ -8,30 +8,29 @@ import { Comment } from '@/types';
 import { AlertCircle, FileText, ShieldEllipsis } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { Checkbox } from './ui/checkbox';
 
 interface DialogModerationProps {
     selectedCount: number;
-    getSelectedCommentIds: () => string[];
+    analysisId: number;
     getSelectedComments: () => Comment[];
     onComplete?: (updatedComments: Comment[]) => void;
+    onDataUpdate: (updater: (prevData: Comment[]) => Comment[]) => void;
     onRowSelectionReset: () => void;
 }
 
-export const DialogModeration = ({ selectedCount, getSelectedCommentIds, getSelectedComments, onComplete, onRowSelectionReset }: DialogModerationProps) => {
+export const DialogModeration = ({ selectedCount, analysisId, getSelectedComments, onComplete, onDataUpdate, onRowSelectionReset }: DialogModerationProps) => {
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
-    const [moderationType, setModerationType] = useState('heldForReview');
+    const [moderationStatus, setModerationStatus] = useState('heldForReview');
+    const [banAuthor, setBanAuthor] = useState(false);
 
     const { processLogs, successCount, errorCount, finished, setSuccessCount, setErrorCount, setFinished, addLogEntry, updateLogEntry, resetLogs } = useProcessLogs();
 
     const fetchModeration = async (): Promise<void> => {
-        const selectedCommentIds = getSelectedCommentIds();
         const selectedComments = getSelectedComments();
 
-        console.log('Selected Comment IDs:', selectedCommentIds);
-        console.log('Selected Comments:', selectedComments);
-
-        if (selectedCommentIds.length === 0) {
+        if (selectedComments.length === 0) {
             toast('Informasi!', {
                 description: 'Silakan pilih minimal satu komentar untuk melanjutkan.',
             });
@@ -45,27 +44,89 @@ export const DialogModeration = ({ selectedCount, getSelectedCommentIds, getSele
         let failed = 0;
 
         try {
-            // Add processing logs for each comment
-            selectedComments.forEach((comment) => {
-                addLogEntry(comment.comment_id, 'processing', `Memproses komentar dengan ID ${comment.comment_id}`);
-            });
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const updatedComments: Comment[] = [];
 
-            // Simulate API call - replace with actual implementation
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            for (const selectedComment of selectedComments) {
+                addLogEntry(selectedComment.comment_id, 'processing', `Memproses komentar dengan ID ${selectedComment.comment_id}`);
 
-            // Mock processing - replace with actual API calls
-            for (const comment of selectedComments) {
                 try {
-                    // Simulate API call
-                    await new Promise((resolve) => setTimeout(resolve, 300));
+                    const response = await fetch('/youtube/moderation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            ...(csrfToken && { 'X-CSRF-TOKEN': csrfToken }),
+                        },
+                        body: JSON.stringify({
+                            data: {
+                                analysis_id: analysisId,
+                                comment_id: selectedComment.comment_id,
+                                moderation_status: moderationStatus,
+                                ban_author: banAuthor,
+                            },
+                        }),
+                    });
 
-                    // Mock success
-                    success++;
-                    updateLogEntry(comment.comment_id, 'success', `Komentar dengan ID ${comment.comment_id} berhasil dimoderasi sebagai ${moderationType}.`);
+                    if (!response.ok) {
+                        const errorBody = await response.json();
+                        throw new Error(errorBody.message || `HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.quota_exceeded) {
+                        updateLogEntry(selectedComment.comment_id, 'error', `Komentar dengan ID ${selectedComment.comment_id} gagal dimoderasi. Kuota API terlampaui.`);
+                        failed++;
+
+                        const currentIndex = selectedComments.indexOf(selectedComment);
+                        const remainingComments = selectedComments.slice(currentIndex + 1);
+                        remainingComments.forEach((comment) => {
+                            addLogEntry(comment.comment_id, 'error', `Komentar dengan ID ${comment.comment_id} gagal dimoderasi. Kuota API terlampaui.`);
+                            failed++;
+                        });
+
+                        toast.error('Kuota Terlampaui!', {
+                            description: 'Kuota API YouTube telah terlampaui. Proses dihentikan.',
+                        });
+
+                        break;
+                    }
+
+                    if (result.success) {
+                        success++;
+                        const banAuthorText = banAuthor && moderationStatus === 'reject' ? ' dan author diblokir' : '';
+                        updateLogEntry(selectedComment.comment_id, 'success', `Komentar dengan ID ${selectedComment.comment_id} berhasil dimoderasi sebagai ${moderationStatus}${banAuthorText}.`);
+
+                        const updatedComment = { ...selectedComment, status: moderationStatus as 'heldForReview' | 'reject' | 'draft' | 'dataset' };
+                        updatedComments.push(updatedComment);
+                    } else {
+                        throw new Error(result.message || 'Unknown error');
+                    }
                 } catch (error) {
                     failed++;
-                    updateLogEntry(comment.comment_id, 'error', `Komentar dengan ID ${comment.comment_id} gagal dimoderasi.`);
+                    console.error(`Error processing comment ${selectedComment.comment_id}:`, error);
+
+                    let message = 'Terjadi kesalahan saat menyimpan data.';
+                    if (error instanceof Error) {
+                        message = error.message;
+                    } else if (typeof error === 'string') {
+                        message = error;
+                    }
+
+                    updateLogEntry(selectedComment.comment_id, 'error', `Komentar dengan ID ${selectedComment.comment_id} gagal ditambahkan ke dimoderasi. ${message}`);
                 }
+
+                await new Promise((resolve) => setTimeout(resolve, 300));
+            }
+
+            if (updatedComments.length > 0) {
+                onDataUpdate((prevData) =>
+                    prevData.map((comment) => {
+                        const updatedComment = updatedComments.find((updated) => updated.comment_id === comment.comment_id);
+                        return updatedComment || comment;
+                    }),
+                );
             }
 
             setSuccessCount(success);
@@ -87,14 +148,13 @@ export const DialogModeration = ({ selectedCount, getSelectedCommentIds, getSele
 
             onRowSelectionReset();
 
-            // Uncomment when implementing actual API
-            // if (onComplete && result.updatedComments) {
-            //     onComplete(result.updatedComments);
-            // }
+            if (onComplete && updatedComments.length > 0) {
+                onComplete(updatedComments);
+            }
         } catch (error) {
-            console.error('Error processing moderation:', error);
+            console.error('Error processing comment:', error);
             toast.error('Gagal!', {
-                description: error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui',
+                description: 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.',
             });
         } finally {
             setFinished(true);
@@ -107,6 +167,13 @@ export const DialogModeration = ({ selectedCount, getSelectedCommentIds, getSele
             setLoading(false);
             resetLogs();
         }, 300);
+    };
+
+    const handleModerationStatusChange = (value: string) => {
+        setModerationStatus(value);
+        if (value !== 'reject') {
+            setBanAuthor(false);
+        }
     };
 
     return (
@@ -133,7 +200,7 @@ export const DialogModeration = ({ selectedCount, getSelectedCommentIds, getSele
                     {loading ? (
                         <ProcessStatusComment finished={finished} successCount={successCount} errorCount={errorCount} selectedCount={selectedCount} processLogs={processLogs} />
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-12">
+                        <div className="flex flex-col items-center justify-center py-4">
                             <div className="mb-4">
                                 <AlertCircle className="text-primary h-8 w-8" />
                             </div>
@@ -141,19 +208,28 @@ export const DialogModeration = ({ selectedCount, getSelectedCommentIds, getSele
                                 <p className="font-medium">{`${selectedCount} komentar dipilih`}</p>
                                 <p className="text-muted-foreground max-w-sm text-sm">Pastikan komentar yang Anda pilih sudah benar sebelum melanjutkan.</p>
                             </div>
-                            <div className="w-full space-y-4">
-                                <p className="text-sm font-medium">Pilih tindakan moderasi</p>
-                                <RadioGroup value={moderationType} onValueChange={setModerationType}>
+                            <div className="mb-4 w-full space-y-4">
+                                <p className="text-sm font-medium">Pilih Tindakan Moderasi</p>
+                                <RadioGroup value={moderationStatus} onValueChange={handleModerationStatusChange}>
                                     <div className="flex items-center space-x-2">
                                         <RadioGroupItem value="heldForReview" id="heldForReview" />
-                                        <Label htmlFor="heldForReview">HeldForReview</Label>
+                                        <Label htmlFor="heldForReview">HeldForReview (Tahan komentar untuk ditinjau)</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <RadioGroupItem value="reject" id="reject" />
-                                        <Label htmlFor="reject">Reject</Label>
+                                        <Label htmlFor="reject">Reject (Tolak komentar)</Label>
                                     </div>
                                 </RadioGroup>
                             </div>
+                            {moderationStatus === 'reject' && (
+                                <div className="w-full space-y-4">
+                                    <p className="text-sm font-medium">Tindakan Opsional</p>
+                                    <div className="flex items-center gap-2">
+                                        <Checkbox id="ban_author" checked={banAuthor} onCheckedChange={(checked) => setBanAuthor(checked === true)} />
+                                        <Label htmlFor="ban_author">BanAuthor (Blokir pengguna)</Label>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
