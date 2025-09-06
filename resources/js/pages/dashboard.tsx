@@ -1,8 +1,9 @@
 import Heading from '@/components/heading';
 import { HistoryChart } from '@/components/history-chart';
+import StatCard from '@/components/stat-card';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { DashboardData, SharedData, type BreadcrumbItem } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -12,31 +13,34 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard() {
+    const page = usePage<SharedData>();
+    const { auth } = page.props;
+    const { dashboard } = usePage<{ dashboard: DashboardData }>().props;
+    const { dataset_count, keyword_count, your_analysis_count, public_analysis_count } = dashboard;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dasbor" />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
-                <Heading
-                    title="Dasbor"
-                    description="Ringkasan data dan aktivitas sistem LawanJudol.ID."
-                />
+            <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
+                <Heading title={`Haii ${auth.user.name}`} description="Selamat datang di Dasbor LawanJudol.ID." />
 
-                {/* <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+                <div className="grid auto-rows-min gap-4 md:grid-cols-4 mb-4">
+                    <StatCard title="Dataset" description="Kontribusi dataset Anda" count={dataset_count} />
+                    <StatCard title="Kata Kunci" description="Kontribusi kata kunci Anda" count={keyword_count} />
+                    <StatCard title="Analisis Video Anda" description="Analisis video Anda" count={your_analysis_count} />
+                    <StatCard title="Analisis Video Publik" description="Analisis video publik" count={public_analysis_count} />
+
+                    {/* <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
                         <ChartClasification data="comments" />
                     </div>
                     <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
                         <SpiderChart />
                     </div>
                     <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-full rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
                         <ListChart />
-                    </div>
-                </div> */}
+                    </div> */}
+                </div>
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative rounded-xl border">
-                    {/* <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" /> */}
                     <HistoryChart />
                 </div>
             </div>

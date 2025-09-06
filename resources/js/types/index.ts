@@ -208,3 +208,20 @@ export interface ProcessLog {
     status: 'processing' | 'success' | 'error';
     message: string;
 }
+
+export interface DashboardData {
+    dataset_count: number;
+    keyword_count: number;
+    your_analysis_count: number;
+    public_analysis_count: number;
+    your_analysis: {
+        three_months: Record<string, number>;
+        one_month: Record<string, number>;
+        seven_days: Record<string, number>;
+    };
+    public_analysis: {
+        three_months: Record<string, number>;
+        one_month: Record<string, number>;
+        seven_days: Record<string, number>;
+    };
+}

@@ -1,4 +1,5 @@
 import { AppContent } from '@/components/app-content';
+import { AppFooter } from '@/components/app-footer';
 import { AppHeader } from '@/components/app-header';
 import { AppShell } from '@/components/app-shell';
 import { SharedData, type BreadcrumbItem } from '@/types';
@@ -13,6 +14,7 @@ interface AppHeaderLayoutProps {
 
 export default function AppHeaderLayout({ children, breadcrumbs }: AppHeaderLayoutProps) {
     const { error, success, info } = usePage<SharedData>().props;
+    const { url } = usePage();
 
     useEffect(() => {
         if (error) {
@@ -32,7 +34,7 @@ export default function AppHeaderLayout({ children, breadcrumbs }: AppHeaderLayo
         <AppShell>
             <AppHeader breadcrumbs={breadcrumbs} />
             <AppContent>{children}</AppContent>
-            {/* <AppFooter /> */}
+            {url !== '/' && <AppFooter />}
         </AppShell>
     );
 }

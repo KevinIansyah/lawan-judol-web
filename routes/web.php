@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DatasetController;
 use App\Http\Controllers\KeywordController;
 use App\Http\Controllers\KeywordImportController;
@@ -17,7 +18,7 @@ Route::resource('keywords', KeywordController::class)->only(['index']);
 Route::get('/guides', fn() => Inertia::render('guide'))->name('guides');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', fn() =>  Inertia::render('dashboard'))->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('analysis')->group(function () {
         Route::resource('public-videos', PublicVideoController::class);
@@ -44,8 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('notification')->name('notification.')->group(function () {
         Route::get('/{id}/redirect', [NotificationController::class, 'redirect'])->name('redirect');
-        // Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
-        // Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
     });
 
     Route::prefix('import')->name('import.')->middleware('is_admin')->group(function () {
