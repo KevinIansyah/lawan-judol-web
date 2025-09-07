@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'is_admin' => \App\Http\Middleware\IsAdmin::class,
+            'ensure_analysis_owner' => \App\Http\Middleware\EnsureAnalysisOwner::class
         ]);
 
         $middleware->web(append: [

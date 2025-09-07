@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Analysis;
-use App\Models\User;
-use App\Notifications\AnalysisNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -51,6 +49,13 @@ class PublicVideoController extends Controller
     public function show($id)
     {
         $analysis = Analysis::findOrFail($id);
+
+        if ($analysis->type !== 'public') {
+            if ($analysis->type === 'your') {
+                return redirect()->route('your-videos.show', $analysis->id);
+            }
+            abort(404);
+        }
 
         if ($analysis->status !== 'success') {
             return redirect()->back()->with('error', 'Mohon tunggu hingga proses analisis selesai sebelum melihat hasil.');

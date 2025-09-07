@@ -14,15 +14,17 @@ use Inertia\Inertia;
 
 Route::get('/', fn() => Inertia::render('home'))->name('home');
 
-Route::resource('keywords', KeywordController::class)->only(['index']);
+Route::get('/keywords', [KeywordController::class, 'index'])->name('keywords.index');
 Route::get('/guides', fn() => Inertia::render('guide'))->name('guides');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('analysis')->group(function () {
-        Route::resource('public-videos', PublicVideoController::class);
-        Route::resource('your-videos', YourVideoController::class);
+        Route::get('public-videos/{id}', [PublicVideoController::class, 'show'])->name('public-videos.show')->middleware('ensure_analysis_owner');
+        Route::get('your-videos/{id}', [YourVideoController::class, 'show'])->name('your-videos.show')->middleware('ensure_analysis_owner');
+        Route::resource('public-videos', PublicVideoController::class)->except('show');
+        Route::resource('your-videos', YourVideoController::class)->except('show');
     });
     Route::resource('analyses', AnalysisController::class);
 

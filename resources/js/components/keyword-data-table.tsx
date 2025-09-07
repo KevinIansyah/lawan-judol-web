@@ -141,7 +141,7 @@ export default function KeywordDataTable({ data: initialData, pageIndex, setPage
                                 <RotateCcw className="ml-1 size-4" />
                             </Button>
                         </div>
-                        {auth.user.role === 'admin' && (
+                        {auth?.user?.role === 'admin' && (
                             <div className="flex-1 md:flex-none">
                                 <Button variant="outline" className="w-full" asChild>
                                     <Link href="/import/keyword">
