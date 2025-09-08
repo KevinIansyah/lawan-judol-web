@@ -1,5 +1,5 @@
+import { ChartHistory } from '@/components/chart-history';
 import Heading from '@/components/heading';
-import { HistoryChart } from '@/components/history-chart';
 import StatCard from '@/components/stat-card';
 import AppLayout from '@/layouts/app-layout';
 import { DashboardData, SharedData, type BreadcrumbItem } from '@/types';
@@ -24,7 +24,7 @@ export default function Dashboard() {
             <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
                 <Heading title={`Haii ${auth.user.name}`} description="Selamat datang di Dasbor LawanJudol.ID." />
 
-                <div className="grid auto-rows-min gap-4 md:grid-cols-4 mb-4">
+                <div className="mb-4 grid auto-rows-min gap-4 md:grid-cols-4">
                     <StatCard title="Dataset" description="Kontribusi dataset Anda" count={dataset_count} />
                     <StatCard title="Kata Kunci" description="Kontribusi kata kunci Anda" count={keyword_count} />
                     <StatCard title="Analisis Video Anda" description="Analisis video Anda" count={your_analysis_count} />
@@ -41,7 +41,7 @@ export default function Dashboard() {
                     </div> */}
                 </div>
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative rounded-xl border">
-                    <HistoryChart />
+                    <ChartHistory />
                 </div>
             </div>
         </AppLayout>

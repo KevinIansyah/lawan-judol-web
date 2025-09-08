@@ -3,11 +3,13 @@ import DataTableGambling from '@/components/data-table-gambling';
 import DataTableNonGambling from '@/components/data-table-non-gambling';
 import Heading from '@/components/heading';
 import KeywordList from '@/components/keyword-list';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VideoMetadata from '@/components/video-metadata';
 import AppLayout from '@/layouts/app-layout';
 import { Analysis, CommentChunk, Keyword, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
+import { Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface DetailProps {
@@ -67,6 +69,16 @@ export default function Detail() {
                         <TabsTrigger value="keyword">Kata Kunci</TabsTrigger>
                     </TabsList>
                     <TabsContent value="summary">
+                        <Alert className="mb-4">
+                            <Info className="mt-0.5 h-4 w-4 shrink-0" />
+                            <AlertDescription>
+                                <p className="text-muted-foreground text-sm">
+                                    Data komentar dan metadata video berasal dari YouTube Data API. Hasil klasifikasi, label, dan analisis tambahan yang ditampilkan pada halaman ini dihitung secara independen oleh sistem kami dan{' '}
+                                    <span className="font-semibold">bukan merupakan data resmi dari YouTube</span>.
+                                </p>
+                            </AlertDescription>
+                        </Alert>
+
                         <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                             <div className="border-sidebar-border/70 dark:border-sidebar-border bg-card relative h-full rounded-xl border px-4 py-2">
                                 <VideoMetadata analysis={analysis} />

@@ -11,6 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class CommentInferenceJob implements ShouldQueue
 {
@@ -76,6 +77,10 @@ class CommentInferenceJob implements ShouldQueue
             $this->analysis->keyword_file_path = $keywordPath;
             $this->analysis->status = 'success';
             $this->sendNotification('success');
+
+            if (file_exists($filePath)) {
+                Storage::delete('public/' . $this->analysis->video['comments_path']);
+            }
 
             Log::info("Comment inference completed", [
                 'analysis_id' => $this->analysis->id,

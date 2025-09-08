@@ -1,9 +1,4 @@
-import {
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { cn } from '@/lib/utils';
@@ -29,16 +24,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
-                    <Link
-                        className={cn(
-                            'block w-full',
-                            page.url.startsWith('/settings') && 'bg-primary text-[oklch(1_0_0)]',
-                        )}
-                        href={route('profile.edit')}
-                        as="button"
-                        prefetch
-                        onClick={cleanup}
-                    >
+                    <Link className={cn('block w-full', page.url.startsWith('/settings') && 'bg-primary text-[oklch(1_0_0)]')} href={route('profile.edit')} as="button" prefetch onClick={cleanup}>
                         <Settings className="mr-2 dark:text-[oklch(1_0_0)]" />
                         Pengaturan
                     </Link>
@@ -46,16 +32,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuGroup>
             <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
-                    <Link
-                        className={cn(
-                            'block w-full',
-                            page.url.startsWith('/guide') && 'bg-primary text-[oklch(1_0_0)]',
-                        )}
-                        href={route('profile.edit')}
-                        as="button"
-                        prefetch
-                        onClick={cleanup}
-                    >
+                    <Link className={cn('block w-full', page.url.startsWith('/privacy-policy') && 'bg-primary text-[oklch(1_0_0)]')} href={route('privacy-policy')} as="button" prefetch onClick={cleanup}>
                         <ShieldCheck className="mr-2 dark:text-[oklch(1_0_0)]" />
                         Kebijakan Privasi
                     </Link>
@@ -63,13 +40,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-                <Link
-                    className="block w-full"
-                    method="post"
-                    href={route('logout')}
-                    as="button"
-                    onClick={cleanup}
-                >
+                <Link className="block w-full" method="post" href={route('logout')} as="button" onClick={cleanup}>
                     <LogOut className="mr-2 dark:text-[oklch(1_0_0)]" />
                     Keluar
                 </Link>

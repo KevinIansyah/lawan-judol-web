@@ -17,10 +17,7 @@ export default function AuthSplitLayout({ children, title, description }: AuthLa
                 <div className="absolute inset-0 bg-red-50 bg-[url('/assets/images/welcome.svg')] bg-cover bg-center dark:bg-red-700/10" />
                 <div className="absolute inset-0 bg-black/80" />
 
-                <Link
-                    href={route('home')}
-                    className="relative z-20 flex items-center text-lg font-medium"
-                >
+                <Link href={route('home')} className="relative z-20 flex items-center text-lg font-medium">
                     <AppLogoIcon />
                     <span className="ml-2">{name}</span>
                 </Link>
@@ -35,10 +32,7 @@ export default function AuthSplitLayout({ children, title, description }: AuthLa
             </div>
             <div className="w-full lg:p-8">
                 <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-                    <Link
-                        href={route('home')}
-                        className="relative z-20 flex items-center justify-center lg:hidden"
-                    >
+                    <Link href={route('home')} className="relative z-20 flex items-center justify-center lg:hidden">
                         <AppLogoIcon />
                     </Link>
                     <div className="mb-0 flex flex-col items-center gap-2 text-center">
@@ -49,7 +43,7 @@ export default function AuthSplitLayout({ children, title, description }: AuthLa
                     <div className="flex flex-col items-center gap-2 text-center">
                         <p className="text-muted-foreground text-sm text-balance">
                             Dengan masuk, Anda menyetujui <br />
-                            <a href="#" className="underline">
+                            <a href="/privacy-policy" className="underline">
                                 Kebijakan Privasi
                             </a>{' '}
                             kami.

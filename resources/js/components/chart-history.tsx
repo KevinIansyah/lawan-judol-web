@@ -17,7 +17,7 @@ const chartConfig = {
     },
 } satisfies ChartConfig;
 
-export function HistoryChart() {
+export function ChartHistory() {
     const { dashboard } = usePage<{ dashboard: DashboardData }>().props;
     const { your_analysis, public_analysis } = dashboard;
 
