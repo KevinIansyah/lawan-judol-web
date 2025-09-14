@@ -1,10 +1,4 @@
-export default function Heading({
-    title,
-    description,
-}: {
-    title: string;
-    description?: React.ReactNode;
-}) {
+export default function Heading({ title, description }: { title: string; description?: React.ReactNode }) {
     return (
         <>
             <div className="mb-8 space-y-0.5">

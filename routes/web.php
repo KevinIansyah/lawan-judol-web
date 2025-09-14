@@ -39,7 +39,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('dataset')->middleware('is_admin')->group(function () {
         Route::get('/download', [DatasetController::class, 'download'])->name('download');
     });
-    Route::resource('datasets', DatasetController::class)->middleware('is_admin');
+    Route::post('/datasets', [DatasetController::class, 'store'])->name('datasets.store');
+    Route::resource('datasets', DatasetController::class)->middleware('is_admin')->except('store');
 
     Route::prefix('keyword')->group(function () {
         Route::put('/update-json-file', [KeywordController::class, 'updateJsonFile'])->name('update-json-file');

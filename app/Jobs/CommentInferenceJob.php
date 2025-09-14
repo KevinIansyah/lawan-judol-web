@@ -32,6 +32,7 @@ class CommentInferenceJob implements ShouldQueue
             ]);
 
             $url = rtrim(config('model.model_api.url'), '/');
+            $apiKey = config('model.model_api.key');
             $filePath = storage_path('app/public/' . $this->analysis->video['comments_path']);
 
             if (!file_exists($filePath)) {
@@ -39,6 +40,9 @@ class CommentInferenceJob implements ShouldQueue
             }
 
             $response = Http::timeout(600)
+                ->withHeaders([
+                    'X-API-Key' => $apiKey,
+                ])
                 ->attach('file', file_get_contents($filePath), 'comments.json')
                 ->post("$url/predict-file");
 
@@ -61,14 +65,17 @@ class CommentInferenceJob implements ShouldQueue
             @mkdir($keywordDir, 0755, true);
 
             Http::timeout(600)
+                ->withHeaders(['X-API-Key' => $apiKey])
                 ->sink(storage_path("app/public/" . $judolPath))
                 ->get($url . '/download/' . $result['judol_result']);
 
             Http::timeout(600)
+                ->withHeaders(['X-API-Key' => $apiKey])
                 ->sink(storage_path("app/public/" . $nonJudolPath))
                 ->get($url . '/download/' . $result['non_judol_result']);
 
             Http::timeout(600)
+                ->withHeaders(['X-API-Key' => $apiKey])
                 ->sink(storage_path("app/public/" . $keywordPath))
                 ->get($url . '/download/' . $result['keyword_result']);
 

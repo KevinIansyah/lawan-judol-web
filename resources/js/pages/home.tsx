@@ -17,7 +17,7 @@ export default function Home() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Beranda" />
             <div className="flex min-h-[calc(100vh-70px)] w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0">
-                <main className="flex w-full max-w-[335px] flex-col-reverse lg:max-w-4xl lg:flex-row">
+                <main className="flex w-full max-w-[335px] flex-col-reverse lg:max-w-4xl lg:flex-row py-8">
                     <div className="flex-1 flex-col justify-center rounded-br-lg rounded-bl-lg p-6 leading-[20px] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:flex lg:rounded-tl-lg lg:rounded-br-none lg:px-15 dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]">
                         <h1 className="mb-1 text-base font-bold">Bersama Kita Lawan Judi Online</h1>
                         <p className="text-muted-foreground mb-2 text-sm">

@@ -288,11 +288,15 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                         {page.url === '#' && <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>}
                                     </NavigationMenuItem>
 
+                                    {/* <NavigationMenuItem className="relative flex h-full items-center">
+                                        <AppearanceToggleDropdown />
+                                    </NavigationMenuItem>
+
                                     <NavigationMenuItem className="relative ml-3 flex h-full items-center">
                                         <Button asChild>
                                             <Link href="/login">Masuk</Link>
                                         </Button>
-                                    </NavigationMenuItem>
+                                    </NavigationMenuItem> */}
                                 </NavigationMenuList>{' '}
                             </NavigationMenu>
                         </div>
@@ -309,6 +313,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 </TooltipTrigger>
                                 <TooltipContent>{auth.user.youtube_permission_granted ? <p>Terhubung dengan YouTube</p> : <p>Belum terhubung dengan YouTube</p>}</TooltipContent>
                             </Tooltip>
+
                             <AppearanceToggleDropdown />
                             <NotificationDropdown />
 
@@ -327,9 +332,13 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                             </DropdownMenu>
                         </div>
                     ) : (
-                        <Button asChild className="lg:hidden">
-                            <Link href={`/login`}>Masuk</Link>
-                        </Button>
+                        <div className="ml-auto flex items-center gap-3">
+                            <AppearanceToggleDropdown />
+
+                            <Button asChild>
+                                <Link href={`/login`}>Masuk</Link>
+                            </Button>
+                        </div>
                     )}
                 </div>
             </div>
