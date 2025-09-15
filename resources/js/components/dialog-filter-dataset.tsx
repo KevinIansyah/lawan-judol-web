@@ -196,7 +196,7 @@ export function DialogFilterDataset({ isOpen, onOpenChange }: DialogFilterDatase
                 )}
 
                 <DialogFooter className="border-t pt-4">
-                    <div className="flex w-full justify-end gap-2">
+                    <div className="flex w-full justify-end">
                         <Button onClick={handleDownload} disabled={loadingDownload || !!error || success} className="flex items-center gap-2">
                             <Download className="h-4 w-4" />
                             Unduh

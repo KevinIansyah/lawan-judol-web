@@ -156,10 +156,12 @@ export const DialogAddKeyword = ({ selectedCount, getSelectedKeyword }: DialogAd
                 </div>
 
                 <DialogFooter className="border-t pt-4">
-                    <Button onClick={fetchKeyword} disabled={loading || selectedCount === 0} className="flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
-                        Tambah ke Kamus
-                    </Button>
+                    <div className="flex w-full justify-end">
+                        <Button onClick={fetchKeyword} disabled={loading || selectedCount === 0} className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Tambah ke Kamus
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

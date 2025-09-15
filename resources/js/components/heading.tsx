@@ -1,7 +1,7 @@
 export default function Heading({ title, description }: { title: string; description?: React.ReactNode }) {
     return (
         <>
-            <div className="mb-8 space-y-0.5">
+            <div className="mb-8 space-y-0.5 mt-4">
                 <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
                 {description && <p className="text-muted-foreground text-sm">{description}</p>}
             </div>

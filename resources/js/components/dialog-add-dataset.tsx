@@ -182,10 +182,12 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
                 </div>
 
                 <DialogFooter className="border-t pt-4">
-                    <Button onClick={fetchDataset} disabled={loading} className="flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
-                        Tambah ke Dataset
-                    </Button>
+                    <div className="flex w-full justify-end">
+                        <Button onClick={fetchDataset} disabled={loading} className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Tambah ke Dataset
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

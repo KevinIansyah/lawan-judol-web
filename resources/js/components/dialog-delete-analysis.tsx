@@ -141,10 +141,13 @@ export default function DialogDeleteAnalysis({ analysis }: DialogDeleteAnalysisP
                         </div>
                     )}
 
-                    <DialogFooter className="gap-2">
-                        <Button onClick={handleDelete} variant="destructive" disabled={loadingDelete}>
-                            Hapus Analisis
-                        </Button>
+                    <DialogFooter className="border-t pt-4">
+                        <div className="flex w-full justify-end">
+                            <Button onClick={handleDelete} variant="destructive" disabled={loadingDelete} className="flex items-center gap-2">
+                                <Trash />
+                                Hapus Analisis
+                            </Button>
+                        </div>
                     </DialogFooter>
                 </div>
             </DialogContent>

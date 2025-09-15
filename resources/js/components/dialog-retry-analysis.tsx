@@ -147,14 +147,13 @@ export default function DialogRetryAnalysis({ analysis }: DialogRetryAnalysisPro
                     )}
 
                     {!loadingRetry && !error && (
-                        <DialogFooter className="gap-2">
-                            <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
-                                Batal
-                            </Button>
-                            <Button onClick={handleRetry} variant="default" className="flex items-center gap-2">
-                                <RotateCcw className="h-4 w-4" />
-                                Ulang Analisis
-                            </Button>
+                        <DialogFooter className="border-t pt-4">
+                            <div className="flex w-full justify-end">
+                                <Button onClick={handleRetry} variant="default" className="flex items-center gap-2">
+                                    <RotateCcw className="h-4 w-4" />
+                                    Ulang Analisis
+                                </Button>
+                            </div>
                         </DialogFooter>
                     )}
                 </div>

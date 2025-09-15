@@ -228,12 +228,12 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                         <NavigationMenuContent>
                                             <ul className="grid w-[200px] gap-4">
                                                 <li>
-                                                    <NavigationMenuLink asChild>
+                                                    <NavigationMenuLink asChild className='mb-1'>
                                                         <Link href="/analysis/public-videos" className={cn(page.url.startsWith('/analysis/public-videos') && 'bg-primary text-[oklch(1_0_0)]')}>
                                                             Video Publik
                                                         </Link>
                                                     </NavigationMenuLink>
-                                                    <NavigationMenuLink asChild>
+                                                    <NavigationMenuLink asChild className='mb-[1.5px]'>
                                                         <Link href="/analysis/your-videos" className={cn(page.url.startsWith('/analysis/your-videos') && 'bg-primary text-[oklch(1_0_0)]')}>
                                                             Video Saya
                                                         </Link>

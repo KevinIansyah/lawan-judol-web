@@ -91,7 +91,7 @@ export default function NotificationDropdown() {
                         notifications.map((notif) => (
                             <DropdownMenuItem
                                 key={notif.id}
-                                className={`focus:bg-secondary-foreground/20 ${
+                                className={`first:mt-0 last:mb-0 focus:bg-secondary-foreground/20 ${
                                     notif.read_at === null ? 'bg-secondary-foreground/10' : ''
                                 }`}
                             >

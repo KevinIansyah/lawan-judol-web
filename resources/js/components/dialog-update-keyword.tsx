@@ -161,10 +161,12 @@ export const DialogUpdateKeyword = ({ selectedCount, analysisId, getSelectedKeyw
                 </div>
 
                 <DialogFooter className="border-t pt-4">
-                    <Button onClick={fetchKeyword} disabled={loading || selectedCount === 0} className="flex items-center gap-2">
-                        <Save className="h-4 w-4" />
-                        Simpan Perubahan
-                    </Button>
+                    <div className="flex w-full justify-end">
+                        <Button onClick={fetchKeyword} disabled={loading || selectedCount === 0} className="flex items-center gap-2">
+                            <Save className="h-4 w-4" />
+                            Simpan Perubahan
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

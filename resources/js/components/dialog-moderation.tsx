@@ -235,10 +235,12 @@ export const DialogModeration = ({ selectedCount, analysisId, getSelectedComment
                 </div>
 
                 <DialogFooter className="border-t pt-4">
-                    <Button onClick={fetchModeration} disabled={loading} className="flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
-                        Moderasi Komentar
-                    </Button>
+                    <div className="flex w-full justify-end">
+                        <Button onClick={fetchModeration} disabled={loading} className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Moderasi Komentar
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
