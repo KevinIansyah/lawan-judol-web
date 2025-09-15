@@ -7,7 +7,7 @@ use App\Services\Youtube\Fetchers\YoutubeFetcher;
 use App\Services\Youtube\Formatters\YoutubeFormatter;
 use App\Services\Youtube\Handlers\CacheHandler;
 use App\Services\Youtube\Handlers\TokenHandler;
-use App\Services\Youtube\Helpers\YouTubeErrorHelper;
+use App\Services\Youtube\Helpers\YoutubeErrorHelper;
 use App\Services\Youtube\Responses\ErrorResponseBuilder;
 use App\Services\Youtube\Responses\SuccessResponseBuilder;
 use Illuminate\Support\Facades\Cache;
@@ -30,7 +30,7 @@ class YoutubeService
     CacheHandler $cacheHandler,
     YoutubeFetcher $youtubeFetcher,
     YoutubeFormatter $youtubeFormatter,
-    YouTubeErrorHelper $youTubeErrorHelper,
+    YoutubeErrorHelper $youtubeErrorHelper,
     ErrorResponseBuilder $errorResponseBuilder,
     SuccessResponseBuilder $successResponseBuilder,
   ) {
@@ -38,7 +38,7 @@ class YoutubeService
     $this->cacheHandler = $cacheHandler;
     $this->youtubeFetcher = $youtubeFetcher;
     $this->youtubeFormatter = $youtubeFormatter;
-    $this->youtubeErrorHelper = $youTubeErrorHelper;
+    $this->youtubeErrorHelper = $youtubeErrorHelper;
     $this->errorResponseBuilder = $errorResponseBuilder;
     $this->successResponseBuilder = $successResponseBuilder;
   }
