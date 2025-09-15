@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\YouTube\Responses;
+namespace App\Services\Youtube\Responses;
 
 class ErrorResponseBuilder
 {

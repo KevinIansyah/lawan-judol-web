@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\YouTube\Formatters;
+namespace App\Services\Youtube\Formatters;
 
 class YoutubeFormatter
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\YouTube\Helpers;
+namespace App\Services\Youtube\Helpers;
 
 use Illuminate\Http\Client\Response;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\YouTube\Handlers;
+namespace App\Services\Youtube\Handlers;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
