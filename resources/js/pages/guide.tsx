@@ -17,7 +17,7 @@ export default function Guides() {
             <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
                 <Heading
                     title="Panduan Pengguna"
-                    description="Panduan lengkap untuk menggunakan fitur LawanJudol.ID dengan mudah."
+                    description="Panduan lengkap untuk menggunakan fitur LawanJudol dengan mudah."
                 />
             </div>
         </AppLayout>

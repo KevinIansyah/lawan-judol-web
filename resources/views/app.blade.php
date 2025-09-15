@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="description"
-    content="LawanJudol.ID adalah platform untuk menganalisis dan membersihkan komentar judi online dari video YouTube Anda secara otomatis.">
+    content="LawanJudol adalah platform untuk menganalisis dan membersihkan komentar judi online dari video YouTube Anda secara otomatis.">
 
-  <title inertia>{{ config('app.name', 'LawanJudol.ID') }}</title>
+  <title inertia>{{ config('app.name', 'LawanJudol') }}</title>
 
   <link rel="icon" href="/assets/images/logo.svg" type="image/svg">
   <link rel="preconnect" href="https://fonts.bunny.net">

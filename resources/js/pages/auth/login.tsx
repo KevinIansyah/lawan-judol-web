@@ -6,7 +6,7 @@ export default function Login() {
     return (
         <AuthLayout
             title="Masuk ke Akun Anda"
-            description="Silakan masuk untuk mulai mengelola komentar dan aktivitas di LawanJudol.ID."
+            description="Silakan masuk untuk mulai mengelola komentar dan aktivitas di LawanJudol."
         >
             <Head title="Masuk" />
             <Button className="w-full" asChild>

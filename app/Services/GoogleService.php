@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Log;
 
 class GoogleService
 {
-  /**
-   * Find an existing user by Google ID or email, or create a new one.
-   */
   public function findOrCreateUser($googleUser)
   {
     $user = User::where('google_id', $googleUser->id)
@@ -53,9 +50,6 @@ class GoogleService
     return $user;
   }
 
-  /**
-   * Refresh the Google API access token using the refresh token.
-   */
   public function refreshGoogleToken(string $refreshToken, User $user)
   {
     $clientId = config('services.google.client_id');

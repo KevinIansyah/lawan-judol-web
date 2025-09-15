@@ -5,7 +5,7 @@ export default function AppLogo() {
                 <img src="/assets/images/logo.svg" alt="Logo" className="h-6 w-6" />
             </div>
             <div className="grid flex-1 text-center text-sm">
-                <span className="truncate leading-none font-semibold">LawanJudol.ID</span>
+                <span className="truncate leading-none font-semibold">LawanJudol</span>
             </div>
         </>
     );

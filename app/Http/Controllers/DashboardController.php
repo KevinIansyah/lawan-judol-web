@@ -29,11 +29,12 @@ class DashboardController extends Controller
             $data = Analysis::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
                 ->where('user_id', $user->id)
                 ->where('type', $type)
-                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereDate('created_at', '>=', $startDate->toDateString())
+                ->whereDate('created_at', '<=', $endDate->toDateString())
                 ->groupBy('date')
                 ->pluck('count', 'date')
                 ->toArray();
-                
+
             $period = CarbonPeriod::create($startDate, $endDate);
 
             $result = [];

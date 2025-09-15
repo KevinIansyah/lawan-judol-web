@@ -4,7 +4,7 @@ import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { cn } from '@/lib/utils';
 import { SharedData, type User } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { LogOut, Settings, ShieldCheck } from 'lucide-react';
+import { FileKey, FileText, LogOut, Settings } from 'lucide-react';
 
 interface UserMenuContentProps {
     user: User;
@@ -33,8 +33,14 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
                     <Link className={cn('block w-full', page.url.startsWith('/privacy-policy') && 'bg-primary text-[oklch(1_0_0)]')} href={route('privacy-policy')} as="button" prefetch onClick={cleanup}>
-                        <ShieldCheck className="mr-2 dark:text-[oklch(1_0_0)]" />
+                        <FileKey className="mr-2 dark:text-[oklch(1_0_0)]" />
                         Kebijakan Privasi
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link className={cn('block w-full', page.url.startsWith('/terms-of-service') && 'bg-primary text-[oklch(1_0_0)]')} href={route('privacy-policy')} as="button" prefetch onClick={cleanup}>
+                        <FileText className="mr-2 dark:text-[oklch(1_0_0)]" />
+                        Ketentuan Layanan
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>

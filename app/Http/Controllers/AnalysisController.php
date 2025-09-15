@@ -6,6 +6,7 @@ use App\Jobs\CommentInferenceJob;
 use App\Models\Analysis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AnalysisController extends Controller
@@ -57,7 +58,11 @@ class AnalysisController extends Controller
                 'data' => $analysis,
             ], 201);
         } catch (\Exception $e) {
-            Log::error("Failed to store analysis data for user ID: {$user->id}. Error: " . $e->getMessage());
+            Log::error("Failed to create analysis", [
+                'user_id' => $user->id ?? null,
+                'video_title' => $request->input('data.video.title') ?? 'Unknown',
+                'error' => $e->getMessage(),
+            ]);
 
             return response()->json([
                 'success' => false,
@@ -73,5 +78,126 @@ class AnalysisController extends Controller
 
     public function update(Request $request, Analysis $analysis) {}
 
-    public function destroy(Analysis $analysis) {}
+    public function destroy(Analysis $analysis)
+    {
+        try {
+            $user = Auth::user();
+
+            if ($analysis->user_id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki izin untuk menghapus analisis ini.',
+                ], 403);
+            }
+
+            if (in_array($analysis->status, ['on_process', 'queue'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Analisis sedang diproses dan tidak dapat dihapus.',
+                ], 422);
+            }
+
+            $filesToDelete = [];
+
+            if (!empty($analysis->gambling_file_path)) {
+                $filesToDelete[] = storage_path('app/public/' . $analysis->gambling_file_path);
+            }
+
+            if (!empty($analysis->nongambling_file_path)) {
+                $filesToDelete[] = storage_path('app/public/' . $analysis->nongambling_file_path);
+            }
+
+            if (!empty($analysis->keyword_file_path)) {
+                $filesToDelete[] = storage_path('app/public/' . $analysis->keyword_file_path);
+            }
+
+
+            DB::transaction(function () use ($analysis, $filesToDelete) {
+                $analysis->delete();
+
+                foreach ($filesToDelete as $filePath) {
+                    if (file_exists($filePath)) {
+                        if (!unlink($filePath)) {
+                            Log::warning("Failed to delete file: {$filePath}");
+                        }
+                    }
+                }
+            });
+
+            Log::info("Analysis deleted successfully", [
+                'user_id' => $user->id,
+                'analysis_id' => $analysis->id,
+                'deleted_files' => count($filesToDelete),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data analisis berhasil dihapus.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Failed to delete analysis", [
+                'user_id' => $user->id ?? null,
+                'analysis_id' => $analysis->id ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menghapus analisis. Silakan coba lagi.',
+            ], 500);
+        }
+    }
+
+    public function retry(Analysis $analysis)
+    {
+        try {
+            $user = Auth::user();
+
+            if ($analysis->user_id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki izin untuk mengulang analisis ini.',
+                ], 403);
+            }
+
+            if ($analysis->status !== 'failed') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya analisis yang gagal yang dapat diulang.',
+                ], 422);
+            }
+
+            $analysis->update([
+                'status' => 'queue',
+                'gambling_file_path' => null,
+                'nongambling_file_path' => null,
+                'keyword_file_path' => null,
+                'updated_at' => now(),
+            ]);
+
+            CommentInferenceJob::dispatch($analysis)->onQueue('inference');
+
+            Log::info("Analysis retry successfully queued", [
+                'user_id' => $user->id,
+                'analysis_id' => $analysis->id,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Analisis berhasil dimasukkan kembali ke dalam antrean.',
+                'data' => $analysis->fresh(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Failed to retry analysis", [
+                'user_id' => $user->id ?? null,
+                'analysis_id' => $analysis->id ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengulang analisis. Silakan coba lagi.',
+            ], 500);
+        }
+    }
 }

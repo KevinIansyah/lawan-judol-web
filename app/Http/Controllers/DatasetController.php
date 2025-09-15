@@ -24,7 +24,8 @@ class DatasetController extends Controller
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->Where('comment->text', 'like', '%' . $search . '%');
+                $q->where('comment->text', 'like', '%' . $search . '%')
+                    ->orWhere('true_label', $search);
             });
         }
 

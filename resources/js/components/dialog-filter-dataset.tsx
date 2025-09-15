@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { usePreventScroll } from '@/hooks/use-prevent-scroll';
 import { getErrorIcon, getRetryButtonText, getUserFriendlyError } from '@/lib/utils';
 import { ApiResponseDataset } from '@/types';
-import { CheckCircle2Icon, Download, Filter, Loader2, SlidersHorizontal } from 'lucide-react';
+import { CheckCircle2Icon, Download, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
 interface DialogFilterDatasetProps {
@@ -113,16 +113,16 @@ export function DialogFilterDataset({ isOpen, onOpenChange }: DialogFilterDatase
         <Dialog modal={false} open={isOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button variant="outline" className="w-full">
-                    <SlidersHorizontal />
-                    Filter atau Unduh
+                    <Download />
+                    Unduh Komentar
                 </Button>
             </DialogTrigger>
 
             {isOpen && <div className="animate-in fade-in-0 fixed inset-0 z-50 bg-black/80" onClick={() => onOpenChange(false)} />}
 
             <DialogContent className="flex min-h-[50vh] flex-col overflow-hidden md:min-h-[40vh] lg:min-h-[45vh] xl:min-h-[65vh]">
-                <DialogTitle>Filter & Unduh Komentar</DialogTitle>
-                <DialogDescription>Pilih rentang tanggal dan kategori komentar sebelum melakukan filter atau mengunduh data.</DialogDescription>
+                <DialogTitle>Unduh Komentar</DialogTitle>
+                <DialogDescription>Pilih rentang tanggal dan kategori komentar sebelum mengunduh data.</DialogDescription>
 
                 {loadingDownload ? (
                     <div className="flex flex-1 flex-col items-center justify-center overflow-hidden">
@@ -197,10 +197,6 @@ export function DialogFilterDataset({ isOpen, onOpenChange }: DialogFilterDatase
 
                 <DialogFooter className="border-t pt-4">
                     <div className="flex w-full justify-end gap-2">
-                        <Button disabled={loadingDownload || !!error || success} className="flex items-center gap-2">
-                            <Filter className="h-4 w-4" />
-                            Filter
-                        </Button>
                         <Button onClick={handleDownload} disabled={loadingDownload || !!error || success} className="flex items-center gap-2">
                             <Download className="h-4 w-4" />
                             Unduh

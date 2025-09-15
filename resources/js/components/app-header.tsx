@@ -9,7 +9,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, ChevronDown, ChevronRight, FileKey, FileText, LayoutGrid, Menu, ShieldCheck, Youtube } from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronRight, FileKey, FileText, LayoutGrid, Menu, Youtube } from 'lucide-react';
 import { useState } from 'react';
 import AppLogo from './app-logo';
 import AppearanceToggleDropdown from './appearance-dropdown';
@@ -182,8 +182,19 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 )}
                                                 onClick={closeMobileMenu}
                                             >
-                                                <ShieldCheck className="h-4 w-4" />
+                                                <FileKey className="h-4 w-4" />
                                                 <span>Kebijakan Privasi</span>
+                                            </Link>
+                                            <Link
+                                                href="/terms-of-service"
+                                                className={cn(
+                                                    'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
+                                                    page.url === '/guides' ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
+                                                )}
+                                                onClick={closeMobileMenu}
+                                            >
+                                                <FileText className="h-4 w-4" />
+                                                <span>Ketentuan Layanan</span>
                                             </Link>
                                         </nav>
                                     )}
@@ -282,8 +293,16 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                                     <NavigationMenuItem className="relative flex h-full items-center">
                                         <Link href="/privacy-policy" className={cn(navigationMenuTriggerStyle(), page.url === '#' && activeItemStyles, 'h-9 px-3')}>
-                                            <ShieldCheck className="mr-2 h-4 w-4" />
+                                            <FileKey className="mr-2 h-4 w-4" />
                                             Kebijakan Privasi
+                                        </Link>
+                                        {page.url === '#' && <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>}
+                                    </NavigationMenuItem>
+
+                                    <NavigationMenuItem className="relative flex h-full items-center">
+                                        <Link href="/terms-of-service" className={cn(navigationMenuTriggerStyle(), page.url === '#' && activeItemStyles, 'h-9 px-3')}>
+                                            <FileText className="mr-2 h-4 w-4" />
+                                            Ketentuan Layanan
                                         </Link>
                                         {page.url === '#' && <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>}
                                     </NavigationMenuItem>

@@ -34,6 +34,24 @@ class YoutubeController extends Controller
             ], 401);
         }
 
+        // $activeAnalysisCount = Analysis::where('user_id', $user->id)->where('type', 'public')
+        //     ->whereIn('status', ['queue', 'on_process'])
+        //     ->count();
+
+        // if ($activeAnalysisCount >= 3) {
+        //     Log::info("Analysis limit reached", [
+        //         'user_id' => $user->id,
+        //         'active_analysis_count' => $activeAnalysisCount,
+        //     ]);
+
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Anda telah mencapai batas maksimal 3 analisis yang sedang diproses. Tunggu hingga minimal 1 analisis selesai sebelum menambahkan analisis baru.',
+        //         'video' => null,
+        //         'total' => 0,
+        //     ], 429);
+        // }
+
         $videoId = $request->input('video_id');
 
         if (empty($videoId) || !$this->isValidYouTubeVideoId($videoId)) {
@@ -61,7 +79,7 @@ class YoutubeController extends Controller
             Log::error("Failed to fetch video", [
                 'user_id' => $user->id,
                 'video_id' => $videoId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
@@ -108,7 +126,7 @@ class YoutubeController extends Controller
         } catch (\Exception $e) {
             Log::error("Failed to fetch videos", [
                 'user_id' => $user->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
@@ -154,7 +172,7 @@ class YoutubeController extends Controller
             Log::error("Failed to fetch comments", [
                 'user_id' => $user->id,
                 'video_id' => $videoId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
@@ -216,7 +234,7 @@ class YoutubeController extends Controller
             Log::error("Failed to moderate comment", [
                 'user_id' => $user->id,
                 'comment_id' => $commentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
@@ -294,7 +312,7 @@ class YoutubeController extends Controller
             Log::error("Error updating JSON file", [
                 'file_path' => $filePath,
                 'comment_id' => $commentId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return false;

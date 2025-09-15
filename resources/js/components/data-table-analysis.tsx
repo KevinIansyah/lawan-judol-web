@@ -1,20 +1,23 @@
+import DialogDeleteAnalysis from '@/components/dialog-delete-analysis';
 import DialogPublicVideo from '@/components/dialog-public-video';
+import DialogRetryAnalysis from '@/components/dialog-retry-analysis';
 import DialogYourVideo from '@/components/dialog-your-video';
 import { TableCellViewer } from '@/components/table-cell-viewer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useUrlSearch } from '@/hooks/use-url-search';
 import { formatDate } from '@/lib/utils';
 import { Analysis } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ColumnDef, VisibilityState, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { CheckCircle2Icon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, CircleX, ColumnsIcon, LoaderIcon, MoreVerticalIcon } from 'lucide-react';
+import { CheckCircle2Icon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, CircleX, ColumnsIcon, Eye, LoaderIcon } from 'lucide-react';
 import { useState } from 'react';
 
 interface DataTableProps {
@@ -96,26 +99,60 @@ export default function DataTableAnalysis({ data, pageIndex, setPageIndex, total
                 </Badge>
             ),
         },
+        // {
+        //     id: 'actions',
+        //     header: 'Aksi',
+        //     cell: ({ row }) => (
+        //         <DropdownMenu>
+        //             <DropdownMenuTrigger asChild>
+        //                 <Button variant="ghost" className="text-muted-foreground data-[state=open]:bg-primary flex size-8 data-[state=open]:text-white" size="icon">
+        //                     <MoreVerticalIcon />
+        //                     <span className="sr-only">Open menu</span>
+        //                 </Button>
+        //             </DropdownMenuTrigger>
+        //             <DropdownMenuContent align="end" className="w-32">
+        //                 <DropdownMenuItem asChild disabled={['failed', 'on_process', 'queue'].includes(row.original.status)}>
+        //                     {url.startsWith('/analysis/your-videos') ? <Link href={`/analysis/your-videos/${row.original.id}`}>Detail</Link> : url.startsWith('/analysis/public-videos') ? <Link href={`/analysis/public-videos/${row.original.id}`}>Detail</Link> : <span>Detail</span>}
+        //                 </DropdownMenuItem>
+        //                 <DropdownMenuItem disabled={row.original.status !== 'failed'}>
+        //                     <DialogRetryAnalysis analysis={row.original} />
+        //                 </DropdownMenuItem>
+        //                 <DropdownMenuItem disabled={row.original.status !== 'success'}>Hapus</DropdownMenuItem>
+        //             </DropdownMenuContent>
+        //         </DropdownMenu>
+        //     ),
+        // },
         {
             id: 'actions',
             header: 'Aksi',
-            cell: ({ row }) => (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="text-muted-foreground data-[state=open]:bg-primary flex size-8 data-[state=open]:text-white" size="icon">
-                            <MoreVerticalIcon />
-                            <span className="sr-only">Open menu</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-32">
-                        <DropdownMenuItem asChild disabled={['failed', 'on_process', 'queue'].includes(row.original.status)}>
-                            {url.startsWith('/analysis/your-videos') ? <Link href={`/analysis/your-videos/${row.original.id}`}>Detail</Link> : url.startsWith('/analysis/public-videos') ? <Link href={`/analysis/public-videos/${row.original.id}`}>Detail</Link> : <span>Detail</span>}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem disabled={row.original.status !== 'failed'}>Ulang</DropdownMenuItem>
-                        <DropdownMenuItem disabled={row.original.status !== 'success'}>Hapus</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            ),
+            cell: ({ row }) => {
+                return (
+                    <div className="flex items-center gap-1">
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="secondary" size="icon" className="h-7 w-7 rounded-md" asChild disabled={['failed', 'on_process', 'queue'].includes(row.original.status)}>
+                                    {url.startsWith('/analysis/your-videos') ? (
+                                        <Link href={`/analysis/your-videos/${row.original.id}`} className={['failed', 'on_process', 'queue'].includes(row.original.status) ? 'pointer-events-none opacity-50' : ''}>
+                                            <Eye />
+                                        </Link>
+                                    ) : url.startsWith('/analysis/public-videos') ? (
+                                        <Link href={`/analysis/public-videos/${row.original.id}`} className={['failed', 'on_process', 'queue'].includes(row.original.status) ? 'pointer-events-none opacity-50' : ''}>
+                                            <Eye />
+                                        </Link>
+                                    ) : null}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Detail analisis</p>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <DialogRetryAnalysis analysis={row.original} />
+
+                        <DialogDeleteAnalysis analysis={row.original} />
+                    </div>
+                );
+            },
         },
     ];
 

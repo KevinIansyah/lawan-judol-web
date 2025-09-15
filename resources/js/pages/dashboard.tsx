@@ -22,7 +22,7 @@ export default function Dashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dasbor" />
             <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
-                <Heading title={`Haii ${auth.user.name}`} description="Selamat datang di Dasbor LawanJudol.ID." />
+                <Heading title={`Haii ${auth.user.name}`} description="Selamat datang di Dasbor LawanJudol." />
 
                 <div className="mb-4 grid auto-rows-min gap-4 md:grid-cols-4">
                     <StatCard title="Dataset" description="Kontribusi dataset Anda" count={dataset_count} />

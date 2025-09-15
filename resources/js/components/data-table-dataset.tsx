@@ -96,24 +96,24 @@ export default function DataTableDataset({ data, pageIndex, setPageIndex, totalP
                 </Badge>
             ),
         },
-        {
-            id: 'actions',
-            header: 'Aksi',
-            cell: () => (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="text-muted-foreground data-[state=open]:bg-primary flex size-8 data-[state=open]:text-white" size="icon">
-                            <MoreVerticalIcon />
-                            <span className="sr-only">Open menu</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-32">
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Hapus</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            ),
-        },
+        // {
+        //     id: 'actions',
+        //     header: 'Aksi',
+        //     cell: () => (
+        //         <DropdownMenu>
+        //             <DropdownMenuTrigger asChild>
+        //                 <Button variant="ghost" className="text-muted-foreground data-[state=open]:bg-primary flex size-8 data-[state=open]:text-white" size="icon">
+        //                     <MoreVerticalIcon />
+        //                     <span className="sr-only">Open menu</span>
+        //                 </Button>
+        //             </DropdownMenuTrigger>
+        //             <DropdownMenuContent align="end" className="w-32">
+        //                 <DropdownMenuItem>Edit</DropdownMenuItem>
+        //                 <DropdownMenuItem>Hapus</DropdownMenuItem>
+        //             </DropdownMenuContent>
+        //         </DropdownMenu>
+        //     ),
+        // },
     ];
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,7 +175,7 @@ export default function DataTableDataset({ data, pageIndex, setPageIndex, totalP
                     </div>
 
                     {/* Search Input */}
-                    <Input placeholder="Cari komentar..." value={searchValue} onChange={handleSearchChange} className="max-w-sm md:order-1" />
+                    <Input placeholder="Cari komentar atau label (judol/non_judol)..." value={searchValue} onChange={handleSearchChange} className="max-w-sm md:order-1" />
                 </div>
 
                 {/* Table Section */}

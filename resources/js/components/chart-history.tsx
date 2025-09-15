@@ -113,8 +113,11 @@ export function ChartHistory() {
                                 />
                             }
                         />
-                        <Area dataKey="your" type="natural" fill="url(#fillYour)" stroke="var(--color-your)" stackId="a" />
-                        <Area dataKey="public" type="natural" fill="url(#fillPublic)" stroke="var(--color-public)" stackId="a" />
+                        {/* <Area dataKey="your" type="natural" fill="url(#fillYour)" stroke="var(--color-your)" stackId="a" />
+                        <Area dataKey="public" type="natural" fill="url(#fillPublic)" stroke="var(--color-public)" stackId="a" /> */}
+                        <Area dataKey="your" type="natural" fill="url(#fillYour)" stroke="var(--color-your)" fillOpacity={0.3} />
+                        <Area dataKey="public" type="natural" fill="url(#fillPublic)" stroke="var(--color-public)" fillOpacity={0.3} />
+
                         <ChartLegend content={<ChartLegendContent />} />
                     </AreaChart>
                 </ChartContainer>

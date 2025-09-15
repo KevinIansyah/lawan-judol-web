@@ -86,7 +86,7 @@ class CommentInferenceJob implements ShouldQueue
             $this->sendNotification('success');
 
             if (file_exists($filePath)) {
-                Storage::delete('public/' . $this->analysis->video['comments_path']);
+                unlink($filePath);
             }
 
             Log::info("Comment inference completed", [

@@ -1,5 +1,5 @@
 <div align="center">
-<h1 align="center"><strong><em>LAWANJUDOL.ID</em></strong></h1>
+<h1 align="center"><strong><em>LAWANJUDOL</em></strong></h1>
   
 *Memberdayakan Inovasi, Mengubah Kemungkinan Setiap Hari*
 
@@ -36,7 +36,7 @@ _Dibangun dengan alat dan teknologi berikut:_
 
 ## Gambaran Umum
 
-**LawanJudol.ID** adalah sebuah situs berbasis web yang dibuat untuk membantu masyarakat memerangi penyebaran konten judi online di platform YouTube. Website ini menyediakan antarmuka modern yang memudahkan pengguna untuk mendeteksi dan menghapus komentar spam, melacak aktivitas mencurigakan, serta menampilkan analisis data seputar video dan komentar yang terindikasi mengandung promosi judi. Beberapa fitur utama antara lain:
+**LawanJudol** adalah sebuah situs berbasis web yang dibuat untuk membantu masyarakat memerangi penyebaran konten judi online di platform YouTube. Website ini menyediakan antarmuka modern yang memudahkan pengguna untuk mendeteksi dan menghapus komentar spam, melacak aktivitas mencurigakan, serta menampilkan analisis data seputar video dan komentar yang terindikasi mengandung promosi judi. Beberapa fitur utama antara lain:
 
 - 🧹 **Struktur Komponen & Styling:** Menjamin konsistensi UI dengan komponen yang modular dan gaya yang rapi.
 - ⚡ **Performa Cepat:** Menggunakan Vite, React, Laravel, dan Tailwind CSS untuk proses build dan development yang cepat.
@@ -59,7 +59,7 @@ Proyek ini membutuhkan dependensi berikut:
 
 ### Instalasi
 
-Bangun `lawanjudol.id` dari sumber dan instal semua dependensi:
+Bangun `lawanjudol` dari sumber dan instal semua dependensi:
 
 1. **Klon repositori:**
 
