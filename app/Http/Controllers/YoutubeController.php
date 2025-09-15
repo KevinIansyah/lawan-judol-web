@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Analysis;
-use App\Services\YouTube\Handlers\CacheHandler;
+use App\Services\Youtube\Handlers\CacheHandler;
 use App\Services\Youtube\YoutubeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
