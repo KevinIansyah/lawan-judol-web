@@ -1,10 +1,9 @@
-import { SharedData, type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
-
 import GrantAccess from '@/components/grant-access';
 import RevokeAccess from '@/components/revoke-access';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { SharedData, type BreadcrumbItem } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -20,9 +19,7 @@ export default function YoutubeAccess() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Pengaturan Izin" />
 
-            <SettingsLayout>
-                {auth.user.youtube_permission_granted ? <RevokeAccess /> : <GrantAccess />}
-            </SettingsLayout>
+            <SettingsLayout>{auth.user.youtube_permission_granted ? <RevokeAccess /> : <GrantAccess />}</SettingsLayout>
         </AppLayout>
     );
 }

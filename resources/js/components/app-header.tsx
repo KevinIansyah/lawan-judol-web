@@ -43,7 +43,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                             <SheetTrigger asChild>
                                 <Button variant="ghost" size="icon" className="mr-2 h-[34px] w-[34px]">
-                                    <Menu className="h-5 w-5" />
+                                    <Menu className="size-5 lg:size-4.5" />
                                     <span className="sr-only">Buka menu navigasi</span>
                                 </Button>
                             </SheetTrigger>
@@ -228,12 +228,12 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                         <NavigationMenuContent>
                                             <ul className="grid w-[200px] gap-4">
                                                 <li>
-                                                    <NavigationMenuLink asChild className='mb-1'>
+                                                    <NavigationMenuLink asChild className="mb-1">
                                                         <Link href="/analysis/public-videos" className={cn(page.url.startsWith('/analysis/public-videos') && 'bg-primary text-[oklch(1_0_0)]')}>
                                                             Video Publik
                                                         </Link>
                                                     </NavigationMenuLink>
-                                                    <NavigationMenuLink asChild className='mb-[1.5px]'>
+                                                    <NavigationMenuLink asChild className="mb-[1.5px]">
                                                         <Link href="/analysis/your-videos" className={cn(page.url.startsWith('/analysis/your-videos') && 'bg-primary text-[oklch(1_0_0)]')}>
                                                             Video Saya
                                                         </Link>

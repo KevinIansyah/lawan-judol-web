@@ -131,22 +131,21 @@ export default function KeywordDataTable({ data: initialData, pageIndex, setPage
                         {/* Additional Action Buttons */}
                         <div className="flex-1 md:flex-none">
                             <Button variant="outline" className="w-full" onClick={handleCopy}>
-                                Salin
-                                <Copy className="ml-1 size-4" />
+                                <Copy className="ml-1 size-4" /> Salin
                             </Button>
                         </div>
                         <div className="flex-1 md:flex-none">
                             <Button variant="outline" className="w-full" onClick={handleReset}>
-                                Reset
                                 <RotateCcw className="ml-1 size-4" />
+                                Reset
                             </Button>
                         </div>
                         {auth?.user?.role === 'admin' && (
                             <div className="flex-1 md:flex-none">
                                 <Button variant="outline" className="w-full" asChild>
                                     <Link href="/import/keyword">
-                                        Import
                                         <Upload className="ml-1 size-4" />
+                                        Import
                                     </Link>
                                 </Button>
                             </div>

@@ -5,11 +5,20 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
-import { FormEventHandler, useRef } from 'react';
+import { FormEventHandler } from 'react';
 
 export default function DeleteUser() {
-    const passwordInput = useRef<HTMLInputElement>(null);
-    const { data, setData, delete: destroy, processing, reset, errors, clearErrors } = useForm({ password: '' });
+    const {
+        data,
+        setData,
+        delete: destroy,
+        processing,
+        reset,
+        errors,
+        clearErrors,
+    } = useForm({
+        confirmation: '',
+    });
 
     const deleteUser: FormEventHandler = (e) => {
         e.preventDefault();
@@ -17,7 +26,7 @@ export default function DeleteUser() {
         destroy(route('profile.destroy'), {
             preserveScroll: true,
             onSuccess: () => closeModal(),
-            onError: () => passwordInput.current?.focus(),
+            onError: () => console.log('Gagal menghapus akun'),
             onFinish: () => reset(),
         });
     };
@@ -40,28 +49,31 @@ export default function DeleteUser() {
                     <DialogTrigger asChild>
                         <Button variant="destructive">Hapus Akun</Button>
                     </DialogTrigger>
+
                     <DialogContent>
                         <DialogTitle>Apakah Anda yakin ingin menghapus akun Anda?</DialogTitle>
-                        <DialogDescription>Setelah akun Anda dihapus, semua sumber daya dan data terkait juga akan dihapus secara permanen. Masukkan kata sandi Anda untuk mengonfirmasi bahwa Anda ingin menghapus akun secara permanen.</DialogDescription>
+                        <DialogDescription>
+                            Jika akun dihapus, semua data terkait akan dihapus secara permanen dalam jangka waktu maksimal 7 (tujuh) hari kalender. Anda bisa login kembali ke sistem sebelum batas 7 hari untuk membatalkan penghapusan. Ketik{' '}
+                            <strong>HAPUS AKUN</strong> di bawah untuk mengonfirmasi penghapusan.
+                        </DialogDescription>
+
                         <form className="space-y-6" onSubmit={deleteUser}>
                             <div className="grid gap-2">
-                                <Label htmlFor="password" className="sr-only">
-                                    Kata Sandi
-                                </Label>
+                                <Label htmlFor="confirmation" className='sr-only'>Konfirmasi Penghapusan</Label>
 
-                                <Input id="password" type="password" name="password" ref={passwordInput} value={data.password} onChange={(e) => setData('password', e.target.value)} placeholder="Kata Sandi" autoComplete="current-password" />
+                                <Input id="confirmation" name="confirmation" value={data.confirmation} onChange={(e) => setData('confirmation', e.target.value)} placeholder="Ketik HAPUS AKUN" />
 
-                                <InputError message={errors.password} />
+                                <InputError message={errors.confirmation} />
                             </div>
 
-                            <DialogFooter className="gap-2">
+                            <DialogFooter className="gap-2 border-t pt-4">
                                 <DialogClose asChild>
                                     <Button variant="secondary" onClick={closeModal}>
                                         Batal
                                     </Button>
                                 </DialogClose>
 
-                                <Button variant="destructive" disabled={processing} asChild>
+                                <Button variant="destructive" disabled={processing || data.confirmation !== 'HAPUS AKUN'} asChild>
                                     <button type="submit">Hapus Akun</button>
                                 </Button>
                             </DialogFooter>

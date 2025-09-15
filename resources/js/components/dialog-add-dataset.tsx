@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ProcessStatusComment } from '@/components/process-status-comment';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -79,15 +80,15 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
                     } else {
                         throw new Error(result.message || 'Unknown error');
                     }
-                } catch (error) {
+                } catch (err) {
                     failed++;
-                    console.error(`Error processing comment ${selectedComment.comment_id}:`, error);
+                    // console.error(`Error processing comment ${selectedComment.comment_id}:`, err);
 
                     let message = 'Terjadi kesalahan saat menyimpan data.';
-                    if (error instanceof Error) {
-                        message = error.message;
-                    } else if (typeof error === 'string') {
-                        message = error;
+                    if (err instanceof Error) {
+                        message = err.message;
+                    } else if (typeof err === 'string') {
+                        message = err;
                     }
 
                     updateLogEntry(selectedComment.comment_id, 'error', `Komentar dengan ID ${selectedComment.comment_id} gagal ditambahkan ke dataset. ${message}`);
@@ -127,8 +128,8 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
             if (onComplete && updatedComments.length > 0) {
                 onComplete(updatedComments);
             }
-        } catch (error) {
-            console.error('Error processing dataset:', error);
+        } catch (err) {
+            // console.error('Error processing dataset:', err);
             toast.error('Gagal!', {
                 description: 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.',
             });
@@ -182,12 +183,10 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
                 </div>
 
                 <DialogFooter className="border-t pt-4">
-                    <div className="flex w-full justify-end">
-                        <Button onClick={fetchDataset} disabled={loading} className="flex items-center gap-2">
-                            <FileText className="h-4 w-4" />
-                            Tambah ke Dataset
-                        </Button>
-                    </div>
+                    <Button onClick={fetchDataset} disabled={loading} className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Tambah ke Dataset
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

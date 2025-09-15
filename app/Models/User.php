@@ -26,7 +26,9 @@ class User extends Authenticatable
         'google_id',
         'google_token',
         'google_refresh_token',
-        'youtube_permission_granted'
+        'youtube_permission_granted',
+        'delete_account',
+        'scheduled_deletion_at'
     ];
 
     /**
@@ -48,6 +50,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'scheduled_deletion_at' => 'datetime',
             'password' => 'hashed',
             'google_token' => 'encrypted',
             'google_refresh_token' => 'encrypted',
@@ -67,5 +70,21 @@ class User extends Authenticatable
     public function keywords()
     {
         return $this->hasMany(Keyword::class);
+    }
+
+    public function isScheduledForDeletion(): bool
+    {
+        return $this->delete_account &&
+            $this->scheduled_deletion_at &&
+            $this->scheduled_deletion_at > now();
+    }
+
+    public function getDaysUntilDeletion(): ?int
+    {
+        if (!$this->isScheduledForDeletion()) {
+            return null;
+        }
+
+        return now()->diffInDays($this->scheduled_deletion_at);
     }
 }

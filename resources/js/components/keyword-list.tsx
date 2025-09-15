@@ -103,13 +103,13 @@ export default function KeywordList({ analysis_id, data: initialData }: KeywordL
                 <div className="rounded-xl border p-4">
                     <div className="mb-4 flex flex-wrap gap-2">
                         <Button variant="outline" onClick={handleCopy}>
-                            Salin
                             <Copy className="ml-1 size-4" />
+                            Salin
                         </Button>
 
                         <Button variant="outline" onClick={handleReset}>
-                            Reset
                             <RotateCcw className="ml-1 size-4" />
+                            Reset
                         </Button>
 
                         {isAnalysisPage ? (
@@ -120,8 +120,8 @@ export default function KeywordList({ analysis_id, data: initialData }: KeywordL
                             </>
                         ) : (
                             <Button variant="outline" onClick={handleFilter}>
-                                Filter
                                 <Filter className="ml-1 size-4" />
+                                Filter
                             </Button>
                         )}
                     </div>

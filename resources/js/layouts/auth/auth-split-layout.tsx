@@ -42,11 +42,16 @@ export default function AuthSplitLayout({ children, title, description }: AuthLa
                     {children}
                     <div className="flex flex-col items-center gap-2 text-center">
                         <p className="text-muted-foreground text-sm text-balance">
-                            Dengan masuk, Anda menyetujui <br />
+                            Dengan masuk, Anda menyetujui
+                            <br />{' '}
                             <a href="/privacy-policy" className="underline">
                                 Kebijakan Privasi
                             </a>{' '}
-                            kami.
+                            dan{' '}
+                            <a href="/terms-of-service" className="underline">
+                                Ketentuan Layanan
+                            </a>
+                            <br /> kami.
                         </p>
                     </div>
                 </div>

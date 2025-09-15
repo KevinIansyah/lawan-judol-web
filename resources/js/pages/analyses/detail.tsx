@@ -3,13 +3,13 @@ import DataTableGambling from '@/components/data-table-gambling';
 import DataTableNonGambling from '@/components/data-table-non-gambling';
 import Heading from '@/components/heading';
 import KeywordList from '@/components/keyword-list';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VideoMetadata from '@/components/video-metadata';
 import AppLayout from '@/layouts/app-layout';
 import { Analysis, CommentChunk, Keyword, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import { Info } from 'lucide-react';
+import { AlertCircleIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface DetailProps {
@@ -70,12 +70,13 @@ export default function Detail() {
                     </TabsList>
                     <TabsContent value="summary">
                         <Alert className="mb-4">
-                            <Info className="mt-0.5 h-4 w-4 shrink-0" />
+                            <AlertCircleIcon />
+                            <AlertTitle>Informasi Hasil Analisis Komentar YouTube</AlertTitle>
                             <AlertDescription>
-                                <p className="text-muted-foreground text-sm">
-                                    Data komentar dan metadata video berasal dari YouTube Data API. Hasil klasifikasi, label, dan analisis tambahan yang ditampilkan pada halaman ini dihitung secara independen oleh sistem kami dan{' '}
-                                    <span className="font-semibold">bukan merupakan data resmi dari YouTube</span>.
-                                </p>
+                                <ul className="list-outside list-disc text-sm ml-4">
+                                    <li>Data komentar dan metadata video diperoleh secara otomatis melalui YouTube Data API</li>
+                                    <li>Analisis tambahan dilakukan sepenuhnya oleh sistem kami secara independen</li>
+                                </ul>
                             </AlertDescription>
                         </Alert>
 

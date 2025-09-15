@@ -18,7 +18,7 @@ export default function AppearanceToggleDropdown({
     const { appearance, updateAppearance } = useAppearance();
 
     const getCurrentIcon = () => {
-        const baseClass = 'size-4.5';
+        const baseClass = 'size-5 lg:size-4.5';
         switch (appearance) {
             case 'dark':
                 return <Moon className={baseClass} />;

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->mediumText('google_token')->nullable();
             $table->mediumText('google_refresh_token')->nullable();
             $table->boolean('youtube_permission_granted')->default(false);
+            $table->boolean('delete_account')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

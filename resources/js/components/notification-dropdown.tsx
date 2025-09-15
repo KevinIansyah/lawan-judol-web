@@ -63,7 +63,7 @@ export default function NotificationDropdown() {
                     size="icon"
                     className="group relative mr-2 h-9 w-9 cursor-pointer rounded-md"
                 >
-                    <Bell className="size-4.5" />
+                    <Bell className="size-5 lg:size-4.5" />
                     {notifications.some((n) => n.read_at === null) && (
                         <span className="bg-chart-2 absolute right-1.5 bottom-2 h-2 w-2 rounded-full" />
                     )}

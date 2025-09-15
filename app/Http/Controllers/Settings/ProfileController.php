@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Jobs\DeleteUserPermanently;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,18 +38,68 @@ class ProfileController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         $request->validate([
-            'password' => ['required', 'current_password'],
+            'confirmation' => ['required', 'string', function ($attribute, $value, $fail) {
+                if ($value !== 'HAPUS AKUN') {
+                    $fail('Konfirmasi penghapusan tidak sesuai.');
+                }
+            }],
         ]);
 
         $user = $request->user();
 
-        Auth::logout();
+        $user->update([
+            'delete_account' => true,
+            'scheduled_deletion_at' => now()->addDays(7),
+        ]);
 
-        $user->delete();
+        DeleteUserPermanently::dispatch($user->id)->delay(now()->addDays(7))->onQueue('delete_account');
+
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->with('success', 'Akun Anda telah dijadwalkan untuk dihapus dalam 7 hari. Anda dapat login kembali untuk membatalkan penghapusan.');
+    }
+
+
+    public function showCancelDeletion(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user->delete_account || !$user->scheduled_deletion_at) {
+            return redirect()->route('dashboard');
+        }
+
+        $daysRemaining = now()->diffInDays($user->scheduled_deletion_at, false);
+        $hoursRemaining = now()->diffInHours($user->scheduled_deletion_at, false) % 24;
+
+        return Inertia::render('cancel-deletion', [
+            'deletion_info' => [
+                'days_remaining' => max(0, (int) $daysRemaining),
+                'hours_remaining' => max(0, (int) $hoursRemaining),
+                'scheduled_deletion_at' => $user->scheduled_deletion_at->toISOString(),
+                'can_cancel' => $user->scheduled_deletion_at > now(),
+            ]
+        ]);
+    }
+
+    public function cancelDeletion(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($user->delete_account && $user->scheduled_deletion_at > now()) {
+            $user->update([
+                'delete_account' => false,
+                'scheduled_deletion_at' => null,
+            ]);
+
+            $intendedUrl = session('url.intended', route('dashboard'));
+            session()->forget('url.intended');
+
+            return redirect($intendedUrl)->with('success', 'Penghapusan akun berhasil dibatalkan.');
+        }
+
+        return redirect('/')->with('error', 'Tidak ada penghapusan akun yang dapat dibatalkan.');
     }
 }

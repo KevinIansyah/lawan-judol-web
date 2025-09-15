@@ -62,7 +62,7 @@ export default function DialogDeleteAnalysis({ analysis }: DialogDeleteAnalysisP
                 setErrorType(friendlyError.type);
             }
         } catch (err) {
-            console.error('Error delete analysis:', error);
+            // console.error('Error delete analysis:', error);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);
@@ -142,12 +142,10 @@ export default function DialogDeleteAnalysis({ analysis }: DialogDeleteAnalysisP
                     )}
 
                     <DialogFooter className="border-t pt-4">
-                        <div className="flex w-full justify-end">
-                            <Button onClick={handleDelete} variant="destructive" disabled={loadingDelete} className="flex items-center gap-2">
-                                <Trash />
-                                Hapus Analisis
-                            </Button>
-                        </div>
+                        <Button onClick={handleDelete} variant="destructive" disabled={loadingDelete} className="flex items-center gap-2">
+                            <Trash />
+                            Hapus Analisis
+                        </Button>
                     </DialogFooter>
                 </div>
             </DialogContent>

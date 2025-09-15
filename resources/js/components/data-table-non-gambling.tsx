@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { DialogAddDataset } from '@/components/dialog-add-dataset';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Comment } from '@/types';
 import { ColumnDef, ColumnFiltersState, FilterFn, SortingState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
-import { ArrowUpDown, CheckCircle2Icon, FileTextIcon, Info, Loader2 } from 'lucide-react';
+import { AlertCircleIcon, ArrowUpDown, CheckCircle2Icon, FileTextIcon, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -77,14 +78,7 @@ const columns: ColumnDef<Comment>[] = [
 
             return (
                 <div className="flex items-start gap-3">
-                    <img
-                        src={user.profile_url}
-                        alt={user.username}
-                        className="h-6 w-6 flex-shrink-0 rounded-full object-cover"
-                        // onError={(e) => {
-                        //     (e.target as HTMLImageElement).src = '/default-avatar.png';
-                        // }}
-                    />
+                    <img src={user.profile_url} alt={user.username} className="h-6 w-6 flex-shrink-0 rounded-full object-cover" />
                     <div className="min-w-0 flex-1 space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
                             <div className="truncate text-xs font-medium">{user.username.replace(/^@/, '')}</div>
@@ -174,8 +168,8 @@ export default function DataTableNonGambling({ analysis_id, data: apiData, onAdd
             } else {
                 setHasMore(false);
             }
-        } catch (error) {
-            console.error('Error loading chunk:', error);
+        } catch (err) {
+            // console.error('Error loading chunk:', err);
             toast.error('Gagal!', {
                 description: 'Terjadi kesalahan saat memuat data tambahan',
             });
@@ -271,14 +265,17 @@ export default function DataTableNonGambling({ analysis_id, data: apiData, onAdd
 
                 {data.length > 0 && (
                     <Alert>
-                        <Info />
-                        <AlertTitle>
-                            {table.getFilteredSelectedRowModel().rows.length} dari {table.getFilteredRowModel().rows.length} baris dipilih
-                        </AlertTitle>
+                        <AlertCircleIcon />
+                        <AlertTitle>Informasi Data Komentar</AlertTitle>
                         <AlertDescription>
-                            <p>
-                                Menampilkan {data.length} dari total {apiData.total_comments} komentar
-                            </p>
+                            <ul className="ml-4 list-outside list-disc text-sm">
+                                <li>
+                                    Menampilkan {data.length} dari total {apiData.total_comments} komentar
+                                </li>
+                                <li>
+                                    {table.getFilteredSelectedRowModel().rows.length} dari {table.getFilteredRowModel().rows.length} baris dipilih
+                                </li>
+                            </ul>
                         </AlertDescription>
                     </Alert>
                 )}

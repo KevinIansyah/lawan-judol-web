@@ -72,7 +72,7 @@ export default function DialogPublicVideo() {
             }
         } catch (err) {
             console.log(err);
-            console.error('Error fetching video:', err);
+            // console.error('Error fetching video:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);
@@ -129,7 +129,7 @@ export default function DialogPublicVideo() {
                 setErrorType(friendlyError.type);
             }
         } catch (err) {
-            console.error('Error fetching comments:', err);
+            // console.error('Error fetching comments:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);
@@ -183,7 +183,7 @@ export default function DialogPublicVideo() {
                 setErrorType(friendlyError.type);
             }
         } catch (err) {
-            console.error('Error fetching analysis:', err);
+            // console.error('Error fetching analysis:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);
@@ -279,12 +279,10 @@ export default function DialogPublicVideo() {
                     </div>
                 )}
                 <DialogFooter className="border-t pt-4">
-                    <div className="flex w-full justify-end">
-                        <Button onClick={handleProceed} disabled={!videoId.trim() || loadingVideo || loadingComments || loadingAnalysis || !!error} className="flex items-center gap-2">
-                            <Play className="h-4 w-4" />
-                            Analisis Video
-                        </Button>
-                    </div>
+                    <Button onClick={handleProceed} disabled={!videoId.trim() || loadingVideo || loadingComments || loadingAnalysis || !!error} className="flex items-center gap-2">
+                        <Play className="h-4 w-4" />
+                        Analisis Video
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

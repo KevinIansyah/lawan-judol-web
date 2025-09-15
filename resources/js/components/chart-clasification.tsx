@@ -20,7 +20,7 @@ export function ChartClasification({ title = 'Chart Title', description = 'Chart
               { category: 'Bukan Judi', visitors: nonGamblingCount, fill: 'var(--chart-4)' },
           ]
         : [
-              { category: 'Kata Kunci', visitors: keywordCount, fill: 'var(--chart-2)' },
+              { category: 'Kata Kunci', visitors: keywordCount, fill: 'var(--chart-1)' },
               { category: 'kosong', visitors: 0, fill: 'transparent' },
           ];
 

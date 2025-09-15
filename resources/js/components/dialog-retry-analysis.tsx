@@ -67,7 +67,7 @@ export default function DialogRetryAnalysis({ analysis }: DialogRetryAnalysisPro
                 setErrorType(friendlyError.type);
             }
         } catch (err) {
-            console.error('Error retry analysis:', err);
+            // console.error('Error retry analysis:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);
@@ -148,12 +148,10 @@ export default function DialogRetryAnalysis({ analysis }: DialogRetryAnalysisPro
 
                     {!loadingRetry && !error && (
                         <DialogFooter className="border-t pt-4">
-                            <div className="flex w-full justify-end">
-                                <Button onClick={handleRetry} variant="default" className="flex items-center gap-2">
-                                    <RotateCcw className="h-4 w-4" />
-                                    Ulang Analisis
-                                </Button>
-                            </div>
+                            <Button onClick={handleRetry} variant="default" className="flex items-center gap-2">
+                                <RotateCcw className="h-4 w-4" />
+                                Ulang Analisis
+                            </Button>
                         </DialogFooter>
                     )}
                 </div>

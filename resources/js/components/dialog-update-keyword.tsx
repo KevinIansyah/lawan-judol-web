@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ProcessStatusKeyword } from '@/components/process-status-keyword';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -70,15 +71,15 @@ export const DialogUpdateKeyword = ({ selectedCount, analysisId, getSelectedKeyw
                     } else {
                         throw new Error(result.message || 'Unknown error');
                     }
-                } catch (error) {
+                } catch (err) {
                     failed++;
-                    console.error(`Error processing keyword ${selectedKeyword.id}:`, error);
+                    // console.error(`Error processing keyword ${selectedKeyword.id}:`, err);
 
                     let message = 'Terjadi kesalahan saat menyimpan data.';
-                    if (error instanceof Error) {
-                        message = error.message;
-                    } else if (typeof error === 'string') {
-                        message = error;
+                    if (err instanceof Error) {
+                        message = err.message;
+                    } else if (typeof err === 'string') {
+                        message = err;
                     }
 
                     updateLogEntry(`${selectedKeyword.id}`, 'error', `Perubahan kata kunci ${selectedKeyword.keyword} gagal disimpan. ${message}`);
@@ -103,8 +104,8 @@ export const DialogUpdateKeyword = ({ selectedCount, analysisId, getSelectedKeyw
                     description: `${success} perubahan berhasil, ${failed} perubahan gagal disimpan.`,
                 });
             }
-        } catch (error) {
-            console.error('Error processing kamus:', error);
+        } catch (err) {
+            // console.error('Error processing kamus:', err);
             toast.error('Gagal!', {
                 description: 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.',
             });
@@ -132,8 +133,8 @@ export const DialogUpdateKeyword = ({ selectedCount, analysisId, getSelectedKeyw
         >
             <DialogTrigger asChild>
                 <Button variant="outline" disabled={selectedCount === 0}>
-                    {selectedCount === 0 ? 'Simpan' : `Simpan (${selectedCount})`}
                     <Save className="ml-1 size-4" />
+                    {selectedCount === 0 ? 'Simpan' : `Simpan (${selectedCount})`}
                 </Button>
             </DialogTrigger>
             <DialogContent className="flex max-h-[80vh] flex-col overflow-hidden">
@@ -161,12 +162,10 @@ export const DialogUpdateKeyword = ({ selectedCount, analysisId, getSelectedKeyw
                 </div>
 
                 <DialogFooter className="border-t pt-4">
-                    <div className="flex w-full justify-end">
-                        <Button onClick={fetchKeyword} disabled={loading || selectedCount === 0} className="flex items-center gap-2">
-                            <Save className="h-4 w-4" />
-                            Simpan Perubahan
-                        </Button>
-                    </div>
+                    <Button onClick={fetchKeyword} disabled={loading || selectedCount === 0} className="flex items-center gap-2">
+                        <Save className="h-4 w-4" />
+                        Simpan Perubahan
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

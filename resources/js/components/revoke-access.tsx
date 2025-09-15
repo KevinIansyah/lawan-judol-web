@@ -1,9 +1,8 @@
-import { useForm } from '@inertiajs/react';
-import { FormEventHandler, useState } from 'react';
-
 import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useForm } from '@inertiajs/react';
+import { FormEventHandler, useState } from 'react';
 
 export default function RevokeAccess() {
     const { delete: destroy, processing } = useForm();
@@ -26,7 +25,6 @@ export default function RevokeAccess() {
     return (
         <div className="space-y-6">
             <HeadingSmall title="Cabut Akses YouTube" description="Cabut akses aplikasi ke akun YouTube Anda" />
-    
 
             <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
                 <div className="relative space-y-0.5 text-red-600 dark:text-red-100">

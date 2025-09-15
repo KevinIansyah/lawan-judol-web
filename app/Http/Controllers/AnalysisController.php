@@ -80,10 +80,16 @@ class AnalysisController extends Controller
 
     public function destroy(Analysis $analysis)
     {
-        try {
-            $user = Auth::user();
+        $user = Auth::user();
 
+        try {
             if ($analysis->user_id !== $user->id) {
+                Log::warning("Unauthorized analysis deletion attempt", [
+                    'user_id' => $user->id,
+                    'analysis_id' => $analysis->id,
+                    'analysis_owner' => $analysis->user_id
+                ]);
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Anda tidak memiliki izin untuk menghapus analisis ini.',
@@ -91,43 +97,50 @@ class AnalysisController extends Controller
             }
 
             if (in_array($analysis->status, ['on_process', 'queue'])) {
+                Log::info("Analysis deletion blocked - processing status", [
+                    'user_id' => $user->id,
+                    'analysis_id' => $analysis->id,
+                    'status' => $analysis->status
+                ]);
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Analisis sedang diproses dan tidak dapat dihapus.',
                 ], 422);
             }
 
-            $filesToDelete = [];
+            $filesToDelete = array_filter([
+                !empty($analysis->gambling_file_path) ? storage_path('app/public/' . $analysis->gambling_file_path) : null,
+                !empty($analysis->nongambling_file_path) ? storage_path('app/public/' . $analysis->nongambling_file_path) : null,
+                !empty($analysis->keyword_file_path) ? storage_path('app/public/' . $analysis->keyword_file_path) : null
+            ]);
 
-            if (!empty($analysis->gambling_file_path)) {
-                $filesToDelete[] = storage_path('app/public/' . $analysis->gambling_file_path);
-            }
+            $filesDeleted = 0;
+            $filesFailed = 0;
 
-            if (!empty($analysis->nongambling_file_path)) {
-                $filesToDelete[] = storage_path('app/public/' . $analysis->nongambling_file_path);
-            }
-
-            if (!empty($analysis->keyword_file_path)) {
-                $filesToDelete[] = storage_path('app/public/' . $analysis->keyword_file_path);
-            }
-
-
-            DB::transaction(function () use ($analysis, $filesToDelete) {
+            DB::transaction(function () use ($analysis, $filesToDelete, &$filesDeleted, &$filesFailed) {
                 $analysis->delete();
 
                 foreach ($filesToDelete as $filePath) {
                     if (file_exists($filePath)) {
-                        if (!unlink($filePath)) {
-                            Log::warning("Failed to delete file: {$filePath}");
+                        if (unlink($filePath)) {
+                            $filesDeleted++;
+                        } else {
+                            $filesFailed++;
+                            Log::warning("Analysis file deletion failed", [
+                                'file_path' => $filePath,
+                                'analysis_id' => $analysis->id
+                            ]);
                         }
                     }
                 }
             });
 
-            Log::info("Analysis deleted successfully", [
+            Log::info("Analysis deletion completed", [
                 'user_id' => $user->id,
                 'analysis_id' => $analysis->id,
-                'deleted_files' => count($filesToDelete),
+                'files_deleted' => $filesDeleted,
+                'files_failed' => $filesFailed
             ]);
 
             return response()->json([
@@ -135,10 +148,10 @@ class AnalysisController extends Controller
                 'message' => 'Data analisis berhasil dihapus.',
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to delete analysis", [
-                'user_id' => $user->id ?? null,
-                'analysis_id' => $analysis->id ?? null,
-                'error' => $e->getMessage(),
+            Log::error("Analysis deletion failed", [
+                'user_id' => $user->id,
+                'analysis_id' => $analysis->id,
+                'error' => $e->getMessage()
             ]);
 
             return response()->json([

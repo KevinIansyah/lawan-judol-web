@@ -33,7 +33,6 @@ export default function KeywordActions({ data, onCopy, onReset, onSave, onUpload
                 </Button>
             )}
 
-            {/* {onUpload && <DialogAddKeyword data={data} selectedCount={selectedCount} getSelectedKeyword={getSelectedKeyword} onComplete={onComplete} onDataUpdate={onDataUpdate} onRowSelectionReset={onRowSelectionReset} />} */}
             {onUpload && (
                 <Button
                     variant="outline"

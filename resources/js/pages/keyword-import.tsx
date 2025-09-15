@@ -79,9 +79,9 @@ export default function KeywordImport() {
                 setImportResult(page.props.result as ImportResult);
                 reset();
             },
-            onError: (errors) => {
-                console.error('Import error:', errors);
-            },
+            // onError: (err) => {
+            //     console.err('Import error:', errors);
+            // },
         });
     };
 
@@ -104,7 +104,7 @@ export default function KeywordImport() {
             <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
                 <Heading title="Import Kata Kunci" description="Upload file JSON untuk menambahkan kata kunci dalam jumlah banyak ke database." />
 
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2 lg:gap-6">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -176,7 +176,7 @@ export default function KeywordImport() {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                <div className="bg-muted rounded-lg p-4">
+                                <div className="rounded-lg border p-4">
                                     <pre className="overflow-x-auto text-sm">
                                         <code>{jsonExample}</code>
                                     </pre>

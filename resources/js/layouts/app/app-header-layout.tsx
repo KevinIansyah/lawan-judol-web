@@ -32,9 +32,9 @@ export default function AppHeaderLayout({ children, breadcrumbs }: AppHeaderLayo
 
     return (
         <AppShell>
-            <AppHeader breadcrumbs={breadcrumbs} />
+            {url !== '/cancel-deletion' && <AppHeader breadcrumbs={breadcrumbs} />}
             <AppContent>{children}</AppContent>
-            {url !== '/' && <AppFooter />}
+            {url !== '/cancel-deletion' && <AppFooter />}
         </AppShell>
     );
 }

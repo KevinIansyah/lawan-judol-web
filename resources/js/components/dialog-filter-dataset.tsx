@@ -93,7 +93,7 @@ export function DialogFilterDataset({ isOpen, onOpenChange }: DialogFilterDatase
             return console.log(datasetData);
         } catch (err) {
             console.log(err);
-            console.error('Error fetching dataset:', err);
+            // console.error('Error fetching dataset:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);
@@ -196,12 +196,10 @@ export function DialogFilterDataset({ isOpen, onOpenChange }: DialogFilterDatase
                 )}
 
                 <DialogFooter className="border-t pt-4">
-                    <div className="flex w-full justify-end">
-                        <Button onClick={handleDownload} disabled={loadingDownload || !!error || success} className="flex items-center gap-2">
-                            <Download className="h-4 w-4" />
-                            Unduh
-                        </Button>
-                    </div>
+                    <Button onClick={handleDownload} disabled={loadingDownload || !!error || success} className="flex items-center gap-2">
+                        <Download className="h-4 w-4" />
+                        Unduh
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

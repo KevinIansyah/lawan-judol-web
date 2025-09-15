@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ProcessStatusKeyword } from '@/components/process-status-keyword';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -68,15 +69,15 @@ export const DialogAddKeyword = ({ selectedCount, getSelectedKeyword }: DialogAd
                     } else {
                         throw new Error(result.message || 'Unknown error');
                     }
-                } catch (error) {
+                } catch (err) {
                     failed++;
-                    console.error(`Error processing keyword ${selectedKeyword.id}:`, error);
+                    // console.error(`Error processing keyword ${selectedKeyword.id}:`, err);
 
                     let message = 'Terjadi kesalahan saat menyimpan data.';
-                    if (error instanceof Error) {
-                        message = error.message;
-                    } else if (typeof error === 'string') {
-                        message = error;
+                    if (err instanceof Error) {
+                        message = err.message;
+                    } else if (typeof err === 'string') {
+                        message = err;
                     }
 
                     updateLogEntry(`${selectedKeyword.id}`, 'error', `Kata kunci ${selectedKeyword.keyword} gagal ditambahkan ke kamus. ${message}`);
@@ -101,8 +102,8 @@ export const DialogAddKeyword = ({ selectedCount, getSelectedKeyword }: DialogAd
                     description: `${success} berhasil, ${failed} gagal ditambahkan ke kamus.`,
                 });
             }
-        } catch (error) {
-            console.error('Error processing kamus:', error);
+        } catch (err) {
+            // console.error('Error processing kamus:', err);
             toast.error('Gagal!', {
                 description: 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.',
             });
@@ -131,8 +132,8 @@ export const DialogAddKeyword = ({ selectedCount, getSelectedKeyword }: DialogAd
         >
             <DialogTrigger asChild>
                 <Button variant="outline" disabled={selectedCount === 0}>
-                    {selectedCount === 0 ? 'Unggah' : `Unggah (${selectedCount})`}
                     <ArrowUpFromLine className="ml-1 size-4" />
+                    {selectedCount === 0 ? 'Unggah' : `Unggah (${selectedCount})`}
                 </Button>
             </DialogTrigger>
             <DialogContent className="flex max-h-[80vh] flex-col overflow-hidden">
@@ -156,12 +157,10 @@ export const DialogAddKeyword = ({ selectedCount, getSelectedKeyword }: DialogAd
                 </div>
 
                 <DialogFooter className="border-t pt-4">
-                    <div className="flex w-full justify-end">
-                        <Button onClick={fetchKeyword} disabled={loading || selectedCount === 0} className="flex items-center gap-2">
-                            <FileText className="h-4 w-4" />
-                            Tambah ke Kamus
-                        </Button>
-                    </div>
+                    <Button onClick={fetchKeyword} disabled={loading || selectedCount === 0} className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Tambah ke Kamus
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

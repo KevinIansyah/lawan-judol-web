@@ -7,6 +7,7 @@ use App\Http\Controllers\KeywordController;
 use App\Http\Controllers\KeywordImportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicVideoController;
+use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\YourVideoController;
 use App\Http\Controllers\YoutubeController;
 use Illuminate\Support\Facades\Route;
@@ -19,7 +20,7 @@ Route::get('/guides', fn() => Inertia::render('guide'))->name('guides');
 Route::get('/privacy-policy', fn() => Inertia::render('privacy-policy'))->name('privacy-policy');
 Route::get('/terms-of-service', fn() => Inertia::render('terms-of-service'))->name('terms-of-service');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'check_account_deletion_status'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('analysis')->group(function () {
@@ -58,6 +59,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/keyword', [KeywordImportController::class, 'index']);
         Route::post('/keyword', [KeywordImportController::class, 'store']);
     });
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/cancel-deletion', [ProfileController::class, 'showCancelDeletion'])->name('cancel-deletion');
+    Route::post('/cancel-deletion', [ProfileController::class, 'cancelDeletion'])->name('cancel-deletion.confirm');
 });
 
 require __DIR__ . '/settings.php';

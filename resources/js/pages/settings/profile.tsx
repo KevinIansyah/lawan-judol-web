@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,7 +23,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
     const { auth } = usePage<SharedData>().props;
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
+    const { data, setData, patch, errors, processing } = useForm({
         name: auth.user.name,
         email: auth.user.email,
     });
@@ -32,6 +33,18 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
         patch(route('profile.update'), {
             preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Berhasil!', {
+                    description: 'Profil Anda berhasil diperbarui.',
+                });
+            },
+            onError: (err) => {
+                // console.error('Error update profile:', err);
+                toast.error('Gagal!', {
+                    description: 'Terjadi kesalahan, periksa kembali data profil Anda.',
+                });
+                
+            },
         });
     };
 
@@ -76,9 +89,9 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         <div className="flex items-center gap-4">
                             <Button disabled={processing}>Simpan</Button>
 
-                            <Transition show={recentlySuccessful} enter="transition ease-in-out" enterFrom="opacity-0" leave="transition ease-in-out" leaveTo="opacity-0">
+                            {/* <Transition show={recentlySuccessful} enter="transition ease-in-out" enterFrom="opacity-0" leave="transition ease-in-out" leaveTo="opacity-0">
                                 <p className="text-sm text-neutral-600">Tersimpan</p>
-                            </Transition>
+                            </Transition> */}
                         </div>
                     </form>
                 </div>
