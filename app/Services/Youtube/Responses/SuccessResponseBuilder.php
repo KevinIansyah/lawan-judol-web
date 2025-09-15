@@ -2,7 +2,7 @@
 
 namespace App\Services\Youtube\Responses;
 
-use App\Services\YouTube\Formatters\YoutubeFormatter;
+use App\Services\Youtube\Formatters\YoutubeFormatter;
 
 class SuccessResponseBuilder
 {
