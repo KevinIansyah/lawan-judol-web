@@ -4,7 +4,7 @@ namespace App\Services\Youtube\Helpers;
 
 use Illuminate\Http\Client\Response;
 
-class YouTubeErrorHelper
+class YoutubeErrorHelper
 {
   public static function checkQuotaError(Response $response): array
   {
