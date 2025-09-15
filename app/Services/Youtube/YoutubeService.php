@@ -3,13 +3,13 @@
 namespace App\Services\Youtube;
 
 use App\Models\User;
-use App\Services\YouTube\Fetchers\YoutubeFetcher;
-use App\Services\YouTube\Formatters\YoutubeFormatter;
-use App\Services\YouTube\Handlers\CacheHandler;
-use App\Services\YouTube\Handlers\TokenHandler;
-use App\Services\YouTube\Helpers\YouTubeErrorHelper;
-use App\Services\YouTube\Responses\ErrorResponseBuilder;
-use App\Services\YouTube\Responses\SuccessResponseBuilder;
+use App\Services\Youtube\Fetchers\YoutubeFetcher;
+use App\Services\Youtube\Formatters\YoutubeFormatter;
+use App\Services\Youtube\Handlers\CacheHandler;
+use App\Services\Youtube\Handlers\TokenHandler;
+use App\Services\Youtube\Helpers\YouTubeErrorHelper;
+use App\Services\Youtube\Responses\ErrorResponseBuilder;
+use App\Services\Youtube\Responses\SuccessResponseBuilder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
