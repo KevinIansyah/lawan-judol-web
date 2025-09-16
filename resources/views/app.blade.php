@@ -32,10 +32,6 @@
   <link rel="dns-prefetch" href="https://fonts.bunny.net">
   <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600&display=swap" rel="stylesheet" />
 
-  <!-- Preload Critical Resources -->
-  <link rel="preload" href="/assets/images/welcome.svg" as="image" fetchpriority="high">
-  <link rel="preload" href="/assets/images/logo.svg" as="image">
-
   @routes
   @viteReactRefresh
   @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
