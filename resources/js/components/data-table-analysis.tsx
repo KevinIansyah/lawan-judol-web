@@ -147,7 +147,7 @@ export default function DataTableAnalysis({ data, pageIndex, setPageIndex, total
                             </TooltipContent>
                         </Tooltip>
 
-                        <DialogRetryAnalysis analysis={row.original} />
+                        {row.original.status === 'failed' && <DialogRetryAnalysis analysis={row.original} />}
 
                         <DialogDeleteAnalysis analysis={row.original} />
                     </div>

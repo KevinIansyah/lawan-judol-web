@@ -11,7 +11,7 @@ type KeywordActionsProps = {
     onFilter?: () => void;
 };
 
-export default function KeywordActions({ data, onCopy, onReset, onSave, onUpload, onFilter }: KeywordActionsProps) {
+export default function KeywordActions({ onCopy, onReset, onSave, onUpload, onFilter }: KeywordActionsProps) {
     return (
         <div className="mb-4 flex flex-wrap gap-2">
             {onCopy && (
@@ -34,13 +34,7 @@ export default function KeywordActions({ data, onCopy, onReset, onSave, onUpload
             )}
 
             {onUpload && (
-                <Button
-                    variant="outline"
-                    onClick={() => {
-                        console.log('🔖 Save clicked!', data);
-                        onUpload();
-                    }}
-                >
+                <Button variant="outline" onClick={() => onUpload()}>
                     Unggah
                     <ArrowUpFromLine className="ml-1 size-4" />
                 </Button>

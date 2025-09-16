@@ -2,8 +2,10 @@
 import { ProcessStatusKeyword } from '@/components/process-status-keyword';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useProcessLogs } from '@/hooks/use-process-logs';
 import { Keyword } from '@/types';
+import { Tooltip } from '@radix-ui/react-tooltip';
 import { AlertCircle, Save } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -131,12 +133,20 @@ export const DialogUpdateKeyword = ({ selectedCount, analysisId, getSelectedKeyw
                 }
             }}
         >
-            <DialogTrigger asChild>
-                <Button variant="outline" disabled={selectedCount === 0}>
-                    <Save className="ml-1 size-4" />
-                    {selectedCount === 0 ? 'Simpan' : `Simpan (${selectedCount})`}
-                </Button>
-            </DialogTrigger>
+            <Tooltip>
+                <DialogTrigger asChild>
+                    <TooltipTrigger asChild>
+                        <Button variant="outline" disabled={selectedCount === 0}>
+                            <Save className="ml-1 size-4" />
+                            {selectedCount === 0 ? 'Simpan' : `Simpan (${selectedCount})`}
+                        </Button>
+                    </TooltipTrigger>
+                </DialogTrigger>
+                <TooltipContent>
+                    <p>Simpan perubahan kata kunci</p>
+                </TooltipContent>
+            </Tooltip>
+
             <DialogContent className="flex max-h-[80vh] flex-col overflow-hidden">
                 <DialogTitle>Konfirmasi Perubahan Kata Kunci</DialogTitle>
                 <DialogDescription>Kata kunci yang telah Anda ubah atau tambahkan akan disimpan ke dalam kamus.</DialogDescription>

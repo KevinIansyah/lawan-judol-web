@@ -17,7 +17,7 @@ export default function Home() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Beranda" />
             <div className="flex min-h-[calc(100vh-70px)] w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0">
-                <main className="flex w-full max-w-[335px] flex-col-reverse lg:max-w-4xl lg:flex-row py-8">
+                <main className="flex w-full max-w-[335px] flex-col-reverse py-8 lg:max-w-4xl lg:flex-row">
                     <div className="flex-1 flex-col justify-center rounded-br-lg rounded-bl-lg p-6 leading-[20px] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:flex lg:rounded-tl-lg lg:rounded-br-none lg:px-15 dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]">
                         <h1 className="mb-1 text-base font-bold">Bersama Kita Lawan Judi Online</h1>
                         <p className="text-muted-foreground mb-2 text-sm">
@@ -66,7 +66,11 @@ export default function Home() {
                     </div>
 
                     <div className="relative h-full w-full rounded-t-lg bg-red-50 lg:w-[438px] lg:rounded-t-none lg:rounded-r-lg dark:bg-red-700/10">
-                        <img src="/assets/images/welcome.svg" alt="Logo" className="object-cover transition-all duration-750 starting:translate-y-6 starting:opacity-0" />
+                        {/* <img src="/assets/images/welcome.webp" fetchPriority="high" alt="Logo" className="object-cover transition-all duration-750 starting:translate-y-6 starting:opacity-0" /> */}
+                        <picture>
+                            <source srcSet="/assets/images/welcome.webp" type="image/webp" />
+                            <img src="/assets/images/welcome.svg" alt="Logo" fetchPriority="high" className="object-cover transition-all duration-750 starting:translate-y-6 starting:opacity-0" />
+                        </picture>
                         <div className="absolute inset-0 rounded-t-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-t-none lg:rounded-r-lg dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]" />
                     </div>
                 </main>

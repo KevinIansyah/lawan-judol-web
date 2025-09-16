@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useUrlSearch } from '@/hooks/use-url-search';
 import { Keyword, SharedData } from '@/types';
@@ -130,24 +131,45 @@ export default function KeywordDataTable({ data: initialData, pageIndex, setPage
                     <div className="flex w-full justify-center gap-2 md:order-2 md:justify-end">
                         {/* Additional Action Buttons */}
                         <div className="flex-1 md:flex-none">
-                            <Button variant="outline" className="w-full" onClick={handleCopy}>
-                                <Copy className="ml-1 size-4" /> Salin
-                            </Button>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="outline" className="w-full" onClick={handleCopy}>
+                                        <Copy className="ml-1 size-4" /> Salin
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Salin kata kunci</p>
+                                </TooltipContent>
+                            </Tooltip>
                         </div>
                         <div className="flex-1 md:flex-none">
-                            <Button variant="outline" className="w-full" onClick={handleReset}>
-                                <RotateCcw className="ml-1 size-4" />
-                                Reset
-                            </Button>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="outline" className="w-full" onClick={handleReset}>
+                                        <RotateCcw className="ml-1 size-4" />
+                                        Reset
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Reset perubahan kata kunci</p>
+                                </TooltipContent>
+                            </Tooltip>
                         </div>
                         {auth?.user?.role === 'admin' && (
                             <div className="flex-1 md:flex-none">
-                                <Button variant="outline" className="w-full" asChild>
-                                    <Link href="/import/keyword">
-                                        <Upload className="ml-1 size-4" />
-                                        Import
-                                    </Link>
-                                </Button>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="outline" className="w-full" asChild>
+                                            <Link href="/import/keyword">
+                                                <Upload className="ml-1 size-4" />
+                                                Import
+                                            </Link>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Import kata kunci</p>
+                                    </TooltipContent>
+                                </Tooltip>
                             </div>
                         )}
                     </div>

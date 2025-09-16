@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ProcessStatusComment } from '@/components/process-status-comment';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -9,7 +10,6 @@ import { Comment } from '@/types';
 import { AlertCircle, FileText, ShieldEllipsis } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Checkbox } from './ui/checkbox';
 
 interface DialogModerationProps {
     selectedCount: number;

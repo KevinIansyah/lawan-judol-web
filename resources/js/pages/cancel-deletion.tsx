@@ -56,7 +56,6 @@ export default function CancelDeletion({ deletion_info }: CancelDeletionProps) {
             <div className="mx-auto flex h-full w-full max-w-none flex-1 flex-col px-4 py-6 sm:px-6 lg:px-8">
                 <div className="mx-auto w-full max-w-4xl">
                     <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
-                        {/* Main deletion info card - takes 2/3 width on large screens */}
                         <Card className="lg:col-span-2">
                             <CardHeader className="text-center">
                                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
@@ -69,10 +68,8 @@ export default function CancelDeletion({ deletion_info }: CancelDeletionProps) {
                             </CardHeader>
 
                             <CardContent className="space-y-6">
-                                {/* Timeline Info */}
                                 <div className="rounded-lg border p-4">
                                     <div className="mb-3 flex items-center gap-3">
-                                        {/* <Clock className="text-muted-foreground h-5 w-5" /> */}
                                         <h3 className="font-semibold">Informasi Penghapusan</h3>
                                     </div>
                                     <div className="grid gap-3 text-sm">

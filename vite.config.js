@@ -15,5 +15,50 @@ export default defineConfig({
     ],
     esbuild: {
         jsx: 'automatic',
+        minifyIdentifiers: true,
+        minifySyntax: true,
+        minifyWhitespace: true,
+    },
+    build: {
+        target: 'es2020',
+
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'vendor-react': ['react', 'react-dom', 'react/jsx-runtime'],
+                    'vendor-inertia': ['@inertiajs/react'],
+                    'vendor-utils': ['lodash', 'axios', 'clsx'],
+                },
+                chunkFileNames: 'assets/[name]-[hash].js',
+                entryFileNames: 'assets/[name]-[hash].js',
+                assetFileNames: 'assets/[name]-[hash].[ext]',
+            },
+        },
+
+        minify: 'esbuild',
+        cssMinify: true,
+        sourcemap: false,
+        assetsInlineLimit: 2048,
+        chunkSizeWarningLimit: 500,
+    },
+    optimizeDeps: {
+        include: ['react', 'react-dom', '@inertiajs/react'],
+        exclude: [
+            // Exclude heavy dev dependencies
+        ],
+    },
+
+    css: {
+        postcss: {
+            plugins: [
+                // Tambahan optimasi CSS jika diperlukan
+            ],
+        },
+    },
+
+    server: {
+        warmup: {
+            clientFiles: ['resources/js/app.tsx', 'resources/js/pages/**/*.tsx'],
+        },
     },
 });

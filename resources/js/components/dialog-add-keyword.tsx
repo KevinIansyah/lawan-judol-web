@@ -2,6 +2,7 @@
 import { ProcessStatusKeyword } from '@/components/process-status-keyword';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useProcessLogs } from '@/hooks/use-process-logs';
 import { Keyword } from '@/types';
 import { AlertCircle, ArrowUpFromLine, FileText } from 'lucide-react';
@@ -130,12 +131,19 @@ export const DialogAddKeyword = ({ selectedCount, getSelectedKeyword }: DialogAd
                 }
             }}
         >
-            <DialogTrigger asChild>
-                <Button variant="outline" disabled={selectedCount === 0}>
-                    <ArrowUpFromLine className="ml-1 size-4" />
-                    {selectedCount === 0 ? 'Unggah' : `Unggah (${selectedCount})`}
-                </Button>
-            </DialogTrigger>
+            <Tooltip>
+                <DialogTrigger asChild>
+                    <TooltipTrigger asChild>
+                        <Button variant="outline" disabled={selectedCount === 0}>
+                            <ArrowUpFromLine className="ml-1 size-4" />
+                            {selectedCount === 0 ? 'Unggah' : `Unggah (${selectedCount})`}
+                        </Button>
+                    </TooltipTrigger>
+                </DialogTrigger>
+                <TooltipContent>
+                    <p>Unggah kata kunci ke kamus</p>
+                </TooltipContent>
+            </Tooltip>
             <DialogContent className="flex max-h-[80vh] flex-col overflow-hidden">
                 <DialogTitle>Tambah Kata Kunci ke Kamus</DialogTitle>
                 <DialogDescription>Kata kunci yang telah Anda pilih akan diproses dan ditambahkan ke kamus.</DialogDescription>

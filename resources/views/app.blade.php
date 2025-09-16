@@ -8,20 +8,57 @@
   <meta name="description"
     content="LawanJudol adalah platform untuk menganalisis dan membersihkan komentar judi online dari video YouTube Anda secara otomatis.">
 
+  <!-- SEO & Social Meta -->
+  <meta property="og:title" content="{{ config('app.name', 'LawanJudol') }}">
+  <meta property="og:description"
+    content="Platform untuk menganalisis dan membersihkan komentar judi online dari video YouTube Anda secara otomatis.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ url()->current() }}">
+  <meta property="og:image" content="{{ asset('/assets/images/logo.svg') }}">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ config('app.name', 'LawanJudol') }}">
+  <meta name="twitter:description"
+    content="Platform untuk menganalisis dan membersihkan komentar judi online dari video YouTube Anda secara otomatis.">
+
   <title inertia>{{ config('app.name', 'LawanJudol') }}</title>
 
-  <link rel="icon" href="/assets/images/logo.svg" type="image/svg">
-  <link rel="preconnect" href="https://fonts.bunny.net">
-  <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+  <!-- Favicon optimized -->
+  <link rel="icon" href="/assets/images/logo.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/images/logo.svg">
+
+  <!-- Font Optimization -->
+  <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+  <link rel="dns-prefetch" href="https://fonts.bunny.net">
+  <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600&display=swap" rel="stylesheet" />
+
+  <!-- Preload Critical Resources -->
+  <link rel="preload" href="/assets/images/welcome.svg" as="image" fetchpriority="high">
+  <link rel="preload" href="/assets/images/logo.svg" as="image">
 
   @routes
   @viteReactRefresh
   @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
   @inertiaHead
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "{{ config('app.name', 'LawanJudol') }}",
+    "description": "Platform untuk menganalisis dan membersihkan komentar judi online dari video YouTube Anda secara otomatis.",
+    "url": "{{ url('/') }}",
+    "applicationCategory": "WebApplication",
+    "operatingSystem": "Web Browser"
+  }
+  </script>
 </head>
 
-<body class="font-sans antialiased ">
+<body class="font-sans antialiased">
+
   @inertia
+
 </body>
 
 </html>
