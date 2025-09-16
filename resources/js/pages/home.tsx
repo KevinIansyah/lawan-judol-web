@@ -67,7 +67,7 @@ export default function Home() {
                     </div>
 
                     <div className="relative h-full w-full rounded-t-lg bg-red-50 lg:w-[438px] lg:rounded-t-none lg:rounded-r-lg dark:bg-red-700/10">
-                        <img src={welcomeImage} fetchPriority="high" alt="Logo" className="h-full w-full object-cover transition-all duration-750 starting:translate-y-6 starting:opacity-0" />
+                        <img src={welcomeImage} fetchPriority="high" alt="Logo" className="h-full w-full overflow-hidden object-cover transition-all duration-750 starting:translate-y-6 starting:opacity-0 lg:rounded-br-lg lg:rounded-tr-lg" />
 
                         <div className="absolute inset-0 rounded-t-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-t-none lg:rounded-r-lg dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]" />
                     </div>
