@@ -5,10 +5,9 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-class CheckAccountDeletionStatus
+class RedirectIfDeletionScheduled
 {
     public function handle(Request $request, Closure $next): Response
     {
@@ -17,11 +16,6 @@ class CheckAccountDeletionStatus
 
             if ($user->delete_account && $user->scheduled_deletion_at) {
                 if ($user->scheduled_deletion_at <= now()) {
-                    Log::info("User logged out - deletion schedule passed", [
-                        'user_id' => $user->id,
-                        'scheduled_deletion_at' => $user->scheduled_deletion_at->toDateTimeString()
-                    ]);
-
                     Auth::logout();
                     $request->session()->invalidate();
                     $request->session()->regenerateToken();
@@ -29,15 +23,7 @@ class CheckAccountDeletionStatus
                     return redirect('/')->with('error', 'Akun Anda telah dihapus.');
                 }
 
-                $isAllowedRoute = $request->is('cancel-deletion') ||
-                    $request->is('cancel-deletion/*') ||
-                    $request->routeIs('logout');
-
-                if (!$isAllowedRoute) {
-                    session(['url.intended' => $request->url()]);
-                    
-                    return redirect()->route('cancel-deletion');
-                }
+                return redirect()->route('cancel-deletion');
             }
         }
 

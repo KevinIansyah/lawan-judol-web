@@ -13,13 +13,13 @@ use App\Http\Controllers\YoutubeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn() => Inertia::render('home'))->name('home');
-
-Route::get('/keywords', [KeywordController::class, 'index'])->name('keywords.index');
-Route::get('/guides', fn() => Inertia::render('guide'))->name('guides');
-Route::get('/privacy-policy', fn() => Inertia::render('privacy-policy'))->name('privacy-policy');
-Route::get('/terms-of-service', fn() => Inertia::render('terms-of-service'))->name('terms-of-service');
-
+Route::middleware(['redirect_if_deletion_scheduled'])->group(function () {
+    Route::get('/', fn() => Inertia::render('home'))->name('home');
+    Route::get('/keywords', [KeywordController::class, 'index'])->name('keywords.index');
+    Route::get('/guides', fn() => Inertia::render('guide'))->name('guides');
+    Route::get('/privacy-policy', fn() => Inertia::render('privacy-policy'))->name('privacy-policy');
+    Route::get('/terms-of-service', fn() => Inertia::render('terms-of-service'))->name('terms-of-service');
+});
 Route::middleware(['auth', 'verified', 'check_account_deletion_status'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

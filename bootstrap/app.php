@@ -17,7 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'is_admin' => \App\Http\Middleware\IsAdmin::class,
             'ensure_analysis_owner' => \App\Http\Middleware\EnsureAnalysisOwner::class,
-            'check_account_deletion_status' => \App\Http\Middleware\CheckAccountDeletionStatus::class
+            'check_account_deletion_status' => \App\Http\Middleware\CheckAccountDeletionStatus::class,
+            'redirect_if_deletion_scheduled' => \App\Http\Middleware\RedirectIfDeletionScheduled::class
         ]);
 
         $middleware->web(append: [
