@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData, type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
+import welcomeImage from '../../../public/assets/images/welcome.webp';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -66,11 +67,8 @@ export default function Home() {
                     </div>
 
                     <div className="relative h-full w-full rounded-t-lg bg-red-50 lg:w-[438px] lg:rounded-t-none lg:rounded-r-lg dark:bg-red-700/10">
-                        <img src="/assets/images/welcome.webp" fetchPriority="high" alt="Logo" className="object-cover transition-all duration-750 starting:translate-y-6 starting:opacity-0" />
-                        {/* <picture>
-                            <source srcSet="/assets/images/welcome.webp" type="image/webp" />
-                            <img src="/assets/images/welcome.svg" alt="Logo" fetchPriority="high" className="object-cover transition-all duration-750 starting:translate-y-6 starting:opacity-0" />
-                        </picture> */}
+                        <img src={welcomeImage} fetchPriority="high" alt="Logo" className="h-full w-full object-cover transition-all duration-750 starting:translate-y-6 starting:opacity-0" />
+
                         <div className="absolute inset-0 rounded-t-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-t-none lg:rounded-r-lg dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]" />
                     </div>
                 </main>
