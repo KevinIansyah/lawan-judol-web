@@ -29,9 +29,9 @@ export default function Keywords() {
                     title="Kamus Kata Kunci"
                     description={
                         <>
-                            Filter komentar promosi judi online dengan kata kunci. Pelajari caranya{' '}
-                            <a href="https://support.google.com/youtube/answer/100178" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                                di sini!
+                            Filter komentar promosi judi online dengan kata kunci. Pelajari caranya di{' '}
+                            <a href="/guides" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                                sini!
                             </a>
                             .
                         </>

@@ -38,7 +38,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Link className={cn('block w-full', page.url.startsWith('/terms-of-service') && 'bg-primary text-[oklch(1_0_0)]')} href={route('privacy-policy')} as="button" prefetch onClick={cleanup}>
+                    <Link className={cn('block w-full', page.url.startsWith('/terms-of-service') && 'bg-primary text-[oklch(1_0_0)]')} href={route('terms-of-service')} as="button" prefetch onClick={cleanup}>
                         <FileText className="mr-2 dark:text-[oklch(1_0_0)]" />
                         Ketentuan Layanan
                     </Link>

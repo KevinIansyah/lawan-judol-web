@@ -212,9 +212,9 @@ export default function DialogPublicVideo() {
             <DialogContent className="flex min-h-[50vh] flex-col overflow-hidden md:min-h-[40vh] lg:min-h-[45vh] xl:min-h-[65vh]">
                 <DialogTitle>Analisis Video</DialogTitle>
                 <DialogDescription>
-                    Masukkan ID video YouTube yang ingin dianalisis. Pelajari cara menemukan ID video{' '}
-                    <a href="https://support.google.com/youtube/answer/171780?hl=id" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                        di sini!
+                    Masukkan ID video YouTube yang ingin dianalisis. Pelajari cara menemukan ID video di{' '}
+                    <a href="/guides" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                        sini!
                     </a>
                 </DialogDescription>
 
@@ -273,7 +273,7 @@ export default function DialogPublicVideo() {
                 ) : (
                     <div className="flex-1 overflow-hidden">
                         <div className="grid gap-3">
-                            <Label htmlFor="video-id">ID Video Youtube</Label>
+                            <Label htmlFor="video-id">ID Video YouTube</Label>
                             <Input id="video-id" name="video_id" placeholder="9UEFQ90AhE" onChange={(e) => setVideoId(e.target.value)} value={videoId} />
                         </div>
                     </div>
