@@ -36,8 +36,8 @@ export default function TermsOfService() {
             <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
                 <Heading title="Ketentuan Layanan" description="Syarat dan ketentuan penggunaan aplikasi LawanJudol dan layanan yang disediakan." />
 
-                <Card className="pt-0 pb-0">
-                    <CardContent className="space-y-4 p-4 text-sm lg:space-y-6 lg:p-6">
+                <Card>
+                    <CardContent className="space-y-4 text-sm lg:space-y-6">
                         <Select value={language} onValueChange={(val) => setLanguage(val as 'id' | 'en')}>
                             <SelectTrigger className="w-full md:w-[200px]">
                                 <SelectValue placeholder="Pilih bahasa" />

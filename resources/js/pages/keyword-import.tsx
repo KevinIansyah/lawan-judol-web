@@ -1,13 +1,15 @@
 import Heading from '@/components/heading';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
-import { CheckCircle, Download, FileText, Info, Loader2, Upload, UploadIcon, XCircle } from 'lucide-react';
+import { AlertCircleIcon, CheckCircle, Download, FileText, Loader2, Upload, UploadIcon, XCircle } from 'lucide-react';
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -20,7 +22,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface ImportResult {
+interface ImportResultProps {
     success: boolean;
     message: string;
     data?: {
@@ -33,7 +35,7 @@ interface ImportResult {
 
 export default function KeywordImport() {
     const [dragActive, setDragActive] = useState(false);
-    const [importResult, setImportResult] = useState<ImportResult | null>(null);
+    const [importResult, setImportResult] = useState<ImportResultProps | null>(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         json_file: null as File | null,
@@ -76,12 +78,11 @@ export default function KeywordImport() {
         post('/import/keyword', {
             forceFormData: true,
             onSuccess: (page) => {
-                setImportResult(page.props.result as ImportResult);
+                const result = page.props.result as ImportResultProps;
+                setImportResult(result);
                 reset();
+                toast.success('Berhasil!', { description: result?.message });
             },
-            // onError: (err) => {
-            //     console.err('Import error:', errors);
-            // },
         });
     };
 
@@ -117,7 +118,7 @@ export default function KeywordImport() {
                             <div className="space-y-4">
                                 <div className="space-y-2">
                                     <div
-                                        className={`relative rounded-lg border-2 border-dashed p-6 text-center transition-colors ${dragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-muted-foreground/50'}`}
+                                        className={`bg-background relative rounded-lg border-2 border-dashed p-6 text-center transition-colors ${dragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-muted-foreground/50'}`}
                                         onDragEnter={handleDrag}
                                         onDragLeave={handleDrag}
                                         onDragOver={handleDrag}
@@ -146,7 +147,7 @@ export default function KeywordImport() {
                                     {processing ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Mengimport...
+                                            Mengimport
                                         </>
                                     ) : (
                                         <>
@@ -176,7 +177,7 @@ export default function KeywordImport() {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                <div className="rounded-lg border p-4">
+                                <div className="bg-background rounded-lg border p-4">
                                     <pre className="overflow-x-auto text-sm">
                                         <code>{jsonExample}</code>
                                     </pre>
@@ -186,18 +187,18 @@ export default function KeywordImport() {
                                     <h4 className="font-medium">Field yang diperlukan:</h4>
                                     <div className="flex flex-col gap-2">
                                         <div>
-                                            <code className="bg-muted rounded px-1">word</code> - Kata kunci (wajib)
+                                            <Badge variant="secondary">word code</Badge> - Kata kunci (wajib)
                                         </div>
                                         <div>
-                                            <code className="bg-muted rounded px-1">type</code> - Tipe kata kunci (opsional)
+                                            <Badge variant="secondary">type</Badge> - Tipe kata kunci (opsional)
                                         </div>
                                         <div>
-                                            <code className="bg-muted rounded px-1">id_keyword</code> - ID referensi (opsional)
+                                            <Badge variant="secondary">id_keyword</Badge> - ID referensi (opsional)
                                         </div>
                                     </div>
                                 </div>
 
-                                <Button variant="outline" className="w-full">
+                                <Button className="w-full">
                                     <Download className="mr-2 h-4 w-4" />
                                     Download Template JSON
                                 </Button>
@@ -210,28 +211,32 @@ export default function KeywordImport() {
                     <Card className="mt-6">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                {importResult.success ? <CheckCircle className="h-5 w-5 text-green-500" /> : <XCircle className="h-5 w-5 text-red-500" />}
+                                {importResult.success ? <CheckCircle className="text-chart-4 h-5 w-5" /> : <XCircle className="text-primary h-5 w-5" />}
                                 Hasil Import
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Alert>
-                                <Info />
+                                <AlertCircleIcon />
                                 <AlertTitle>Pesan</AlertTitle>
-                                <AlertDescription>{importResult.message}</AlertDescription>
+                                <AlertDescription>
+                                    <ul className="ml-4 list-outside list-disc text-sm">
+                                        <li>{importResult.message}</li>
+                                    </ul>
+                                </AlertDescription>
                             </Alert>
 
                             {importResult.data && (
                                 <div className="mt-4 grid gap-4 md:grid-cols-3">
-                                    <div className="bg-chart-5 rounded-lg p-4 text-center">
+                                    <div className="bg-chart-2 rounded-lg p-4 text-center text-[oklch(1_0_0)]">
                                         <div className="text-2xl font-bold">{importResult.data.total_items}</div>
                                         <div className="text-sm">Total Items</div>
                                     </div>
-                                    <div className="bg-chart-4 rounded-lg p-4 text-center">
+                                    <div className="bg-chart-4 rounded-lg p-4 text-center text-[oklch(0.2178_0_0)]">
                                         <div className="text-2xl font-bold">{importResult.data.inserted}</div>
                                         <div className="text-sm">Berhasil</div>
                                     </div>
-                                    <div className="bg-chart-1 rounded-lg p-4 text-center">
+                                    <div className="bg-chart-1 rounded-lg p-4 text-center text-[oklch(1_0_0)]">
                                         <div className="text-2xl font-bold">{importResult.data.errors}</div>
                                         <div className="text-sm">Error</div>
                                     </div>
@@ -241,12 +246,12 @@ export default function KeywordImport() {
                             {importResult.data?.error_details && importResult.data.error_details.length > 0 && (
                                 <div className="mt-4">
                                     <h4 className="mb-2 font-medium">Detail Error:</h4>
-                                    <div className="bg-muted dark:bg-background mt-4 max-h-[300px] w-full space-y-2 overflow-y-auto rounded-md border p-4 text-sm">
-                                        {importResult.data.error_details.map((error, index) => (
-                                            <div key={index}>
-                                                {index + 1}. <span className="text-primary">{error}</span>
-                                            </div>
-                                        ))}
+                                    <div className="bg-background mt-4 max-h-[300px] w-full space-y-2 overflow-y-auto rounded-md border p-4 text-sm">
+                                        <ol className="ml-4 list-outside list-decimal space-y-1 text-sm">
+                                            {importResult.data.error_details.map((error) => (
+                                                <li>{error}</li>
+                                            ))}
+                                        </ol>
                                     </div>
                                 </div>
                             )}

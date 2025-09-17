@@ -24,7 +24,7 @@
   <title inertia>{{ config('app.name', 'LawanJudol') }}</title>
 
   <!-- Critical Resource Preloads -->
-  <link rel="preload" href="{{ asset('assets/images/welcome.webp') }}" as="image" type="image/webp">
+  {{-- <link rel="preload" href="{{ asset('assets/images/welcome.webp') }}" as="image" type="image/webp"> --}}
 
   <!-- Favicon optimized -->
   <link rel="icon" href="/assets/images/logo.svg" type="image/svg+xml">

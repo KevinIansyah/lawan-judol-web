@@ -285,10 +285,8 @@ export default function DataTableGambling({ analysis_id, data: apiData, onAddDat
                                 <li>
                                     {table.getFilteredSelectedRowModel().rows.length} dari {table.getFilteredRowModel().rows.length} baris dipilih
                                 </li>
-                                <li>Ada {draftCount} komentar draft yang menunggu moderasi</li>
+                                {url.startsWith('/analysis/your-videos') && draftCount > 0 && <li>Ada {draftCount} komentar draft yang menunggu moderasi</li>}
                             </ul>
-
-                            {/* {url.startsWith('/analysis/your-videos') && draftCount > 0 && <Badge className="bg-chart-3 mt-2 text-[oklch(0.2178_0_0)]">Ada {draftCount} komentar draft yang menunggu moderasi</Badge>} */}
                         </AlertDescription>
                     </Alert>
                 )}

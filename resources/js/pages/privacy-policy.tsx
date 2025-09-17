@@ -36,8 +36,8 @@ export default function PrivacyPolicy() {
             <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
                 <Heading title="Kebijakan Privasi" description="Penjelasan mengenai bagaimana LawanJudol mengelola dan melindungi data pribadi pengguna." />
 
-                <Card className="pt-0 pb-0">
-                    <CardContent className="space-y-4 p-4 text-sm lg:space-y-6 lg:p-6">
+                <Card>
+                    <CardContent className="space-y-4 text-sm lg:space-y-6">
                         <Select value={language} onValueChange={(val) => setLanguage(val as 'id' | 'en')}>
                             <SelectTrigger className="w-full md:w-[200px]">
                                 <SelectValue placeholder="Pilih bahasa" />
@@ -105,7 +105,6 @@ export default function PrivacyPolicy() {
                                         <li>Memfasilitasi pengguna dalam melakukan moderasi komentar secara langsung melalui aplikasi.</li>
                                         <li>Menyediakan dashboard analitik dan wawasan statistik terkait aktivitas komentar pada video pengguna.</li>
                                         <li>Meningkatkan kualitas layanan dan mengembangkan fitur baru.</li>
-                                       
                                     </ul>
                                     <blockquote className="border-muted text-muted-foreground mt-3 border-l-4 pl-4">Kami tidak menggunakan data Anda untuk tujuan iklan, pemasaran komersial, atau penjualan kepada pihak ketiga di luar ruang lingkup aplikasi.</blockquote>
                                 </div>
@@ -344,7 +343,6 @@ export default function PrivacyPolicy() {
                                         <li>Enable you to moderate comments directly through the application.</li>
                                         <li>Provide analytics dashboard and statistical insights related to comment activity on your videos.</li>
                                         <li>Improve service quality and develop new features.</li>
-                                       
                                     </ul>
                                     <blockquote className="border-muted text-muted-foreground mt-3 border-l-4 pl-4">We do not use your data for advertising, commercial marketing, or selling to third parties outside the scope of this application.</blockquote>
                                 </div>
