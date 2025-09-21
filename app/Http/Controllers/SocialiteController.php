@@ -28,7 +28,7 @@ class SocialiteController extends Controller
                 'https://www.googleapis.com/auth/youtube.force-ssl'
             ])->with([
                 'access_type' => 'offline',
-                'include_granted_scopes' => 'true',
+                // 'include_granted_scopes' => 'true',
             ])
             ->redirect();
         // return Socialite::driver('google')
