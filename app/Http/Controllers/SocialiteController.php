@@ -21,22 +21,23 @@ class SocialiteController extends Controller
 
     public function redirect()
     {
-        // return Socialite::driver('google')
-        //     ->scopes([
-        //         'email',
-        //         'profile',
-        //         'https://www.googleapis.com/auth/youtube.force-ssl'
-        //     ])->with([
-        //         'access_type' => 'offline',
-        //     ])
-        //     ->redirect();
         return Socialite::driver('google')
-            ->scopes(['email', 'profile'])
-            ->with([
+            ->scopes([
+                'email',
+                'profile',
+                'https://www.googleapis.com/auth/youtube.force-ssl'
+            ])->with([
                 'access_type' => 'offline',
                 'include_granted_scopes' => 'true',
             ])
             ->redirect();
+        // return Socialite::driver('google')
+        //     ->scopes(['email', 'profile'])
+        //     ->with([
+        //         'access_type' => 'offline',
+        //         'include_granted_scopes' => 'true',
+        //     ])
+        //     ->redirect();
     }
 
     public function callback(Request $request)
