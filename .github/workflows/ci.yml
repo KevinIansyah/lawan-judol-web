@@ -91,7 +91,7 @@ jobs:
       #   run: ./vendor/bin/pest
 
   # ==========================
-  # 3. Deploy (Only on main)
+  # 3. Deploy (Only on main branch)
   # ==========================
   deploy:
     runs-on: ubuntu-latest
