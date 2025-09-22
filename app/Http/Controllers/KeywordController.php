@@ -5,12 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Analysis;
 use App\Models\Keyword;
 use Illuminate\Database\QueryException;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 
 class KeywordController extends Controller

@@ -292,19 +292,19 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                     </NavigationMenuItem>
 
                                     <NavigationMenuItem className="relative flex h-full items-center">
-                                        <Link href="/privacy-policy" className={cn(navigationMenuTriggerStyle(), page.url === '#' && activeItemStyles, 'h-9 px-3')}>
+                                        <Link href="/privacy-policy" className={cn(navigationMenuTriggerStyle(), page.url === '/privacy-policy' && activeItemStyles, 'h-9 px-3')}>
                                             <FileKey className="mr-2 h-4 w-4" />
                                             Kebijakan Privasi
                                         </Link>
-                                        {page.url === '#' && <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>}
+                                        {page.url === '/privacy-policy' && <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>}
                                     </NavigationMenuItem>
 
                                     <NavigationMenuItem className="relative flex h-full items-center">
-                                        <Link href="/terms-of-service" className={cn(navigationMenuTriggerStyle(), page.url === '#' && activeItemStyles, 'h-9 px-3')}>
+                                        <Link href="/terms-of-service" className={cn(navigationMenuTriggerStyle(), page.url === '/terms-of-service' && activeItemStyles, 'h-9 px-3')}>
                                             <FileText className="mr-2 h-4 w-4" />
                                             Ketentuan Layanan
                                         </Link>
-                                        {page.url === '#' && <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>}
+                                        {page.url === '/terms-of-service' && <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>}
                                     </NavigationMenuItem>
 
                                     {/* <NavigationMenuItem className="relative flex h-full items-center">

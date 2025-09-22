@@ -23,7 +23,7 @@ export default function Guides() {
                     <CardContent className="space-y-6">
                         <Accordion type="single" collapsible className="w-full" defaultValue="item-1">
                             <AccordionItem value="item-1">
-                                <AccordionTrigger className="border-t text-sm">Cara menggunakan fitur analisis video publik</AccordionTrigger>
+                                <AccordionTrigger className="border-t text-left text-sm">Cara menggunakan fitur analisis video publik</AccordionTrigger>
                                 <AccordionContent className="flex flex-col gap-4 text-balance">
                                     <ol className="ml-4 list-outside list-decimal space-y-2 text-sm">
                                         <li>
@@ -41,7 +41,7 @@ export default function Guides() {
                                         <li>Tekan tombol "Tambah Analisis"</li>
                                         <li>
                                             Masukkan ID video YouTube:
-                                            <ul className="mt-1 ml-6 list-disc space-y-1">
+                                            <ul className="mt-1 ml-5 list-outside list-disc space-y-1">
                                                 <li>
                                                     Jika menggunakan YouTube browser, ID video adalah <code className="text-primary">9_ZcmpZ35Mk</code> pada link: <br />
                                                     <code className="text-primary">https://www.youtube.com/watch?v=9_ZcmpZ35Mk</code>
@@ -58,7 +58,7 @@ export default function Guides() {
                                 </AccordionContent>
                             </AccordionItem>
                             <AccordionItem value="item-2">
-                                <AccordionTrigger className="text-sm">Cara menggunakan fitur analisis video Anda</AccordionTrigger>
+                                <AccordionTrigger className="text-left text-sm">Cara menggunakan fitur analisis video Anda</AccordionTrigger>
                                 <AccordionContent className="flex flex-col gap-4 text-balance">
                                     <ol className="ml-4 list-outside list-decimal space-y-2 text-sm">
                                         <li>
@@ -81,7 +81,7 @@ export default function Guides() {
                                 </AccordionContent>
                             </AccordionItem>
                             <AccordionItem value="item-3">
-                                <AccordionTrigger className="text-sm">Cara melakukan moderasi komentar</AccordionTrigger>
+                                <AccordionTrigger className="text-left text-sm">Cara melakukan moderasi komentar</AccordionTrigger>
                                 <AccordionContent className="flex flex-col gap-4 text-balance">
                                     <ol className="ml-4 list-outside list-decimal space-y-2 text-sm">
                                         <li>
@@ -109,7 +109,7 @@ export default function Guides() {
                                 </AccordionContent>
                             </AccordionItem>
                             <AccordionItem value="item-4">
-                                <AccordionTrigger className="text-sm">Cara menambahkan kata kunci ke pengaturan channel YouTube (moderasi: kata yang diblokir)</AccordionTrigger>
+                                <AccordionTrigger className="text-left text-sm">Cara menambahkan kata kunci ke pengaturan channel YouTube (moderasi: kata yang diblokir)</AccordionTrigger>
                                 <AccordionContent className="flex flex-col gap-4 text-balance">
                                     <ol className="ml-4 list-outside list-decimal space-y-2 text-sm">
                                         <li>
