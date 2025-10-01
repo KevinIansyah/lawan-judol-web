@@ -39,7 +39,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 });
             },
             onError: (err) => {
-                // console.error('Error update profile:', err);
                 toast.error('Gagal!', {
                     description: 'Terjadi kesalahan, periksa kembali data profil Anda.',
                 });

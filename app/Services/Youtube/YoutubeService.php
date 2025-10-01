@@ -3,6 +3,7 @@
 namespace App\Services\Youtube;
 
 use App\Models\User;
+use App\Services\QuotaService;
 use App\Services\Youtube\Fetchers\YoutubeFetcher;
 use App\Services\Youtube\Formatters\YoutubeFormatter;
 use App\Services\Youtube\Handlers\CacheHandler;
@@ -24,6 +25,7 @@ class YoutubeService
   protected $youtubeErrorHelper;
   protected $errorResponseBuilder;
   protected $successResponseBuilder;
+  protected $quotaService;
 
   public function __construct(
     TokenHandler $tokenHandler,
@@ -33,6 +35,7 @@ class YoutubeService
     YoutubeErrorHelper $youtubeErrorHelper,
     ErrorResponseBuilder $errorResponseBuilder,
     SuccessResponseBuilder $successResponseBuilder,
+    QuotaService $quotaService,
   ) {
     $this->tokenHandler = $tokenHandler;
     $this->cacheHandler = $cacheHandler;
@@ -41,6 +44,7 @@ class YoutubeService
     $this->youtubeErrorHelper = $youtubeErrorHelper;
     $this->errorResponseBuilder = $errorResponseBuilder;
     $this->successResponseBuilder = $successResponseBuilder;
+    $this->quotaService = $quotaService;
   }
 
   public function getVideoById(User $user, string $videoId): array
@@ -104,6 +108,9 @@ class YoutubeService
         'title' => $video['title']
       ]);
 
+      // Track quota: snippet = 2 units
+      $this->quotaService->trackYoutubeQuota($user, 2);
+
       return $this->successResponseBuilder->buildVideoSuccess($video);
     } catch (\Exception $e) {
       Log::error("Error fetching video", [
@@ -159,6 +166,9 @@ class YoutubeService
 
         return $this->errorResponseBuilder->buildUserVideosError('Terjadi kesalahan saat mengambil data channel. Silakan coba beberapa saat lagi.');
       }
+
+      // Track quota: id (0) + contentDetails (2) = 2 units
+      $this->quotaService->trackYoutubeQuota($user, 2);
 
       return $tokenResult['response']->json();
     } catch (\Exception $e) {
@@ -233,6 +243,9 @@ class YoutubeService
           $nextPageToken = $data['nextPageToken'] ?? null;
           $requestCount++;
 
+          // Track quota per request: snippet = 2 units
+          $this->quotaService->trackYoutubeQuota($user, 2);
+
           if ($nextPageToken) {
             usleep(config('youtube.api.request_delay_microseconds'));
           }
@@ -266,6 +279,7 @@ class YoutubeService
         'user_id' => $user->id,
         'video_count' => $videoCount,
         'request_count' => $requestCount,
+        'total_quota_used' => 2 + ($requestCount * 2), // getUserChannel + playlist requests
         'duration_seconds' => now()->diffInSeconds($startTime),
         'cache_hours' => config('youtube.cache.hours')
       ]);
@@ -330,6 +344,9 @@ class YoutubeService
 
           $nextPageToken = $data['nextPageToken'] ?? null;
           $requestCount++;
+
+          // Track quota per request: snippet = 2 units
+          $this->quotaService->trackYoutubeQuota($user, 2);
 
           if ($nextPageToken) {
             usleep(config('youtube.api.request_delay_microseconds'));
@@ -401,6 +418,7 @@ class YoutubeService
         'video_id' => $videoId,
         'comment_count' => $commentCount,
         'request_count' => $requestCount,
+        'total_quota_used' => $requestCount * 2,
         'filename' => $filename,
         'duration_seconds' => now()->diffInSeconds($startTime)
       ]);
@@ -474,11 +492,15 @@ class YoutubeService
         );
       }
 
+      // Track quota: write operation = 50 units
+      $this->quotaService->trackYoutubeQuota($user, 50);
+
       Log::info("Comment moderated successfully", [
         'user_id' => $user->id,
         'comment_id' => $commentId,
+        'quota_used' => 50
       ]);
-      
+
       return $this->successResponseBuilder->buildModerationCommentSuccess($commentId);
     } catch (\Exception $e) {
       Log::error("Error during comment moderation", [

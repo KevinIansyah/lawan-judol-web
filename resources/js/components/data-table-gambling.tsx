@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { DialogAddDataset } from '@/components/dialog-add-dataset';
 import { DialogModeration } from '@/components/dialog-moderation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -172,10 +171,10 @@ export default function DataTableGambling({ analysis_id, data: apiData, onAddDat
             } else {
                 setHasMore(false);
             }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
-            // console.error('Error loading chunk:', err);
             toast.error('Gagal!', {
-                description: 'Terjadi kesalahan saat memuat data tambahan',
+                description: 'Terjadi kesalahan saat memuat data tambahan. Silahkan coba lagi.',
             });
         }
 

@@ -52,15 +52,25 @@ export default function DialogPublicVideo() {
                 credentials: 'same-origin',
             });
 
-            if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                const friendlyError = getUserFriendlyError(errorResponse.message, response.status);
+            const result = await response.json();
+
+            if (result.quota_exceeded) {
+                const friendlyError = getUserFriendlyError('Kuota YouTube Data API telah habis. Silakan coba lagi besok.');
                 setError(friendlyError.message);
                 setErrorType(friendlyError.type);
+
                 return;
             }
 
-            const videoData: ApiResponseVideo = await response.json();
+            if (!response.ok) {
+                const friendlyError = getUserFriendlyError(result.message, response.status);
+                setError(friendlyError.message);
+                setErrorType(friendlyError.type);
+
+                return;
+            }
+
+            const videoData: ApiResponseVideo = result;
 
             if (videoData.success) {
                 setLoadingComments(true);
@@ -71,8 +81,6 @@ export default function DialogPublicVideo() {
                 setErrorType(friendlyError.type);
             }
         } catch (err) {
-            console.log(err);
-            // console.error('Error fetching video:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);
@@ -98,15 +106,25 @@ export default function DialogPublicVideo() {
                 credentials: 'same-origin',
             });
 
-            if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                const friendlyError = getUserFriendlyError(errorResponse.message, response.status);
+            const result = await response.json();
+
+            if (result.quota_exceeded) {
+                const friendlyError = getUserFriendlyError('Kuota YouTube Data API telah habis. Silakan coba lagi besok.');
                 setError(friendlyError.message);
                 setErrorType(friendlyError.type);
+
                 return;
             }
 
-            const commentData: ApiResponseComment = await response.json();
+            if (!response.ok) {
+                const friendlyError = getUserFriendlyError(result.message, response.status);
+                setError(friendlyError.message);
+                setErrorType(friendlyError.type);
+
+                return;
+            }
+
+            const commentData: ApiResponseComment = result;
 
             if (commentData.success && videoData.video) {
                 const mergedData = {
@@ -129,7 +147,6 @@ export default function DialogPublicVideo() {
                 setErrorType(friendlyError.type);
             }
         } catch (err) {
-            // console.error('Error fetching comments:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);
@@ -158,15 +175,17 @@ export default function DialogPublicVideo() {
                 credentials: 'same-origin',
             });
 
+            const result = await response.json();
+
             if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                const friendlyError = getUserFriendlyError(errorResponse.message, response.status);
+                const friendlyError = getUserFriendlyError(result.message, response.status);
                 setError(friendlyError.message);
                 setErrorType(friendlyError.type);
+
                 return;
             }
 
-            const analysisData: ApiResponseAnalysis = await response.json();
+            const analysisData: ApiResponseAnalysis = result;
 
             if (analysisData.success) {
                 setVideoId('');
@@ -183,7 +202,6 @@ export default function DialogPublicVideo() {
                 setErrorType(friendlyError.type);
             }
         } catch (err) {
-            // console.error('Error fetching analysis:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { type ClassValue, clsx } from 'clsx';
 import { AlertCircle, WifiOff } from 'lucide-react';
 import React, { ReactNode } from 'react';
@@ -40,38 +41,38 @@ export function getUserFriendlyError(error: unknown, statusCode?: number): Frien
         };
     }
 
-    switch (statusCode) {
-        case 401:
-            return {
-                message: 'Sesi Anda telah berakhir. Silakan login ulang.',
-                type: 'validation',
-            };
-        case 500:
-            return {
-                message: 'Terjadi kesalahan pada server. Tim kami akan segera memperbaikinya.',
-                type: 'server',
-            };
-    }
+    // switch (statusCode) {
+    //     case 401:
+    //         return {
+    //             message: 'Sesi Anda telah berakhir. Silakan login ulang.',
+    //             type: 'validation',
+    //         };
+    //     case 500:
+    //         return {
+    //             message: 'Terjadi kesalahan pada server. Tim kami akan segera memperbaikinya.',
+    //             type: 'server',
+    //         };
+    // }
 
     let message = 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.';
 
     if (typeof error === 'string') {
         const lower = error.toLowerCase();
         const isSensitive =
-            lower.includes('exception') || // pesan error dari PHP/Laravel/Node
-            lower.includes('call to') || // error method/function tidak ditemukan
-            lower.includes('undefined') || // error JS/TS runtime
-            lower.includes('sql') || // query atau error database
-            lower.includes('stack') || // stack trace
-            lower.includes('trace') || // trace detail error
-            lower.includes('not found') || // resource atau route hilang
-            lower.includes('could not') || // indikasi internal error
-            lower.includes('failed') || // indikasi internal error
-            lower.includes('permission') || // info izin yang sensitif
-            lower.includes('forbidden') || // status 403
-            lower.includes('internal server') || // status 500
-            lower.includes('route') || // info route Laravel
-            lower.includes('file'); // info file path server
+            lower.includes('exception') ||          // pesan error dari PHP/Laravel/Node
+            lower.includes('call to') ||            // error method/function tidak ditemukan
+            lower.includes('undefined') ||          // error JS/TS runtime
+            lower.includes('sql') ||                // query atau error database
+            lower.includes('stack') ||              // stack trace
+            lower.includes('trace') ||              // trace detail error
+            lower.includes('not found') ||          // resource atau route hilang
+            lower.includes('could not') ||          // indikasi internal error
+            lower.includes('failed') ||             // indikasi internal error
+            lower.includes('permission') ||         // info izin yang sensitif
+            lower.includes('forbidden') ||          // status 403
+            lower.includes('internal server') ||    // status 500
+            lower.includes('route') ||              // info route Laravel
+            lower.includes('file');                 // info file path server
 
         if (!isSensitive) {
             message = error;

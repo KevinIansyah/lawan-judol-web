@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Analysis;
 use App\Models\Dataset;
 use App\Models\Keyword;
+use App\Services\QuotaService;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,15 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
+    protected $quotaService;
+
+    public function __construct(
+        QuotaService $quotaService
+    ) {
+        $this->quotaService = $quotaService;
+    }
+
+
     public function index()
     {
         $user = Auth::user();
@@ -46,6 +56,8 @@ class DashboardController extends Controller
             return $result;
         };
 
+        $quota = $this->quotaService->getQuotaInfo($user);
+
         return Inertia::render('dashboard', [
             'dashboard' => [
                 'dataset_count' => $datasetCount,
@@ -62,6 +74,7 @@ class DashboardController extends Controller
                     'one_month' => $generateChartData('public', 30),
                     'seven_days' => $generateChartData('public', 7),
                 ],
+                'quota' => $quota,
             ]
         ]);
     }

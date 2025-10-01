@@ -26,7 +26,6 @@ export default function DeleteUser() {
         destroy(route('profile.destroy'), {
             preserveScroll: true,
             onSuccess: () => closeModal(),
-            onError: () => console.log('Gagal menghapus akun'),
             onFinish: () => reset(),
         });
     };

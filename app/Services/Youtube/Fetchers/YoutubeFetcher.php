@@ -19,7 +19,7 @@ class YoutubeFetcher
     return Http::withHeaders([
       'Authorization' => 'Bearer ' . $googleToken,
     ])->timeout(60)->get($this->baseUrl . '/videos', [
-      'part' => 'id,snippet,contentDetails,statistics',
+      'part' => 'snippet',
       'id' => $videoId,
     ]);
   }
@@ -29,7 +29,7 @@ class YoutubeFetcher
     return Http::withHeaders([
       'Authorization' => 'Bearer ' . $googleToken,
     ])->timeout(60)->get($this->baseUrl . '/channels', [
-      'part' => 'id,snippet,contentDetails,statistics',
+      'part' => 'id,contentDetails',
       'mine' => 'true'
     ]);
   }
@@ -37,7 +37,7 @@ class YoutubeFetcher
   public function fetchVideosFromPlaylist(string $googleToken, string $uploadsPlaylistId, ?string $nextPageToken = null): Response
   {
     $params = [
-      'part' => 'snippet,contentDetails',
+      'part' => 'snippet',
       'playlistId' => $uploadsPlaylistId,
       'maxResults' => config('youtube.api.videos_max_results_per_request'),
     ];

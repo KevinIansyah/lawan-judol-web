@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ProcessStatusComment } from '@/components/process-status-comment';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -31,6 +30,7 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
             toast('Informasi!', {
                 description: 'Silakan pilih minimal satu komentar untuk melanjutkan.',
             });
+
             return;
         }
 
@@ -64,15 +64,15 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
                         }),
                     });
 
-                    if (!response.ok) {
-                        const errorBody = await response.json();
-                        throw new Error(errorBody.message || `HTTP error! status: ${response.status}`);
-                    }
-
                     const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.message || `HTTP error! status: ${response.status}`);
+                    }
 
                     if (result.success) {
                         success++;
+
                         updateLogEntry(selectedComment.comment_id, 'success', `Komentar dengan ID ${selectedComment.comment_id} berhasil ditambahkan ke dataset.`);
 
                         const updatedComment = { ...selectedComment, status: 'dataset' as const };
@@ -82,9 +82,9 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
                     }
                 } catch (err) {
                     failed++;
-                    // console.error(`Error processing comment ${selectedComment.comment_id}:`, err);
 
-                    let message = 'Terjadi kesalahan saat menyimpan data.';
+                    let message = 'Terjadi kesalahan saat menyimpan data. Silahkan coba lagi.';
+
                     if (err instanceof Error) {
                         message = err.message;
                     } else if (typeof err === 'string') {
@@ -128,8 +128,8 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
             if (onComplete && updatedComments.length > 0) {
                 onComplete(updatedComments);
             }
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
-            // console.error('Error processing dataset:', err);
             toast.error('Gagal!', {
                 description: 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.',
             });

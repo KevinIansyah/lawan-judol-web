@@ -37,6 +37,7 @@ Route::middleware(['auth', 'verified', 'check_account_deletion_status'])->group(
         Route::get('/videos', [YoutubeController::class, 'getVideos'])->name('videos');
         Route::get('/comments', [YoutubeController::class, 'getComments'])->name('comments');
         Route::post('/moderation', [YoutubeController::class, 'postModerationComment'])->name('moderation');
+        Route::get('/quota', [YoutubeController::class, 'getQuotaInfo'])->name('quota');
     });
 
     Route::prefix('dataset')->middleware('is_admin')->group(function () {

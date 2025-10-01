@@ -1,7 +1,7 @@
 import { DialogFilterDataset } from '@/components/dialog-filter-dataset';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,7 +11,7 @@ import { useUrlSearch } from '@/hooks/use-url-search';
 import { formatDate } from '@/lib/utils';
 import { Dataset } from '@/types';
 import { ColumnDef, VisibilityState, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { CheckCircle2Icon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ColumnsIcon, MoreVerticalIcon } from 'lucide-react';
+import { CheckCircle2Icon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ColumnsIcon } from 'lucide-react';
 import { useState } from 'react';
 
 import dayjs from 'dayjs';
@@ -30,7 +30,7 @@ interface DataTableProps {
     initialFilters?: {
         search?: string;
     };
-};
+}
 
 export default function DataTableDataset({ data, pageIndex, setPageIndex, totalPages, totalItems, perPage, initialFilters = {} }: DataTableProps) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -96,24 +96,6 @@ export default function DataTableDataset({ data, pageIndex, setPageIndex, totalP
                 </Badge>
             ),
         },
-        // {
-        //     id: 'actions',
-        //     header: 'Aksi',
-        //     cell: () => (
-        //         <DropdownMenu>
-        //             <DropdownMenuTrigger asChild>
-        //                 <Button variant="ghost" className="text-muted-foreground data-[state=open]:bg-primary flex size-8 data-[state=open]:text-white" size="icon">
-        //                     <MoreVerticalIcon />
-        //                     <span className="sr-only">Open menu</span>
-        //                 </Button>
-        //             </DropdownMenuTrigger>
-        //             <DropdownMenuContent align="end" className="w-32">
-        //                 <DropdownMenuItem>Edit</DropdownMenuItem>
-        //                 <DropdownMenuItem>Hapus</DropdownMenuItem>
-        //             </DropdownMenuContent>
-        //         </DropdownMenu>
-        //     ),
-        // },
     ];
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,15 +123,12 @@ export default function DataTableDataset({ data, pageIndex, setPageIndex, totalP
     return (
         <div className="flex w-full flex-col justify-start gap-4">
             <div className="relative flex flex-col gap-4 overflow-auto">
-                {/* Toolbar Section */}
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                     <div className="flex w-full justify-center gap-2 md:order-2 md:justify-end">
-                        {/* Filter Dialog */}
                         <div className="flex-1 md:flex-none">
                             <DialogFilterDataset isOpen={isDialogOpen} onOpenChange={setIsDialogOpen} />
                         </div>
 
-                        {/* Column Visibility Toggle */}
                         <div className="flex-1 md:flex-none">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -174,11 +153,9 @@ export default function DataTableDataset({ data, pageIndex, setPageIndex, totalP
                         </div>
                     </div>
 
-                    {/* Search Input */}
                     <Input placeholder="Cari komentar atau label (judol/non_judol)..." value={searchValue} onChange={handleSearchChange} className="max-w-sm md:order-1" />
                 </div>
 
-                {/* Table Section */}
                 <div className="overflow-hidden rounded-lg border">
                     <Table>
                         <TableHeader className="bg-muted sticky top-0 z-10">
@@ -214,14 +191,12 @@ export default function DataTableDataset({ data, pageIndex, setPageIndex, totalP
                     </Table>
                 </div>
 
-                {/* Pagination Section */}
                 <div className="flex items-center justify-between px-4">
                     <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
                         Menampilkan {Math.min(pageIndex * perPage + 1, totalItems)} sampai {Math.min((pageIndex + 1) * perPage, totalItems)} dari {totalItems} hasil
                         {searchValue && <span className="ml-1">untuk "{searchValue}"</span>}
                     </div>
                     <div className="flex w-full items-center gap-8 lg:w-fit">
-                        {/* Page Size Selector */}
                         <div className="hidden items-center gap-2 lg:flex">
                             <Label htmlFor="rows-per-page" className="text-sm font-medium">
                                 Baris per halaman
@@ -240,12 +215,10 @@ export default function DataTableDataset({ data, pageIndex, setPageIndex, totalP
                             </Select>
                         </div>
 
-                        {/* Page Info */}
                         <div className="flex w-fit items-center justify-center text-sm font-medium">
                             Halaman {pageIndex + 1} dari {totalPages}
                         </div>
 
-                        {/* Pagination Controls */}
                         <div className="ml-auto flex items-center gap-2 lg:ml-0">
                             <Button variant="outline" className="hidden h-8 w-8 p-0 lg:flex" onClick={() => goToPage(0)} disabled={!canPreviousPage}>
                                 <span className="sr-only">Go to first page</span>

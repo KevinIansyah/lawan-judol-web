@@ -90,7 +90,7 @@ class KeywordController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat menyimpan data.',
+                'message' => 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.',
                 'data' => null,
             ], 500);
         }
@@ -200,7 +200,7 @@ class KeywordController extends Controller
 
                     return response()->json([
                         'success' => false,
-                        'message' => 'Gagal menyimpan perubahan ke file.',
+                        'message' => 'Gagal menyimpan perubahan ke file. Silakan coba lagi.',
                         'data' => null,
                     ], 500);
                 }
@@ -234,7 +234,7 @@ class KeywordController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat memperbarui file.',
+                'message' => 'Terjadi kesalahan saat memperbarui file. Silakan coba lagi.',
                 'data' => null,
             ], 500);
         }

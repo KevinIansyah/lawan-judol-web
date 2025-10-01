@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ProcessStatusKeyword } from '@/components/process-status-keyword';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -29,6 +28,7 @@ export const DialogUpdateKeyword = ({ selectedCount, analysisId, getSelectedKeyw
             toast('Informasi!', {
                 description: 'Silakan pilih minimal satu kata kunci untuk melanjutkan.',
             });
+
             return;
         }
 
@@ -60,24 +60,24 @@ export const DialogUpdateKeyword = ({ selectedCount, analysisId, getSelectedKeyw
                         }),
                     });
 
-                    if (!response.ok) {
-                        const errorBody = await response.json();
-                        throw new Error(errorBody.message || `HTTP error! status: ${response.status}`);
-                    }
-
                     const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.message || `HTTP error! status: ${response.status}`);
+                    }
 
                     if (result.success) {
                         success++;
+
                         updateLogEntry(`${selectedKeyword.id}`, 'success', `Perubahan kata kunci ${selectedKeyword.keyword} berhasil disimpan.`);
                     } else {
                         throw new Error(result.message || 'Unknown error');
                     }
                 } catch (err) {
                     failed++;
-                    // console.error(`Error processing keyword ${selectedKeyword.id}:`, err);
 
-                    let message = 'Terjadi kesalahan saat menyimpan data.';
+                    let message = 'Terjadi kesalahan saat menyimpan data. Silahkan coba lagi.';
+
                     if (err instanceof Error) {
                         message = err.message;
                     } else if (typeof err === 'string') {
@@ -106,8 +106,8 @@ export const DialogUpdateKeyword = ({ selectedCount, analysisId, getSelectedKeyw
                     description: `${success} perubahan berhasil, ${failed} perubahan gagal disimpan.`,
                 });
             }
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
-            // console.error('Error processing kamus:', err);
             toast.error('Gagal!', {
                 description: 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.',
             });

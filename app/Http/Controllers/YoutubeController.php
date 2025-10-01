@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Analysis;
+use App\Services\QuotaService;
 use App\Services\Youtube\Handlers\CacheHandler;
 use App\Services\Youtube\YoutubeService;
 use Illuminate\Http\Request;
@@ -14,11 +15,16 @@ class YoutubeController extends Controller
 {
     protected $youtubeService;
     protected $cacheHandler;
+    protected $quotaService;
 
-    public function __construct(YoutubeService $youtubeService, CacheHandler $cacheHandler)
-    {
+    public function __construct(
+        YoutubeService $youtubeService,
+        CacheHandler $cacheHandler,
+        QuotaService $quotaService
+    ) {
         $this->youtubeService = $youtubeService;
         $this->cacheHandler = $cacheHandler;
+        $this->quotaService = $quotaService;
     }
 
     public function getVideo(Request $request): JsonResponse
@@ -34,23 +40,16 @@ class YoutubeController extends Controller
             ], 401);
         }
 
-        // $activeAnalysisCount = Analysis::where('user_id', $user->id)->where('type', 'public')
-        //     ->whereIn('status', ['queue', 'on_process'])
-        //     ->count();
+        $quotaCheck = $this->quotaService->canAnalyzeVideo($user);
 
-        // if ($activeAnalysisCount >= 3) {
-        //     Log::info("Analysis limit reached", [
-        //         'user_id' => $user->id,
-        //         'active_analysis_count' => $activeAnalysisCount,
-        //     ]);
-
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Anda telah mencapai batas maksimal 3 analisis yang sedang diproses. Tunggu hingga minimal 1 analisis selesai sebelum menambahkan analisis baru.',
-        //         'video' => null,
-        //         'total' => 0,
-        //     ], 429);
-        // }
+        if (!$quotaCheck['allowed']) {
+            return response()->json([
+                'success' => false,
+                'message' => $quotaCheck['message'],
+                'video' => null,
+                'total' => 0,
+            ], 429);
+        }
 
         $videoId = $request->input('video_id');
 
@@ -91,6 +90,89 @@ class YoutubeController extends Controller
         }
     }
 
+    public function postModerationComment(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user->google_token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Google belum terhubung. Silakan login ulang.',
+                'comment_id' => '',
+            ], 401);
+        }
+
+        $quotaCheck = $this->quotaService->canModerateComment($user);
+
+        if (!$quotaCheck['allowed']) {
+            return response()->json([
+                'success' => false,
+                'message' => $quotaCheck['message'],
+                'comment_id' => '',
+                'quota_limit_exceeded' => true,
+            ], 429);
+        }
+
+        $commentId = $request->input('data.comment_id');
+        $moderationStatus = $request->input('data.moderation_status');
+        $banAuthor = $request->boolean('data.ban_author', false);
+        $analysisId = $request->input('data.analysis_id');
+
+        $analysis = Analysis::find($analysisId);
+
+        if (!$analysis) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Analysis tidak ditemukan.',
+                'comment_id' => '',
+            ], 404);
+        }
+
+        $filePath = storage_path('app/public/' . $analysis->gambling_file_path);
+
+        try {
+            $result = $this->youtubeService->postModerationCommentById(
+                $user,
+                $commentId,
+                $moderationStatus,
+                $banAuthor,
+            );
+
+            if ($result['success']) {
+                $this->quotaService->consumeCommentModeration($user);
+
+                Log::info("Moderation comment action successful", [
+                    'user_id' => $user->id,
+                    'comment_id' => $commentId,
+                    'moderation_status' => $moderationStatus,
+                    'quota_remaining' => $quotaCheck['remaining'] - 1
+                ]);
+
+                $result['quota_info'] = [
+                    'limit' => $quotaCheck['limit'],
+                    'used' => $quotaCheck['used'] + 1,
+                    'remaining' => $quotaCheck['remaining'] - 1
+                ];
+            }
+
+            $this->updateJsonFileStatus($filePath, $commentId, $moderationStatus);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            Log::error("Failed to moderate comment", [
+                'user_id' => $user->id,
+                'comment_id' => $commentId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memproses moderasi komentar. Silakan coba lagi.',
+                'comment_id' => $commentId,
+            ], 500);
+        }
+    }
+
     public function getVideos(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -104,6 +186,17 @@ class YoutubeController extends Controller
                 'channel_info' => null,
                 'from_cache' => false
             ], 401);
+        }
+
+        $quotaCheck = $this->quotaService->canAnalyzeVideo($user);
+
+        if (!$quotaCheck['allowed']) {
+            return response()->json([
+                'success' => false,
+                'message' => $quotaCheck['message'],
+                'video' => null,
+                'total' => 0,
+            ], 429);
         }
 
         $forceRefresh = $request->boolean('refresh', false);
@@ -184,65 +277,16 @@ class YoutubeController extends Controller
         }
     }
 
-    public function postModerationComment(Request $request): JsonResponse
+    public function getQuotaInfo(): JsonResponse
     {
         $user = Auth::user();
 
-        if (!$user->google_token) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Akun Google belum terhubung. Silakan login ulang.',
-                'comment_id' => '',
-            ], 401);
-        }
+        $quotaInfo = $this->quotaService->getQuotaInfo($user);
 
-        $commentId = $request->input('data.comment_id');
-        $moderationStatus = $request->input('data.moderation_status');
-        $banAuthor = $request->boolean('data.ban_author', false);
-        $analysisId = $request->input('data.analysis_id');
-
-        $analysis = Analysis::find($analysisId);
-        if (!$analysis) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Analysis tidak ditemukan.',
-                'comment_id' => '',
-            ], 404);
-        }
-        $filePath = storage_path('app/public/' . $analysis->gambling_file_path);
-
-        try {
-            $result = $this->youtubeService->postModerationCommentById(
-                $user,
-                $commentId,
-                $moderationStatus,
-                $banAuthor,
-            );
-
-            if ($result['success']) {
-                Log::info("Moderation comment action successful", [
-                    'user_id' => $user->id,
-                    'comment_id' => $commentId,
-                    'moderation_status' => $moderationStatus,
-                ]);
-            }
-
-            $this->updateJsonFileStatus($filePath, $commentId, $moderationStatus);
-
-            return response()->json($result);
-        } catch (\Exception $e) {
-            Log::error("Failed to moderate comment", [
-                'user_id' => $user->id,
-                'comment_id' => $commentId,
-                'error' => $e->getMessage(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat memproses moderasi komentar. Silakan coba lagi.',
-                'comment_id' => $commentId,
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'quota' => $quotaInfo
+        ]);
     }
 
     private function isValidYouTubeVideoId(string $videoId): bool

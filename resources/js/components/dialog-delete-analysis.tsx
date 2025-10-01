@@ -41,14 +41,13 @@ export default function DialogDeleteAnalysis({ analysis }: DialogDeleteAnalysisP
                 credentials: 'same-origin',
             });
 
-            if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                throw new Error(errorResponse.message || 'Terjadi kesalahan saat menghapus analisis');
-            }
-
             const result = await response.json();
 
-            if (result.success || response.ok) {
+            if (!response.ok) {
+                throw new Error(result.message || `HTTP error! status: ${response.status}`);
+            }
+
+            if (result.success) {
                 setIsDialogOpen(false);
 
                 router.reload();
@@ -62,7 +61,6 @@ export default function DialogDeleteAnalysis({ analysis }: DialogDeleteAnalysisP
                 setErrorType(friendlyError.type);
             }
         } catch (err) {
-            // console.error('Error delete analysis:', error);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);

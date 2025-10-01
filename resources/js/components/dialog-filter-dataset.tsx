@@ -51,9 +51,11 @@ export function DialogFilterDataset({ isOpen, onOpenChange }: DialogFilterDatase
             if (startDate) {
                 params.append('start_date', startDate.toISOString().split('T')[0]);
             }
+
             if (endDate) {
                 params.append('end_date', endDate.toISOString().split('T')[0]);
             }
+
             if (label) {
                 params.append('label', label);
             }
@@ -70,16 +72,17 @@ export function DialogFilterDataset({ isOpen, onOpenChange }: DialogFilterDatase
                 credentials: 'same-origin',
             });
 
+            const result = await response.json();
+
             if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                console.log(errorResponse);
-                const friendlyError = getUserFriendlyError(errorResponse.message, response.status);
+                const friendlyError = getUserFriendlyError(result.message, response.status);
                 setError(friendlyError.message);
                 setErrorType(friendlyError.type);
+
                 return;
             }
 
-            const datasetData: ApiResponseDataset = await response.json();
+            const datasetData: ApiResponseDataset = result;
 
             if (datasetData.success) {
                 setDownloadUrl(datasetData.link ?? null);
@@ -89,11 +92,7 @@ export function DialogFilterDataset({ isOpen, onOpenChange }: DialogFilterDatase
                 setError(friendlyError.message);
                 setErrorType(friendlyError.type);
             }
-
-            return console.log(datasetData);
         } catch (err) {
-            console.log(err);
-            // console.error('Error fetching dataset:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);

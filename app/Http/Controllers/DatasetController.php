@@ -128,7 +128,7 @@ class DatasetController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat menyimpan data.',
+                'message' => 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.',
                 'data' => null,
             ], 500);
         }

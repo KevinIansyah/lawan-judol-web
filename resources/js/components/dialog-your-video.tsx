@@ -24,10 +24,10 @@ export default function DialogYourVideo() {
         setIsDialogOpen(true);
 
         if (!hasInitialLoad || videos.length === 0) {
-            console.log('First time opening dialog or no videos cached, fetching from API...');
+            // console.log('First time opening dialog or no videos cached, fetching from API...');
             fetchVideos();
         } else {
-            console.log('Dialog reopened, using existing data (cached or previously loaded)');
+            // console.log('Dialog reopened, using existing data (cached or previously loaded)');
         }
     };
 
@@ -43,7 +43,7 @@ export default function DialogYourVideo() {
     };
 
     const handleRefresh = (): void => {
-        console.log('Manual refresh requested, fetching fresh data from YouTube API...');
+        // console.log('Manual refresh requested, fetching fresh data from YouTube API...');
         fetchVideos(true);
     };
 
@@ -84,29 +84,38 @@ export default function DialogYourVideo() {
                 credentials: 'same-origin',
             });
 
-            if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                const friendlyError = getUserFriendlyError(errorResponse.message, response.status);
+            const result = await response.json();
+
+            if (result.quota_exceeded) {
+                const friendlyError = getUserFriendlyError('Kuota YouTube Data API telah habis. Silakan coba lagi besok.');
                 setError(friendlyError.message);
                 setErrorType(friendlyError.type);
+
                 return;
             }
 
-            const data: ApiResponseVideos = await response.json();
+            if (!response.ok) {
+                const friendlyError = getUserFriendlyError(result.message, response.status);
+                setError(friendlyError.message);
+                setErrorType(friendlyError.type);
+
+                return;
+            }
+
+            const data: ApiResponseVideos = await result;
 
             if (data.success) {
                 setVideos(data.videos);
                 setHasInitialLoad(true);
 
-                console.log(`Videos loaded successfully`);
-                console.log(`Total videos: ${data.videos.length}`);
+                // console.log(`Videos loaded successfully`);
+                // console.log(`Total videos: ${data.videos.length}`);
             } else {
                 const friendlyError = getUserFriendlyError(data.message);
                 setError(friendlyError.message);
                 setErrorType(friendlyError.type);
             }
         } catch (err) {
-            // console.error('Error fetching videos:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);
@@ -134,15 +143,25 @@ export default function DialogYourVideo() {
                 credentials: 'same-origin',
             });
 
-            if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                const friendlyError = getUserFriendlyError(errorResponse.message, response.status);
+            const result = await response.json();
+
+            if (result.quota_exceeded) {
+                const friendlyError = getUserFriendlyError('Kuota YouTube Data API telah habis. Silakan coba lagi besok.');
                 setError(friendlyError.message);
                 setErrorType(friendlyError.type);
+
                 return;
             }
 
-            const commentData: ApiResponseComment = await response.json();
+            if (!response.ok) {
+                const friendlyError = getUserFriendlyError(result.message, response.status);
+                setError(friendlyError.message);
+                setErrorType(friendlyError.type);
+
+                return;
+            }
+
+            const commentData: ApiResponseComment = result;
 
             if (commentData.success) {
                 const mergeData = {
@@ -165,7 +184,6 @@ export default function DialogYourVideo() {
                 setErrorType(friendlyError.type);
             }
         } catch (err) {
-            // console.error('Error fetching comments:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);
@@ -194,15 +212,17 @@ export default function DialogYourVideo() {
                 credentials: 'same-origin',
             });
 
+            const result = await response.json();
+
             if (!response.ok) {
-                const errorResponse = await response.json().catch(() => ({}));
-                const friendlyError = getUserFriendlyError(errorResponse.message, response.status);
+                const friendlyError = getUserFriendlyError(result.message, response.status);
                 setError(friendlyError.message);
                 setErrorType(friendlyError.type);
+
                 return;
             }
 
-            const analysisData: ApiResponseAnalysis = await response.json();
+            const analysisData: ApiResponseAnalysis = result;
 
             if (analysisData.success) {
                 setIsDialogOpen(false);
@@ -217,7 +237,6 @@ export default function DialogYourVideo() {
                 setErrorType(friendlyError.type);
             }
         } catch (err) {
-            // console.error('Error fetching analysis:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);

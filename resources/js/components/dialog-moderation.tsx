@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ProcessStatusComment } from '@/components/process-status-comment';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -35,6 +34,7 @@ export const DialogModeration = ({ selectedCount, analysisId, getSelectedComment
             toast('Informasi!', {
                 description: 'Silakan pilih minimal satu komentar untuk melanjutkan.',
             });
+
             return;
         }
 
@@ -69,34 +69,58 @@ export const DialogModeration = ({ selectedCount, analysisId, getSelectedComment
                         }),
                     });
 
-                    if (!response.ok) {
-                        const errorBody = await response.json();
-                        throw new Error(errorBody.message || `HTTP error! status: ${response.status}`);
-                    }
-
                     const result = await response.json();
 
-                    if (result.quota_exceeded) {
-                        updateLogEntry(selectedComment.comment_id, 'error', `Komentar dengan ID ${selectedComment.comment_id} gagal dimoderasi. Kuota API terlampaui.`);
+                    if (response.status === 429 && result.quota_limit_exceeded) {
+                        updateLogEntry(selectedComment.comment_id, 'error', `Komentar dengan ID ${selectedComment.comment_id} gagal dimoderasi. Kuota moderasi harian Anda telah habis.`);
+
                         failed++;
 
                         const currentIndex = selectedComments.indexOf(selectedComment);
                         const remainingComments = selectedComments.slice(currentIndex + 1);
                         remainingComments.forEach((comment) => {
-                            addLogEntry(comment.comment_id, 'error', `Komentar dengan ID ${comment.comment_id} gagal dimoderasi. Kuota API terlampaui.`);
+                            addLogEntry(comment.comment_id, 'error', `Komentar dengan ID ${comment.comment_id} gagal dimoderasi. Kuota moderasi harian Anda telah habis.`);
+                            
                             failed++;
                         });
 
-                        toast.error('Kuota Terlampaui!', {
-                            description: 'Kuota API YouTube telah terlampaui. Proses dihentikan.',
+                        toast.error('Kuota Harian Habis!', {
+                            description: result.message || 'Kuota moderasi harian Anda telah habis. Silakan coba lagi besok.',
+                            duration: 5000,
                         });
 
                         break;
                     }
 
+                    if (result.quota_exceeded) {
+                        updateLogEntry(selectedComment.comment_id, 'error', `Komentar dengan ID ${selectedComment.comment_id} gagal dimoderasi. Kuota YouTube Data API terlampaui.`);
+
+                        failed++;
+
+                        const currentIndex = selectedComments.indexOf(selectedComment);
+                        const remainingComments = selectedComments.slice(currentIndex + 1);
+                        remainingComments.forEach((comment) => {
+                            addLogEntry(comment.comment_id, 'error', `Komentar dengan ID ${comment.comment_id} gagal dimoderasi. Kuota YouTube Data API terlampaui.`);
+                            
+                            failed++;
+                        });
+
+                        toast.error('Kuota Terlampaui!', {
+                            description: 'Kuota YouTube Data API telah terlampaui. Proses dihentikan.',
+                        });
+
+                        break;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(result.message || `HTTP error! status: ${response.status}`);
+                    }
+
                     if (result.success) {
                         success++;
+
                         const banAuthorText = banAuthor && moderationStatus === 'reject' ? ' dan author diblokir' : '';
+
                         updateLogEntry(selectedComment.comment_id, 'success', `Komentar dengan ID ${selectedComment.comment_id} berhasil dimoderasi sebagai ${moderationStatus}${banAuthorText}.`);
 
                         const updatedComment = { ...selectedComment, status: moderationStatus as 'heldForReview' | 'reject' | 'draft' | 'dataset' };
@@ -106,9 +130,9 @@ export const DialogModeration = ({ selectedCount, analysisId, getSelectedComment
                     }
                 } catch (err) {
                     failed++;
-                    // console.error(`Error processing comment ${selectedComment.comment_id}:`, err);
 
-                    let message = 'Terjadi kesalahan saat menyimpan data.';
+                    let message = 'Terjadi kesalahan saat menyimpan data. Silahkan coba lagi.';
+
                     if (err instanceof Error) {
                         message = err.message;
                     } else if (typeof err === 'string') {
@@ -152,8 +176,8 @@ export const DialogModeration = ({ selectedCount, analysisId, getSelectedComment
             if (onComplete && updatedComments.length > 0) {
                 onComplete(updatedComments);
             }
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
-            // console.error('Error processing comment:', err);
             toast.error('Gagal!', {
                 description: 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.',
             });

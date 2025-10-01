@@ -48,10 +48,19 @@ export default function DialogRetryAnalysis({ analysis }: DialogRetryAnalysisPro
                 const friendlyError = getUserFriendlyError(errorResponse.message, response.status);
                 setError(friendlyError.message);
                 setErrorType(friendlyError.type);
+
                 return;
             }
 
             const result = await response.json();
+
+            if (!response.ok) {
+                const friendlyError = getUserFriendlyError(result.message, response.status);
+                setError(friendlyError.message);
+                setErrorType(friendlyError.type);
+
+                return;
+            }
 
             if (result.success) {
                 setIsDialogOpen(false);
@@ -67,7 +76,6 @@ export default function DialogRetryAnalysis({ analysis }: DialogRetryAnalysisPro
                 setErrorType(friendlyError.type);
             }
         } catch (err) {
-            // console.error('Error retry analysis:', err);
             const friendlyError = getUserFriendlyError(err);
             setError(friendlyError.message);
             setErrorType(friendlyError.type);

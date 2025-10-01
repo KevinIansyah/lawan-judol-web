@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\CommentInferenceJob;
 use App\Models\Analysis;
+use App\Services\QuotaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +12,14 @@ use Illuminate\Support\Facades\Log;
 
 class AnalysisController extends Controller
 {
+    protected $quotaService;
+
+    public function __construct(
+        QuotaService $quotaService
+    ) {
+        $this->quotaService = $quotaService;
+    }
+
     public function index() {}
 
     public function create() {}
@@ -33,6 +42,17 @@ class AnalysisController extends Controller
         try {
             $user = Auth::user();
 
+            $quotaCheck = $this->quotaService->canAnalyzeVideo($user);
+
+            if (!$quotaCheck['allowed']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $quotaCheck['message'],
+                    'video' => null,
+                    'total' => 0,
+                ], 429);
+            }
+
             $video = $request->input('data.video');
             $type = $request->input('data.type');
 
@@ -46,7 +66,13 @@ class AnalysisController extends Controller
                 'keyword_file_path' => null,
             ]);
 
-            Log::info("Analysis data successfully stored for user ID: {$user->id}");
+            $this->quotaService->consumeVideoAnalysis($user);
+
+            Log::info("Analysis created and quota consumed", [
+                'user_id' => $user->id,
+                'analysis_id' => $analysis->id,
+                'video_title' => $video['title']
+            ]);
 
             CommentInferenceJob::dispatch($analysis)->onQueue('inference');
 
@@ -66,7 +92,7 @@ class AnalysisController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat menyimpan data.',
+                'message' => 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.',
                 'data' => null,
             ], 500);
         }

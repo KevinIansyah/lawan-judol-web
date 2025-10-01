@@ -18,7 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'is_admin' => \App\Http\Middleware\IsAdmin::class,
             'ensure_analysis_owner' => \App\Http\Middleware\EnsureAnalysisOwner::class,
             'check_account_deletion_status' => \App\Http\Middleware\CheckAccountDeletionStatus::class,
-            'redirect_if_deletion_scheduled' => \App\Http\Middleware\RedirectIfDeletionScheduled::class
+            'redirect_if_deletion_scheduled' => \App\Http\Middleware\RedirectIfDeletionScheduled::class,
+            'check_quota' => \App\Http\Middleware\CheckQuota::class
         ]);
 
         $middleware->web(append: [

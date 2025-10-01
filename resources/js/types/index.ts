@@ -224,4 +224,21 @@ export interface DashboardData {
         one_month: Record<string, number>;
         seven_days: Record<string, number>;
     };
+    quota: {
+        video_analysis: {
+            limit: number;
+            used: number;
+            remaining: number;
+        };
+        comment_moderation: {
+            limit: number;
+            used: number;
+            remaining: number;
+        };
+        youtube_api: {
+            used: number;
+        };
+        date: string;
+        resets_at: string;
+    };
 }

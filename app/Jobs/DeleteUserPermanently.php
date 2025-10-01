@@ -34,11 +34,13 @@ class DeleteUserPermanently implements ShouldQueue
 
         if (!$user) {
             Log::warning("User deletion failed - user not found", ['user_id' => $this->userId]);
+
             return;
         }
 
         if (!$user->delete_account) {
             Log::info("User deletion cancelled - delete flag disabled", ['user_id' => $this->userId]);
+
             return;
         }
 
@@ -47,6 +49,7 @@ class DeleteUserPermanently implements ShouldQueue
                 'user_id' => $this->userId,
                 'scheduled_at' => $user->scheduled_deletion_at->toDateTimeString()
             ]);
+
             return;
         }
 
@@ -70,6 +73,7 @@ class DeleteUserPermanently implements ShouldQueue
                 'user_id' => $this->userId,
                 'error' => $e->getMessage()
             ]);
+            
             throw $e;
         }
     }

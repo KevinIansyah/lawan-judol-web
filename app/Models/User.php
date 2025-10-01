@@ -72,6 +72,16 @@ class User extends Authenticatable
         return $this->hasMany(Keyword::class);
     }
 
+    public function quota()
+    {
+        return $this->hasOne(UserQuota::class);
+    }
+
+    public function quotaUsages()
+    {
+        return $this->hasMany(QuotaUsage::class);
+    }
+
     public function isScheduledForDeletion(): bool
     {
         return $this->delete_account &&
