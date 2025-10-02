@@ -14,7 +14,7 @@ export default function StatCard({ title, description, count }: StatCardProps) {
         <Card className="@container/card">
             <CardHeader>
                 <CardDescription>{title}</CardDescription>
-                <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">{count}</CardTitle>
+                <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl mt-4">{count}</CardTitle>
             </CardHeader>
             <CardFooter className="flex-col items-start gap-1.5 text-sm">
                 <div className="line-clamp-1 flex gap-2 font-medium">

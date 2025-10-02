@@ -14,7 +14,7 @@ const chartConfig = {
     },
     sisa: {
         label: 'Sisa',
-        color: 'var(--chart-2)',
+        color: 'var(--chart-4)',
     },
 } satisfies ChartConfig;
 
@@ -31,13 +31,13 @@ type ChartQuotaProps = {
 export function ChartQuota({ title, description, quota }: ChartQuotaProps) {
     const chartData = [
         { type: 'dipakai', value: quota.used, fill: 'var(--chart-1)' },
-        { type: 'sisa', value: quota.remaining, fill: 'var(--chart-2)' },
+        { type: 'sisa', value: quota.remaining, fill: 'var(--chart-4)' },
     ];
 
     return (
         <Card className="flex flex-col">
             <CardHeader className="items-center pb-0">
-                <CardTitle>{title}</CardTitle>
+                <CardTitle className="text-sm">{title}</CardTitle>
                 {description && <CardDescription>{description}</CardDescription>}
             </CardHeader>
             <CardContent className="flex-1 pb-0">
@@ -66,7 +66,7 @@ export function ChartQuota({ title, description, quota }: ChartQuotaProps) {
                 </ChartContainer>
             </CardContent>
             <CardFooter className="flex-col gap-2 text-sm">
-                <div className="flex items-center gap-4 text-xs">
+                <div className="flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
                         <span className="bg-muted h-2 w-2 rounded-[2px]"></span>
                         <span>Limit: {quota.limit}</span>
@@ -76,7 +76,7 @@ export function ChartQuota({ title, description, quota }: ChartQuotaProps) {
                         <span>Dipakai: {quota.used}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-[2px] bg-[var(--chart-2)]"></span>
+                        <span className="h-2 w-2 rounded-[2px] bg-[var(--chart-4)]"></span>
                         <span>Sisa: {quota.remaining}</span>
                     </div>
                 </div>

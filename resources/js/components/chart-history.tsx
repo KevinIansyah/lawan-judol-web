@@ -7,13 +7,13 @@ import { useState } from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 
 const chartConfig = {
+    public: {
+        label: 'Video Publik',
+        color: 'var(--chart-4)',
+    },
     your: {
         label: 'Video Anda',
         color: 'var(--chart-1)',
-    },
-    public: {
-        label: 'Video Publik',
-        color: 'var(--chart-2)',
     },
 } satisfies ChartConfig;
 
@@ -51,7 +51,7 @@ export function ChartHistory() {
         <Card className="h-full border-0">
             <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
                 <div className="grid flex-1 gap-1 text-center sm:text-left">
-                    <CardTitle>Riwayat Analisis</CardTitle>
+                    <CardTitle className="text-sm">Riwayat Analisis</CardTitle>
                     <CardDescription>Perbandingan analisis video Anda dan video publik</CardDescription>
                 </div>
                 <Select value={timeRange} onValueChange={(v: '90d' | '30d' | '7d') => setTimeRange(v)}>
@@ -113,12 +113,10 @@ export function ChartHistory() {
                                 />
                             }
                         />
-                        {/* <Area dataKey="your" type="natural" fill="url(#fillYour)" stroke="var(--color-your)" stackId="a" />
-                        <Area dataKey="public" type="natural" fill="url(#fillPublic)" stroke="var(--color-public)" stackId="a" /> */}
                         <Area dataKey="your" type="natural" fill="url(#fillYour)" stroke="var(--color-your)" fillOpacity={0.3} />
                         <Area dataKey="public" type="natural" fill="url(#fillPublic)" stroke="var(--color-public)" fillOpacity={0.3} />
 
-                        <ChartLegend content={<ChartLegendContent />} />
+                        <ChartLegend content={<ChartLegendContent className="text-sm" />} />
                     </AreaChart>
                 </ChartContainer>
             </CardContent>

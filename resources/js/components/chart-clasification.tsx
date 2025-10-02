@@ -33,7 +33,7 @@ export function ChartClasification({ title = 'Chart Title', description = 'Chart
     return (
         <Card className="h-full border-0">
             <CardHeader className="items-center pb-0">
-                <CardTitle className="text-center">{title}</CardTitle>
+                <CardTitle className="text-sm">{title}</CardTitle>
                 <CardDescription className="text-center">{description}</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 pb-0">
@@ -64,16 +64,32 @@ export function ChartClasification({ title = 'Chart Title', description = 'Chart
             <CardFooter className="flex-col gap-2 text-sm">
                 {isCommentChart && (
                     <CardFooter className="flex-col gap-2 text-sm">
-                        <div className="flex items-center gap-2 text-center font-medium">Total komentar: {gamblingCount + nonGamblingCount}</div>
-                        <div className="text-muted-foreground text-center">
+                        {/* <div className="flex items-center gap-2 text-center font-medium">Total komentar: {gamblingCount + nonGamblingCount}</div> */}
+                        {/* <div className="text-muted-foreground text-center">
                             {gamblingCount} komentar <strong>judi online</strong> dan {nonGamblingCount} komentar <strong>bukan judi</strong>
+                        </div> */}
+                        <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-2">
+                                <span className="h-2 w-2 rounded-[2px] bg-[var(--chart-1)]"></span>
+                                <span>Judi Online: {gamblingCount}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="h-2 w-2 rounded-[2px] bg-[var(--chart-4)]"></span>
+                                <span>Bukan Judi: {nonGamblingCount}</span>
+                            </div>
                         </div>
                     </CardFooter>
                 )}
                 {!isCommentChart && (
                     <CardFooter className="flex-col gap-2 text-sm">
-                        <div className="flex items-center gap-2 text-center font-medium">Total kata kunci: {keywordCount}</div>
-                        <div className="text-muted-foreground text-center">Analisis kata kunci berdasarkan komentar pada video</div>
+                        {/* <div className="flex items-center gap-2 text-center font-medium">Total kata kunci: {keywordCount}</div> */}
+                        {/* <div className="text-muted-foreground text-center">Analisis kata kunci berdasarkan komentar pada video</div> */}
+                        <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-2">
+                                <span className="h-2 w-2 rounded-[2px] bg-[var(--chart-1)]"></span>
+                                <span>Kata Kunci: {keywordCount}</span>
+                            </div>
+                        </div>
                     </CardFooter>
                 )}
             </CardFooter>
