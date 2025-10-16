@@ -1,9 +1,8 @@
 import { ChartHistory } from '@/components/chart-history';
 import { ChartQuota } from '@/components/chart-quota';
-import Heading from '@/components/heading';
 import StatCard from '@/components/stat-card';
 import AppLayout from '@/layouts/app-layout';
-import { DashboardData, SharedData, type BreadcrumbItem } from '@/types';
+import { DashboardData, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -14,16 +13,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard() {
-    const page = usePage<SharedData>();
-    const { auth } = page.props;
+    // const page = usePage<SharedData>();
+    // const { auth } = page.props;
     const { dashboard } = usePage<{ dashboard: DashboardData }>().props;
     const { dataset_count, keyword_count, your_analysis_count, public_analysis_count, quota } = dashboard;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dasbor" />
-            <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6">
-                <Heading title={`Haii ${auth.user.name}`} description="Selamat datang di Dasbor LawanJudol." />
+            <div className="flex h-full flex-1 flex-col rounded-xl px-4 py-6 mt-6">
+                {/* <Heading title={`Haii ${auth.user.name}`} description="Selamat datang di Dasbor LawanJudol." /> */}
 
                 <div className="mb-4 grid auto-rows-min gap-4 md:grid-cols-4">
                     <StatCard title="Dataset" description="Kontribusi dataset Anda" count={dataset_count} />

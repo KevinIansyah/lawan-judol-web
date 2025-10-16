@@ -22,7 +22,8 @@ class GoogleService
 
     if ($googleUser->refreshToken) {
       $data['google_refresh_token'] = $googleUser->refreshToken;
-      $data['youtube_permission_granted'] = true;
+      $data['youtube_permission_granted'] = false;
+      // $data['youtube_permission_granted'] = true;
     }
 
     if ($user) {

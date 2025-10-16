@@ -1,5 +1,4 @@
 import { AppContent } from '@/components/app-content';
-import { AppFooter } from '@/components/app-footer';
 import { AppHeader } from '@/components/app-header';
 import { AppShell } from '@/components/app-shell';
 import { SharedData, type BreadcrumbItem } from '@/types';
@@ -34,7 +33,7 @@ export default function AppHeaderLayout({ children, breadcrumbs }: AppHeaderLayo
         <AppShell>
             {url !== '/cancel-deletion' && <AppHeader breadcrumbs={breadcrumbs} />}
             <AppContent>{children}</AppContent>
-            {url !== '/cancel-deletion' && <AppFooter />}
+            {/* {url !== '/cancel-deletion' && <AppFooter />} */}
         </AppShell>
     );
 }
