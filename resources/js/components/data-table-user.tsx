@@ -1,4 +1,3 @@
-import { DialogFilterDataset } from '@/components/dialog-filter-dataset';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
@@ -32,7 +31,6 @@ interface UserProps {
 
 export default function DataTableUser({ data, pageIndex, setPageIndex, totalPages, totalItems, perPage, initialFilters = {} }: UserProps) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { searchValue, setSearchValue, getSearchFromUrl } = useUrlSearch(initialFilters.search);
     const { debouncedSearch, goToPage, changePageSize, canPreviousPage, canNextPage } = useTablePagination({
         pageIndex,
