@@ -8,12 +8,13 @@ import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useUrlSearch } from '@/hooks/use-url-search';
 import { User } from '@/types';
 import { ColumnDef, VisibilityState, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ColumnsIcon } from 'lucide-react';
+import { CheckCircle2Icon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ColumnsIcon } from 'lucide-react';
 import { useState } from 'react';
 
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { Badge } from './ui/badge';
 dayjs.extend(relativeTime);
 dayjs.locale('id');
 
@@ -53,6 +54,35 @@ export default function DataTableUser({ data, pageIndex, setPageIndex, totalPage
             header: 'Email',
             cell: ({ row }) => {
                 return <div className="text-foreground text-left">{row.original.email}</div>;
+            },
+        },
+        {
+            accessorKey: 'akses youtube',
+            header: 'Akses YouTube',
+            cell: ({ row }) => {
+                const granted = row.original.youtube_permission_granted;
+                return (
+                    <Badge
+                        className={`flex gap-1 px-1.5 whitespace-nowrap [&_svg]:size-3 ${granted ? 'text-[oklch(0.2178_0_0)]' : 'text-[oklch(1_0_0)]'}`}
+                        style={{
+                            backgroundColor: granted
+                                ? 'var(--chart-4)'
+                                : 'var(--chart-1)',
+                        }}
+                    >
+                        {granted ? (
+                            <>
+                                <CheckCircle2Icon className="text-[oklch(0.2178_0_0)]" />
+                                Diizinkan
+                            </>
+                        ) : (
+                            <>
+                                <CheckCircle2Icon className="text-[oklch(1_0_0)]" />
+                                Belum Diizinkan
+                            </>
+                        )}
+                    </Badge>
+                );
             },
         },
     ];
