@@ -8,6 +8,7 @@ use App\Http\Controllers\KeywordImportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicVideoController;
 use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\YourVideoController;
 use App\Http\Controllers\YoutubeController;
 use Illuminate\Support\Facades\Route;
@@ -15,7 +16,7 @@ use Inertia\Inertia;
 
 Route::middleware(['redirect_if_deletion_scheduled'])->group(function () {
     Route::get('/', fn() => Inertia::render('home'))->name('home');
-    Route::get('/keywords', [KeywordController::class, 'index'])->name('keywords.index');
+    Route::get('/keywords', [KeywordController::class, 'index'])->name('keywords');
     Route::get('/guides', fn() => Inertia::render('guide'))->name('guides');
     Route::get('/privacy-policy', fn() => Inertia::render('privacy-policy'))->name('privacy-policy');
     Route::get('/terms-of-service', fn() => Inertia::render('terms-of-service'))->name('terms-of-service');
@@ -45,6 +46,8 @@ Route::middleware(['auth', 'verified', 'check_account_deletion_status'])->group(
     });
     Route::post('/datasets', [DatasetController::class, 'store'])->name('datasets.store');
     Route::resource('datasets', DatasetController::class)->middleware('is_admin')->except('store');
+
+    Route::get('/users', [UserController::class, 'index'])->name('users')->middleware('is_admin');
 
     Route::prefix('keyword')->group(function () {
         Route::put('/update-json-file', [KeywordController::class, 'updateJsonFile'])->name('update-json-file');

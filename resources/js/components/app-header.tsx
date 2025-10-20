@@ -135,17 +135,30 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             </Link>
 
                                             {auth.user.role === 'admin' && (
-                                                <Link
-                                                    href="/datasets"
-                                                    className={cn(
-                                                        'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
-                                                        page.url === '/datasets' ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
-                                                    )}
-                                                    onClick={closeMobileMenu}
-                                                >
-                                                    <FileText className="h-4 w-4" />
-                                                    <span>Dataset</span>
-                                                </Link>
+                                                <>
+                                                    <Link
+                                                        href="/datasets"
+                                                        className={cn(
+                                                            'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
+                                                            page.url === '/datasets' ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
+                                                        )}
+                                                        onClick={closeMobileMenu}
+                                                    >
+                                                        <FileText className="h-4 w-4" />
+                                                        <span>Dataset</span>
+                                                    </Link>
+                                                    <Link
+                                                        href="/users"
+                                                        className={cn(
+                                                            'mx-3 flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium',
+                                                            page.url === '/users' ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
+                                                        )}
+                                                        onClick={closeMobileMenu}
+                                                    >
+                                                        <FileText className="h-4 w-4" />
+                                                        <span>Pengguna</span>
+                                                    </Link>
+                                                </>
                                             )}
                                         </nav>
                                     ) : (
@@ -260,13 +273,22 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                     </NavigationMenuItem>
 
                                     {auth.user.role === 'admin' && (
-                                        <NavigationMenuItem className="relative flex h-full items-center">
-                                            <Link href="/datasets" className={cn(navigationMenuTriggerStyle(), page.url === '/datasets' && activeItemStyles, 'h-9 px-3')}>
-                                                <FileText className="mr-2 h-4 w-4" />
-                                                Dataset
-                                            </Link>
-                                            {page.url === '/datasets' && <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>}
-                                        </NavigationMenuItem>
+                                        <>
+                                            <NavigationMenuItem className="relative flex h-full items-center">
+                                                <Link href="/datasets" className={cn(navigationMenuTriggerStyle(), page.url === '/datasets' && activeItemStyles, 'h-9 px-3')}>
+                                                    <FileText className="mr-2 h-4 w-4" />
+                                                    Dataset
+                                                </Link>
+                                                {page.url === '/datasets' && <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>}
+                                            </NavigationMenuItem>
+                                            <NavigationMenuItem className="relative flex h-full items-center">
+                                                <Link href="/users" className={cn(navigationMenuTriggerStyle(), page.url === '/users' && activeItemStyles, 'h-9 px-3')}>
+                                                    <FileText className="mr-2 h-4 w-4" />
+                                                    Pegguna
+                                                </Link>
+                                                {page.url === '/users' && <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>}
+                                            </NavigationMenuItem>
+                                        </>
                                     )}
                                 </NavigationMenuList>
                             </NavigationMenu>

@@ -492,7 +492,6 @@ class YoutubeService
         );
       }
 
-      // Track quota: write operation = 50 units
       $this->quotaService->trackYoutubeQuota($user, 50);
 
       Log::info("Comment moderated successfully", [
