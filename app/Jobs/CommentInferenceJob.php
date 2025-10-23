@@ -26,9 +26,7 @@ class CommentInferenceJob implements ShouldQueue
             $this->analysis->status = 'on_process';
             $this->analysis->save();
 
-            Log::info("Comment inference started", [
-                'analysis_id' => $this->analysis->id
-            ]);
+            Log::info("Comment inference started", ['analysis_id' => $this->analysis->id]);
 
             $url = rtrim(config('model.model_api.url'), '/');
             $apiKey = config('model.model_api.key');
@@ -88,20 +86,13 @@ class CommentInferenceJob implements ShouldQueue
                 unlink($filePath);
             }
 
-            Log::info("Comment inference completed", [
-                'analysis_id' => $this->analysis->id,
-                'duration_seconds' => now()->diffInSeconds($startTime)
-            ]);
+            Log::info("Comment inference completed", ['analysis_id' => $this->analysis->id, 'duration_seconds' => now()->diffInSeconds($startTime)]);
         } catch (\Throwable $e) {
             $this->analysis->status = 'failed';
             $this->analysis->save();
             $this->sendNotification('failed');
 
-            Log::error("Comment inference failed", [
-                'analysis_id' => $this->analysis->id,
-                'error' => $e->getMessage(),
-                'duration_seconds' => now()->diffInSeconds($startTime)
-            ]);
+            Log::error("Comment inference failed", ['analysis_id' => $this->analysis->id, 'error' => $e->getMessage(), 'duration_seconds' => now()->diffInSeconds($startTime)]);
         }
 
         $this->analysis->save();

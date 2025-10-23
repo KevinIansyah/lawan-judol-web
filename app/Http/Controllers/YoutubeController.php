@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Youtube\GetCommentsRequest;
+use App\Http\Requests\Youtube\GetVideoRequest;
+use App\Http\Requests\Youtube\PostModerationCommentRequest;
 use App\Models\Analysis;
 use App\Services\QuotaService;
 use App\Services\Youtube\Handlers\CacheHandler;
@@ -17,17 +20,14 @@ class YoutubeController extends Controller
     protected $cacheHandler;
     protected $quotaService;
 
-    public function __construct(
-        YoutubeService $youtubeService,
-        CacheHandler $cacheHandler,
-        QuotaService $quotaService
-    ) {
+    public function __construct(YoutubeService $youtubeService, CacheHandler $cacheHandler, QuotaService $quotaService)
+    {
         $this->youtubeService = $youtubeService;
         $this->cacheHandler = $cacheHandler;
         $this->quotaService = $quotaService;
     }
 
-    public function getVideo(Request $request): JsonResponse
+    public function getVideo(GetVideoRequest $request): JsonResponse
     {
         $user = Auth::user();
 
@@ -51,124 +51,25 @@ class YoutubeController extends Controller
             ], 429);
         }
 
-        $videoId = $request->input('video_id');
-
-        if (empty($videoId) || !$this->isValidYouTubeVideoId($videoId)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'ID video tidak valid. Pastikan Anda memasukkan ID video YouTube yang benar.',
-                'video' => null,
-                'total' => 0,
-            ], 400);
-        }
+        $validated = $request->validated();
+        $videoId = $validated['video_id'];
 
         try {
             $result = $this->youtubeService->getVideoById($user, $videoId);
 
             if ($result['success']) {
-                Log::info("Video retrieved successfully", [
-                    'user_id' => $user->id,
-                    'video_id' => $videoId,
-                    'video_title' => $result['video']['title'] ?? 'Unknown'
-                ]);
+                Log::info("Video retrieved successfully", ['user_id' => $user->id, 'video_id' => $videoId, 'video_title' => $result['video']['title'] ?? 'Unknown']);
             }
 
             return response()->json($result);
         } catch (\Exception $e) {
-            Log::error("Failed to fetch video", [
-                'user_id' => $user->id,
-                'video_id' => $videoId,
-                'error' => $e->getMessage(),
-            ]);
+            Log::error("Failed to fetch video", ['user_id' => $user->id, 'video_id' => $videoId, 'error' => $e->getMessage()]);
 
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat mengambil video. Silakan coba lagi.',
                 'video' => null,
                 'total' => 0,
-            ], 500);
-        }
-    }
-
-    public function postModerationComment(Request $request): JsonResponse
-    {
-        $user = Auth::user();
-
-        if (!$user->google_token) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Akun Google belum terhubung. Silakan login ulang.',
-                'comment_id' => '',
-            ], 401);
-        }
-
-        $quotaCheck = $this->quotaService->canModerateComment($user);
-
-        if (!$quotaCheck['allowed']) {
-            return response()->json([
-                'success' => false,
-                'message' => $quotaCheck['message'],
-                'comment_id' => '',
-                'quota_limit_exceeded' => true,
-            ], 429);
-        }
-
-        $commentId = $request->input('data.comment_id');
-        $moderationStatus = $request->input('data.moderation_status');
-        $banAuthor = $request->boolean('data.ban_author', false);
-        $analysisId = $request->input('data.analysis_id');
-
-        $analysis = Analysis::find($analysisId);
-
-        if (!$analysis) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Analysis tidak ditemukan.',
-                'comment_id' => '',
-            ], 404);
-        }
-
-        $filePath = storage_path('app/public/' . $analysis->gambling_file_path);
-
-        try {
-            $result = $this->youtubeService->postModerationCommentById(
-                $user,
-                $commentId,
-                $moderationStatus,
-                $banAuthor,
-            );
-
-            if ($result['success']) {
-                $this->quotaService->consumeCommentModeration($user);
-
-                Log::info("Moderation comment action successful", [
-                    'user_id' => $user->id,
-                    'comment_id' => $commentId,
-                    'moderation_status' => $moderationStatus,
-                    'quota_remaining' => $quotaCheck['remaining'] - 1
-                ]);
-
-                $result['quota_info'] = [
-                    'limit' => $quotaCheck['limit'],
-                    'used' => $quotaCheck['used'] + 1,
-                    'remaining' => $quotaCheck['remaining'] - 1
-                ];
-            }
-
-            $this->updateJsonFileStatus($filePath, $commentId, $moderationStatus);
-
-            return response()->json($result);
-        } catch (\Exception $e) {
-            Log::error("Failed to moderate comment", [
-                'user_id' => $user->id,
-                'comment_id' => $commentId,
-                'error' => $e->getMessage(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat memproses moderasi komentar. Silakan coba lagi.',
-                'comment_id' => $commentId,
             ], 500);
         }
     }
@@ -207,20 +108,12 @@ class YoutubeController extends Controller
             $result = $this->youtubeService->getUserVideos($user, $shouldFetchFresh);
 
             if ($result['success']) {
-                Log::info("Videos retrieved successfully", [
-                    'user_id' => $user->id,
-                    'total_videos' => $result['total'],
-                    'from_cache' => $result['from_cache'] ?? false,
-                    'force_refresh' => $forceRefresh
-                ]);
+                Log::info("Videos retrieved successfully", ['user_id' => $user->id, 'total_videos' => $result['total'], 'from_cache' => $result['from_cache'] ?? false, 'force_refresh' => $forceRefresh]);
             }
 
             return response()->json($result);
         } catch (\Exception $e) {
-            Log::error("Failed to fetch videos", [
-                'user_id' => $user->id,
-                'error' => $e->getMessage(),
-            ]);
+            Log::error("Failed to fetch videos", ['user_id' => $user->id, 'error' => $e->getMessage()]);
 
             return response()->json([
                 'success' => false,
@@ -233,7 +126,7 @@ class YoutubeController extends Controller
         }
     }
 
-    public function getComments(Request $request): JsonResponse
+    public function getComments(GetCommentsRequest $request): JsonResponse
     {
         $user = Auth::user();
 
@@ -246,27 +139,19 @@ class YoutubeController extends Controller
             ], 401);
         }
 
-        $videoId = $request->input('video_id');
+        $validated = $request->validated();
+        $videoId = $validated['video_id'];
 
         try {
             $result = $this->youtubeService->getCommentsByVideoId($user, $videoId);
 
             if ($result['success']) {
-                Log::info("Comments retrieved successfully", [
-                    'user_id' => $user->id,
-                    'video_id' => $videoId,
-                    'total_comments' => $result['total'],
-                    'requests_made' => $result['requests_made'] ?? 0
-                ]);
+                Log::info("Comments retrieved successfully", ['user_id' => $user->id, 'video_id' => $videoId, 'total_comments' => $result['total'], 'requests_made' => $result['requests_made'] ?? 0]);
             }
 
             return response()->json($result);
         } catch (\Exception $e) {
-            Log::error("Failed to fetch comments", [
-                'user_id' => $user->id,
-                'video_id' => $videoId,
-                'error' => $e->getMessage(),
-            ]);
+            Log::error("Failed to fetch comments", ['user_id' => $user->id, 'video_id' => $videoId, 'error' => $e->getMessage()]);
 
             return response()->json([
                 'success' => false,
@@ -289,19 +174,91 @@ class YoutubeController extends Controller
         ]);
     }
 
-    private function isValidYouTubeVideoId(string $videoId): bool
+    public function postModerationComment(PostModerationCommentRequest $request): JsonResponse
     {
-        return preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId);
+        $user = Auth::user();
+
+        if (!$user->google_token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Google belum terhubung. Silakan login ulang.',
+                'comment_id' => '',
+            ], 401);
+        }
+
+        $quotaCheck = $this->quotaService->canModerateComment($user);
+
+        if (!$quotaCheck['allowed']) {
+            return response()->json([
+                'success' => false,
+                'message' => $quotaCheck['message'],
+                'comment_id' => '',
+                'quota_limit_exceeded' => true,
+            ], 429);
+        }
+
+        $validated = $request->validated();
+        $commentId = $validated['data']['comment_id'];
+        $moderationStatus = $validated['data']['moderation_status'];
+        $banAuthor = $validated['data']['ban_author'] ?? false;
+        $analysisId = $validated['data']['analysis_id'];
+
+        $analysis = Analysis::where('id', $analysisId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$analysis) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Analysis tidak ditemukan atau Anda tidak memiliki akses.',
+                'comment_id' => '',
+            ], 403);
+        }
+
+        $filePath = storage_path('app/public/' . $analysis->gambling_file_path);
+
+        if (!file_exists($filePath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File tidak ditemukan.',
+                'comment_id' => '',
+            ], 404);
+        }
+
+        try {
+            $result = $this->youtubeService->postModerationCommentById($user, $commentId, $moderationStatus, $banAuthor,);
+
+            if ($result['success']) {
+                $this->quotaService->consumeCommentModeration($user);
+
+                Log::info("Moderation comment action successful", ['user_id' => $user->id, 'comment_id' => $commentId, 'moderation_status' => $moderationStatus, 'quota_remaining' => $quotaCheck['remaining'] - 1]);
+
+                $result['quota_info'] = [
+                    'limit' => $quotaCheck['limit'],
+                    'used' => $quotaCheck['used'] + 1,
+                    'remaining' => $quotaCheck['remaining'] - 1
+                ];
+            }
+
+            $this->updateJsonFileStatus($filePath, $commentId, $moderationStatus);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            Log::error("Failed to moderate comment", ['user_id' => $user->id, 'comment_id' => $commentId, 'error' => $e->getMessage(),]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memproses moderasi komentar. Silakan coba lagi.',
+                'comment_id' => $commentId,
+            ], 500);
+        }
     }
 
     private function updateJsonFileStatus($filePath, $commentId, $newStatus)
     {
         try {
             if (!file_exists($filePath)) {
-                Log::warning("JSON file not found", [
-                    'file_path' => $filePath,
-                    'comment_id' => $commentId
-                ]);
+                Log::warning("JSON file not found", ['file_path' => $filePath, 'comment_id' => $commentId]);
 
                 return false;
             }
@@ -310,10 +267,7 @@ class YoutubeController extends Controller
             $data = json_decode($jsonContent, true);
 
             if (!$data || !isset($data['chunks'])) {
-                Log::warning("Invalid JSON structure", [
-                    'file_path' => $filePath,
-                    'comment_id' => $commentId
-                ]);
+                Log::warning("Invalid JSON structure", ['file_path' => $filePath, 'comment_id' => $commentId]);
 
                 return false;
             }
@@ -335,29 +289,19 @@ class YoutubeController extends Controller
                 $result = file_put_contents($filePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
                 if ($result === false) {
-                    Log::error("Failed to write updated JSON", [
-                        'file_path' => $filePath,
-                        'comment_id' => $commentId
-                    ]);
+                    Log::error("Failed to write updated JSON", ['file_path' => $filePath, 'comment_id' => $commentId]);
 
                     return false;
                 }
 
                 return true;
             } else {
-                Log::warning("Comment not found in JSON file", [
-                    'file_path' => $filePath,
-                    'comment_id' => $commentId
-                ]);
+                Log::warning("Comment not found in JSON file", ['file_path' => $filePath, 'comment_id' => $commentId]);
 
                 return false;
             }
         } catch (\Exception $e) {
-            Log::error("Error updating JSON file", [
-                'file_path' => $filePath,
-                'comment_id' => $commentId,
-                'error' => $e->getMessage(),
-            ]);
+            Log::error("Error updating JSON file", ['file_path' => $filePath, 'comment_id' => $commentId, 'error' => $e->getMessage(),]);
 
             return false;
         }

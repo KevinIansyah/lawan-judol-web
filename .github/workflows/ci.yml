@@ -93,24 +93,24 @@ jobs:
   # ==========================
   # 3. Deploy (Only on main branch)
   # ==========================
-  deploy:
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_PRIVATE_KEY }}
-          port: 2221
-          script: |
-            cd /var/www/lawanjudol-laravel-app
-            git pull origin main
-            composer install --no-interaction --prefer-dist --optimize-autoloader
-            php artisan migrate --force
-            npm ci && npm run build
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: test
+  #   if: github.ref == 'refs/heads/main'
+  #   steps:
+  #     - name: Deploy to VPS
+  #       uses: appleboy/ssh-action@v1.2.0
+  #       with:
+  #         host: ${{ secrets.VPS_HOST }}
+  #         username: ${{ secrets.VPS_USER }}
+  #         key: ${{ secrets.VPS_PRIVATE_KEY }}
+  #         port: 2221
+  #         script: |
+  #           cd /var/www/lawanjudol-laravel-app
+  #           git pull origin main
+  #           composer install --no-interaction --prefer-dist --optimize-autoloader
+  #           php artisan migrate --force
+  #           npm ci && npm run build
+  #           php artisan config:cache
+  #           php artisan route:cache
+  #           php artisan view:cache

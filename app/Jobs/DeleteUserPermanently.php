@@ -17,17 +17,11 @@ class DeleteUserPermanently implements ShouldQueue
 
     protected int $userId;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(int $userId)
     {
         $this->userId = $userId;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         $user = User::with('analyses')->find($this->userId);
@@ -73,14 +67,11 @@ class DeleteUserPermanently implements ShouldQueue
                 'user_id' => $this->userId,
                 'error' => $e->getMessage()
             ]);
-            
+
             throw $e;
         }
     }
 
-    /**
-     * Delete user analyses and their associated files
-     */
     private function deleteUserAnalyses(User $user): array
     {
         $analyses = $user->analyses;
@@ -125,14 +116,8 @@ class DeleteUserPermanently implements ShouldQueue
         ];
     }
 
-    /**
-     * Handle a job failure.
-     */
     public function failed(\Throwable $exception): void
     {
-        Log::error("User deletion job failed", [
-            'user_id' => $this->userId,
-            'error' => $exception->getMessage(),
-        ]);
+        Log::error("User deletion job failed", ['user_id' => $this->userId, 'error' => $exception->getMessage()]);
     }
 }

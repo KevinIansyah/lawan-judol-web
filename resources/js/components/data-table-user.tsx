@@ -11,6 +11,7 @@ import { ColumnDef, VisibilityState, flexRender, getCoreRowModel, useReactTable 
 import { CheckCircle2Icon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ColumnsIcon } from 'lucide-react';
 import { useState } from 'react';
 
+import { formatDate } from '@/lib/utils';
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -57,6 +58,40 @@ export default function DataTableUser({ data, pageIndex, setPageIndex, totalPage
             },
         },
         {
+            accessorKey: 'tanggal daftar',
+            header: 'Tanggal Daftar',
+            cell: ({ row }) => {
+                return <div className="text-foreground text-left">{formatDate(row.original.created_at)}</div>;
+            },
+        },
+        {
+            accessorKey: 'hapus akun',
+            header: 'Hapus Akun',
+            cell: ({ row }) => {
+                const deleted = row.original.delete_account;
+                return (
+                    <Badge
+                        className={`flex gap-1 px-1.5 whitespace-nowrap [&_svg]:size-3 ${deleted ? 'text-[oklch(1_0_0)]' : 'text-[oklch(0.2178_0_0)]'}`}
+                        style={{
+                            backgroundColor: deleted ? 'var(--chart-1)' : 'var(--chart-4)',
+                        }}
+                    >
+                        {deleted ? (
+                            <>
+                                <CheckCircle2Icon className="text-[oklch(1_0_0)]" />
+                                Dijadwalkan untuk Dihapus
+                            </>
+                        ) : (
+                            <>
+                                <CheckCircle2Icon className="text-[oklch(0.2178_0_0)]" />
+                                Tidak Dijadwalkan
+                            </>
+                        )}
+                    </Badge>
+                );
+            },
+        },
+        {
             accessorKey: 'akses youtube',
             header: 'Akses YouTube',
             cell: ({ row }) => {
@@ -65,9 +100,7 @@ export default function DataTableUser({ data, pageIndex, setPageIndex, totalPage
                     <Badge
                         className={`flex gap-1 px-1.5 whitespace-nowrap [&_svg]:size-3 ${granted ? 'text-[oklch(0.2178_0_0)]' : 'text-[oklch(1_0_0)]'}`}
                         style={{
-                            backgroundColor: granted
-                                ? 'var(--chart-4)'
-                                : 'var(--chart-1)',
+                            backgroundColor: granted ? 'var(--chart-4)' : 'var(--chart-1)',
                         }}
                     >
                         {granted ? (

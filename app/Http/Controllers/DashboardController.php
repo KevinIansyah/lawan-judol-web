@@ -16,9 +16,8 @@ class DashboardController extends Controller
 {
     protected $quotaService;
 
-    public function __construct(
-        QuotaService $quotaService
-    ) {
+    public function __construct(QuotaService $quotaService)
+    {
         $this->quotaService = $quotaService;
     }
 

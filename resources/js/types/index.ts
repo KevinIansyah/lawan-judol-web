@@ -40,6 +40,7 @@ export interface User {
     role: 'user' | 'admin';
     youtube_permission_granted: boolean;
     email_verified_at: string | null;
+    delete_account: boolean;
     created_at: string;
     updated_at: string;
     [key: string]: unknown;
@@ -178,6 +179,7 @@ export interface Dataset {
     true_label: 'judol' | 'non_judol';
     created_at: string;
     updated_at: string;
+    user: Pick<User, 'id' | 'name'> | null;
 }
 
 export interface ApiResponseDataset {

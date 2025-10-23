@@ -11,9 +11,6 @@ use Illuminate\Support\Facades\Log;
 
 class QuotaService
 {
-    /**
-     * Cek apakah user masih punya kuota untuk analisis video
-     */
     public function canAnalyzeVideo(User $user): array
     {
         $quota = $this->getUserQuota($user);
@@ -40,9 +37,6 @@ class QuotaService
         ];
     }
 
-    /**
-     * Cek apakah user masih punya kuota untuk moderasi komentar
-     */
     public function canModerateComment(User $user): array
     {
         $quota = $this->getUserQuota($user);
@@ -69,9 +63,6 @@ class QuotaService
         ];
     }
 
-    /**
-     * Consume kuota untuk analisis video
-     */
     public function consumeVideoAnalysis(User $user, int $count = 1): bool
     {
         try {
@@ -83,29 +74,18 @@ class QuotaService
 
             DB::commit();
 
-            Log::info("Video analysis quota consumed", [
-                'user_id' => $user->id,
-                'count' => $count,
-                'total_used' => $usage->videos_analyzed_count
-            ]);
+            Log::info("Video analysis quota consumed", ['user_id' => $user->id, 'count' => $count, 'total_used' => $usage->videos_analyzed_count]);
 
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error("Failed to consume video analysis quota", [
-                'user_id' => $user->id,
-                'count' => $count,
-                'error' => $e->getMessage()
-            ]);
+            Log::error("Failed to consume video analysis quota", ['user_id' => $user->id, 'count' => $count, 'error' => $e->getMessage()]);
 
             return false;
         }
     }
 
-    /**
-     * Consume kuota untuk moderasi komentar
-     */
     public function consumeCommentModeration(User $user, int $count = 1): bool
     {
         try {
@@ -117,29 +97,18 @@ class QuotaService
 
             DB::commit();
 
-            Log::info("Comment moderation quota consumed", [
-                'user_id' => $user->id,
-                'count' => $count,
-                'total_used' => $usage->comments_moderated_count
-            ]);
+            Log::info("Comment moderation quota consumed", ['user_id' => $user->id, 'count' => $count, 'total_used' => $usage->comments_moderated_count]);
 
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error("Failed to consume comment moderation quota", [
-                'user_id' => $user->id,
-                'count' => $count,
-                'error' => $e->getMessage()
-            ]);
+            Log::error("Failed to consume comment moderation quota", ['user_id' => $user->id, 'count' => $count, 'error' => $e->getMessage()]);
 
             return false;
         }
     }
 
-    /**
-     * Get atau create user quota
-     */
     public function getUserQuota(User $user): UserQuota
     {
         return UserQuota::firstOrCreate(
@@ -151,9 +120,6 @@ class QuotaService
         );
     }
 
-    /**
-     * Track YouTube API quota usage
-     */
     public function trackYoutubeQuota(User $user, int $units): bool
     {
         try {
@@ -165,29 +131,18 @@ class QuotaService
 
             DB::commit();
 
-            Log::info("YouTube quota tracked", [
-                'user_id' => $user->id,
-                'units' => $units,
-                'total_used' => $usage->youtube_quota_used
-            ]);
+            Log::info("YouTube quota tracked", ['user_id' => $user->id,'units' => $units,'total_used' => $usage->youtube_quota_used]);
 
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error("Failed to track YouTube quota", [
-                'user_id' => $user->id,
-                'units' => $units,
-                'error' => $e->getMessage()
-            ]);
+            Log::error("Failed to track YouTube quota", ['user_id' => $user->id,'units' => $units,'error' => $e->getMessage()]);
 
             return false;
         }
     }
 
-    /**
-     * Get atau create usage untuk hari ini
-     */
     public function getTodayUsage(User $user): QuotaUsage
     {
         return QuotaUsage::firstOrCreate(
@@ -203,9 +158,6 @@ class QuotaService
         );
     }
 
-    /**
-     * Update limit untuk user tertentu (untuk admin)
-     */
     public function updateUserLimit(User $user, ?int $videoLimit = null, ?int $commentLimit = null): bool
     {
         try {
@@ -221,26 +173,16 @@ class QuotaService
 
             $quota->save();
 
-            Log::info("User quota limits updated", [
-                'user_id' => $user->id,
-                'video_limit' => $quota->daily_video_analysis_limit,
-                'comment_limit' => $quota->daily_comment_moderation_limit
-            ]);
+            Log::info("User quota limits updated", ['user_id' => $user->id, 'video_limit' => $quota->daily_video_analysis_limit, 'comment_limit' => $quota->daily_comment_moderation_limit]);
 
             return true;
         } catch (\Exception $e) {
-            Log::error("Failed to update user quota limits", [
-                'user_id' => $user->id,
-                'error' => $e->getMessage()
-            ]);
+            Log::error("Failed to update user quota limits", ['user_id' => $user->id, 'error' => $e->getMessage()]);
 
             return false;
         }
     }
 
-    /**
-     * Get informasi lengkap kuota user
-     */
     public function getQuotaInfo(User $user): array
     {
         $quota = $this->getUserQuota($user);
@@ -265,9 +207,6 @@ class QuotaService
         ];
     }
 
-    /**
-     * Reset usage untuk testing (optional)
-     */
     public function resetTodayUsage(User $user): bool
     {
         try {
@@ -275,34 +214,23 @@ class QuotaService
                 ->where('date', Carbon::today())
                 ->delete();
 
-            Log::info("Today's quota usage reset", [
-                'user_id' => $user->id
-            ]);
+            Log::info("Today's quota usage reset", ['user_id' => $user->id]);
 
             return true;
         } catch (\Exception $e) {
-            Log::error("Failed to reset today's quota usage", [
-                'user_id' => $user->id,
-                'error' => $e->getMessage()
-            ]);
+            Log::error("Failed to reset today's quota usage", ['user_id' => $user->id, 'error' => $e->getMessage()]);
 
             return false;
         }
     }
 
-    /**
-     * Cleanup old usage data (untuk dijadwalkan via cron)
-     */
     public function cleanupOldUsage(int $daysToKeep = 30): int
     {
         $cutoffDate = Carbon::today()->subDays($daysToKeep);
 
         $deleted = QuotaUsage::where('date', '<', $cutoffDate)->delete();
 
-        Log::info("Old quota usage data cleaned up", [
-            'days_kept' => $daysToKeep,
-            'records_deleted' => $deleted
-        ]);
+        Log::info("Old quota usage data cleaned up", ['days_kept' => $daysToKeep, 'records_deleted' => $deleted]);
 
         return $deleted;
     }

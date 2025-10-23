@@ -176,7 +176,7 @@ export const DialogAddDataset = ({ selectedCount, analysisId, trueLabel, getSele
                             </div>
                             <div className="space-y-2 text-center">
                                 <p className="font-medium">{`${selectedCount} komentar dipilih`}</p>
-                                <p className="text-muted-foreground max-w-sm text-sm">Pastikan komentar yang Anda pilih sudah benar sebelum melanjutkan.</p>
+                                <p className="text-muted-foreground max-w-sm text-sm">Pastikan komentar yang Anda pilih benar-benar salah diklasifikasikan sebelum melanjutkan.</p>
                             </div>
                         </div>
                     )}

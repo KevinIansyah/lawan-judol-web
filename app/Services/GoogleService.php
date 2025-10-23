@@ -29,11 +29,7 @@ class GoogleService
     if ($user) {
       $user->update($data);
 
-      Log::info("User updated from Google OAuth", [
-        'user_id' => $user->id,
-        'google_id' => $googleUser->id,
-        'has_refresh_token' => !empty($googleUser->refreshToken)
-      ]);
+      Log::info("User updated from Google OAuth", ['user_id' => $user->id, 'google_id' => $googleUser->id, 'has_refresh_token' => !empty($googleUser->refreshToken)]);
     } else {
       $user = User::create(array_merge($data, [
         'name' => $googleUser->name,
@@ -41,11 +37,7 @@ class GoogleService
         'role' => 'user',
       ]));
 
-      Log::info("New user created from Google OAuth", [
-        'user_id' => $user->id,
-        'google_id' => $googleUser->id,
-        'email' => $googleUser->email
-      ]);
+      Log::info("New user created from Google OAuth", ['user_id' => $user->id, 'google_id' => $googleUser->id, 'email' => $googleUser->email]);
     }
 
     return $user;
@@ -71,9 +63,7 @@ class GoogleService
           'google_token' => $googleToken,
         ]);
 
-        Log::info("Google token refreshed successfully", [
-          'user_id' => $user->id
-        ]);
+        Log::info("Google token refreshed successfully", ['user_id' => $user->id]);
 
         return [
           'success' => true,
@@ -81,11 +71,7 @@ class GoogleService
         ];
       }
 
-      Log::error("Google token refresh failed", [
-        'user_id' => $user->id,
-        'status' => $response->status(),
-        'error' => $response->json()['error'] ?? 'Unknown error'
-      ]);
+      Log::error("Google token refresh failed", ['user_id' => $user->id, 'status' => $response->status(), 'error' => $response->json()['error'] ?? 'Unknown error']);
 
       return [
         'success' => false,
@@ -93,10 +79,7 @@ class GoogleService
         'response' => $response->json(),
       ];
     } catch (\Exception $e) {
-      Log::error("Exception during Google token refresh", [
-        'user_id' => $user->id,
-        'error' => $e->getMessage()
-      ]);
+      Log::error("Exception during Google token refresh", ['user_id' => $user->id, 'error' => $e->getMessage()]);
 
       return [
         'success' => false,

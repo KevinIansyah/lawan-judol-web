@@ -69,6 +69,17 @@ export default function DataTableDataset({ data, pageIndex, setPageIndex, totalP
             enableHiding: false,
         },
         {
+            accessorKey: 'pengguna',
+            header: 'Pengguna',
+            cell: ({ row }) => {
+                return (
+                    <div className="text-foreground text-left">
+                        {row.original.user?.id} | {row.original.user?.name}
+                    </div>
+                );
+            },
+        },
+        {
             accessorKey: 'tanggal ditambahkan',
             header: 'Tanggal Ditambahkan',
             cell: ({ row }) => {
@@ -78,23 +89,23 @@ export default function DataTableDataset({ data, pageIndex, setPageIndex, totalP
         {
             accessorKey: 'label',
             header: 'Label',
-            cell: ({ row }) => (
-                <Badge
-                    className={`flex gap-1 px-1.5 whitespace-nowrap [&_svg]:size-3 ${['non_judol'].includes(row.original.true_label) ? 'text-[oklch(0.2178_0_0)]' : 'text-[oklch(1_0_0)]'}`}
-                    style={{
-                        backgroundColor: row.original.true_label === 'judol' ? 'var(--chart-1)' : row.original.true_label === 'non_judol' ? 'var(--chart-4)' : undefined,
-                    }}
-                >
-                    {row.original.true_label === 'judol' && <CheckCircle2Icon className="text-[oklch(1_0_0)]" />}
-                    {row.original.true_label === 'non_judol' && <CheckCircle2Icon className="text-[oklch(0.2178_0_0)]" />}
-                    {
-                        {
-                            judol: 'Judi Online',
-                            non_judol: 'Bukan Judi',
-                        }[row.original.true_label]
-                    }
-                </Badge>
-            ),
+            cell: ({ row }) => {
+                const isNonJudol = row.original.true_label === 'non_judol';
+                const isJudol = row.original.true_label === 'judol';
+
+                return (
+                    <Badge
+                        className={`flex gap-1 px-1.5 whitespace-nowrap [&_svg]:size-3 ${isNonJudol ? 'text-[oklch(0.2178_0_0)]' : 'text-[oklch(1_0_0)]'}`}
+                        style={{
+                            backgroundColor: isJudol ? 'var(--chart-1)' : isNonJudol ? 'var(--chart-4)' : undefined,
+                        }}
+                    >
+                        {isJudol && <CheckCircle2Icon className="text-[oklch(1_0_0)]" />}
+                        {isNonJudol && <CheckCircle2Icon className="text-[oklch(0.2178_0_0)]" />}
+                        {isJudol ? 'Judi Online' : isNonJudol ? 'Bukan Judi' : row.original.true_label}
+                    </Badge>
+                );
+            },
         },
     ];
 

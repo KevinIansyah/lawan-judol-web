@@ -20,7 +20,7 @@ class DatasetController extends Controller
 
         $search = $request->get('search');
 
-        $query = Dataset::query();
+        $query = Dataset::with(['user:id,name']);
 
         if ($search) {
             $query->where(function ($q) use ($search) {

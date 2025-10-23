@@ -27,9 +27,7 @@ class TokenHandler
     }
 
     if (empty($user->google_refresh_token)) {
-      Log::error("No refresh token available", [
-        'user_id' => $user->id
-      ]);
+      Log::error("No refresh token available", ['user_id' => $user->id]);
 
       return $this->buildResponse(false, null, 'Refresh token tidak tersedia, silakan login ulang.');
     }
@@ -37,29 +35,23 @@ class TokenHandler
     $refreshResult = $this->googleService->refreshGoogleToken($user->google_refresh_token, $user);
 
     if (!$refreshResult['success']) {
-      Log::error("Token refresh failed", [
-        'user_id' => $user->id
-      ]);
+      Log::error("Token refresh failed", ['user_id' => $user->id]);
 
       return $this->buildResponse(false, null, 'Token sudah tidak valid, silakan login ulang.');
     }
 
     $user->google_token = $refreshResult['google_token'];
+    $user->save();
 
     $retryResponse = $retryCallback($user->google_token);
 
     if (!$retryResponse->successful()) {
-      Log::error("Request failed after token refresh", [
-        'user_id' => $user->id,
-        'status' => $retryResponse->status()
-      ]);
+      Log::error("Request failed after token refresh", ['user_id' => $user->id, 'status' => $retryResponse->status()]);
 
       return $this->buildResponse(false, null, 'Gagal mengambil data setelah refresh token, silahkan login ulang.');
     }
 
-    Log::info("Token refreshed and request succeeded", [
-      'user_id' => $user->id
-    ]);
+    Log::info("Token refreshed and request succeeded", ['user_id' => $user->id]);
 
     return $this->buildResponse(true, $retryResponse, 'Request berhasil setelah refresh token.');
   }
