@@ -33,7 +33,7 @@ class GetVideoRequest extends FormRequest
         throw new HttpResponseException(
             response()->json([
                 'success' => false,
-                'message' => 'ID video tidak valid. Pastikan Anda memasukkan ID video YouTube yang benar',
+                'message' => 'ID video tidak valid. Pastikan Anda memasukkan ID video YouTube yang benar.',
                 'errors' => $validator->errors(),
                 'video' => null,
                 'total' => 0,

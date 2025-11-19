@@ -1,4 +1,6 @@
+// import Echo from 'laravel-echo';
 import { LucideIcon } from 'lucide-react';
+// import Pusher from 'pusher-js';
 
 export interface Auth {
     user: User;
@@ -244,3 +246,10 @@ export interface DashboardData {
         resets_at: string;
     };
 }
+
+// declare global {
+//     interface Window {
+//         Echo: Echo<'reverb'>;
+//         Pusher: typeof Pusher;
+//     }
+// }

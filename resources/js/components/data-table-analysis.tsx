@@ -33,7 +33,10 @@ interface DataTableProps {
 
 export default function DataTableAnalysis({ data, pageIndex, setPageIndex, totalPages, totalItems, perPage, initialFilters = {} }: DataTableProps) {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+    // const [data, setData] = useState<Analysis[]>(initialData);
     const { url } = usePage();
+    // const page = usePage<SharedData>();
+    // const { auth } = page.props;
     const { searchValue, setSearchValue, getSearchFromUrl } = useUrlSearch(initialFilters.search);
     const { debouncedSearch, goToPage, changePageSize, canPreviousPage, canNextPage } = useTablePagination({
         pageIndex,
@@ -43,15 +46,59 @@ export default function DataTableAnalysis({ data, pageIndex, setPageIndex, total
         onlyFields: ['analyses'],
     });
 
+    // useEffect(() => {
+    //     setData(initialData);
+    // }, [initialData]);
+
+    // useEffect(() => {
+    //     console.log('🧩 Auth user:', auth.user);
+
+    //     if (!auth.user?.id) {
+    //         console.warn('⚠️ No authenticated user');
+    //         return;
+    //     }
+
+    //     const channelName = `App.Models.User.${auth.user.id}`;
+    //     console.log('📡 Subscribing to channel:', channelName);
+
+    //     const channel = window.Echo?.private(channelName);
+
+    //     channel
+    //         ?.listen('AnalysisStatusUpdated', (event: { analysis: Analysis }) => {
+    //             console.log('✅ Real-time update received:', event.analysis);
+
+    //             setData((prevData) => {
+    //                 const index = prevData.findIndex((item) => item.id === event.analysis.id);
+
+    //                 if (index === -1) {
+    //                     console.log('ℹ️ Analysis not found in current page');
+    //                     return prevData;
+    //                 }
+
+    //                 console.log('🔄 Updating item at index:', index);
+
+    //                 const updatedData = [...prevData];
+    //                 updatedData[index] = { ...updatedData[index], ...event.analysis };
+
+    //                 return updatedData;
+    //             });
+    //         })
+    //         .error((error: any) => {
+    //             console.error('❌ Channel error:', error);
+    //         });
+
+    //     return () => {
+    //         console.log('🔌 Leaving channel:', channelName);
+    //         window.Echo?.leave(channelName);
+    //     };
+    // }, [auth.user?.id]);
+
     const columns: ColumnDef<Analysis>[] = [
         {
             accessorKey: 'title',
             header: 'Judul',
-            // cell: ({ row }) => {
-            //     return <TableCellViewer item={row.original} />;
-            // },
             cell: ({ row }) => {
-                return <div className="text-foreground w-[600px] text-left leading-snug break-words whitespace-normal">{row.original.video?.title || '-'}</div>;
+                return <div className="text-foreground w-[500px] text-left leading-snug break-words whitespace-normal">{row.original.video?.title || '-'}</div>;
             },
             enableHiding: false,
         },
@@ -142,7 +189,7 @@ export default function DataTableAnalysis({ data, pageIndex, setPageIndex, total
     };
 
     const table = useReactTable({
-        data,
+        data, // ← Menggunakan state data yang bisa diupdate
         columns,
         state: {
             columnVisibility,

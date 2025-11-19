@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+// use App\Events\AnalysisStatusUpdated;
 use App\Models\Analysis;
 use App\Notifications\AnalysisNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -25,6 +26,8 @@ class CommentInferenceJob implements ShouldQueue
         try {
             $this->analysis->status = 'on_process';
             $this->analysis->save();
+
+            // event(new AnalysisStatusUpdated($this->analysis));
 
             Log::info("Comment inference started", ['analysis_id' => $this->analysis->id]);
 
@@ -80,6 +83,10 @@ class CommentInferenceJob implements ShouldQueue
             $this->analysis->nongambling_file_path = $nonJudolPath;
             $this->analysis->keyword_file_path = $keywordPath;
             $this->analysis->status = 'success';
+            $this->analysis->save();
+
+            // event(new AnalysisStatusUpdated($this->analysis));
+
             $this->sendNotification('success');
 
             if (file_exists($filePath)) {
@@ -90,12 +97,13 @@ class CommentInferenceJob implements ShouldQueue
         } catch (\Throwable $e) {
             $this->analysis->status = 'failed';
             $this->analysis->save();
+
+            // event(new AnalysisStatusUpdated($this->analysis));
+
             $this->sendNotification('failed');
 
             Log::error("Comment inference failed", ['analysis_id' => $this->analysis->id, 'error' => $e->getMessage(), 'duration_seconds' => now()->diffInSeconds($startTime)]);
         }
-
-        $this->analysis->save();
     }
 
     private function sendNotification(string $status)

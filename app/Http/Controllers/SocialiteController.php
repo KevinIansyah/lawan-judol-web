@@ -69,9 +69,15 @@ class SocialiteController extends Controller
 
     private function handleLoginCallback($googleUser)
     {
-        $user = $this->googleService->findOrCreateUser($googleUser);
-        Auth::login($user);
-        return redirect('/dashboard');
+        $result = $this->googleService->findOrCreateUser($googleUser);
+
+        Auth::login($result['user']);
+
+        $message = $result['is_new']
+            ? 'Registrasi berhasil. Akun Anda telah aktif.'
+            : 'Login berhasil. Selamat datang kembali!';
+
+        return redirect('/dashboard')->with('success', $message);
     }
 
     private function handleGrantCallback($googleUser)

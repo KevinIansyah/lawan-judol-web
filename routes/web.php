@@ -11,8 +11,11 @@ use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\YourVideoController;
 use App\Http\Controllers\YoutubeController;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+// Broadcast::routes(['middleware' => ['web', 'auth']]);
 
 Route::middleware(['redirect_if_deletion_scheduled'])->group(function () {
     Route::get('/', fn() => Inertia::render('home'))->name('home');

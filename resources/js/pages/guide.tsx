@@ -21,9 +21,46 @@ export default function Guides() {
 
                 <Card>
                     <CardContent className="space-y-6">
-                        <Accordion type="single" collapsible className="w-full" defaultValue="item-1">
+                        <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
+                            <AccordionItem value="item-0">
+                                <AccordionTrigger className="border-t text-left text-sm">Perbedaan antara analisis video Anda dan analisis video publik</AccordionTrigger>
+                                <AccordionContent className="flex flex-col gap-4 text-sm text-balance">
+                                    <p>
+                                        Di dalam sistem <strong>LawanJudol</strong>, terdapat dua jenis analisis video yang dapat Anda lakukan, yaitu <strong>analisis video Anda</strong> dan
+                                        <strong> analisis video publik</strong>. Berikut perbedaannya:
+                                    </p>
+
+                                    <div className="space-y-2">
+                                        <p><strong>Video Anda:</strong></p>
+                                        <ol className="ml-5 list-outside list-decimal space-y-2">
+                                            <li>Video berasal dari channel YouTube milik pengguna yang telah memberikan izin akses.</li>
+                                            <li>
+                                                Daftar video akan muncul secara otomatis ketika menekan tombol <strong>"Tambah Analisis"</strong>.
+                                            </li>
+                                            <li>
+                                                Pengguna dapat melakukan <strong>moderasi komentar</strong> secara langsung pada video miliknya.
+                                            </li>
+                                        </ol>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <p><strong>Video Publik:</strong></p>
+                                        <ol className="ml-5 list-outside list-decimal space-y-2">
+                                            <li>Video berasal dari video publik di YouTube (bukan dari channel pengguna).</li>
+                                            <li>
+                                                Pengguna perlu <strong>memasukkan ID video</strong> YouTube secara manual untuk melakukan analisis.
+                                            </li>
+                                            <li>
+                                                Fitur moderasi komentar tidak tersedia secara langsung, namun pengguna dapat
+                                                <strong> memanfaatkan hasil analisis kata kunci</strong> untuk ditambahkan ke pengaturan YouTube di bagian
+                                                <strong> "Kata yang Diblokir"</strong> guna mencegah komentar serupa muncul di masa mendatang.
+                                            </li>
+                                        </ol>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
                             <AccordionItem value="item-1">
-                                <AccordionTrigger className="border-t text-left text-sm">Cara menggunakan fitur analisis video publik</AccordionTrigger>
+                                <AccordionTrigger className="text-left text-sm">Cara menggunakan fitur analisis video publik</AccordionTrigger>
                                 <AccordionContent className="flex flex-col gap-4 text-balance">
                                     <ol className="ml-4 list-outside list-decimal space-y-2 text-sm">
                                         <li>

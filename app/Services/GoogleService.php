@@ -26,6 +26,8 @@ class GoogleService
       // $data['youtube_permission_granted'] = true;
     }
 
+    $isNewUser = false;
+
     if ($user) {
       $user->update($data);
 
@@ -37,10 +39,15 @@ class GoogleService
         'role' => 'user',
       ]));
 
+      $isNewUser = true;
+
       Log::info("New user created from Google OAuth", ['user_id' => $user->id, 'google_id' => $googleUser->id, 'email' => $googleUser->email]);
     }
 
-    return $user;
+    return [
+      'user' => $user,
+      'is_new' => $isNewUser
+    ];
   }
 
   public function refreshGoogleToken(string $refreshToken, User $user)

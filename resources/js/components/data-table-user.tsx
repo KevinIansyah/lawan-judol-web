@@ -11,11 +11,11 @@ import { ColumnDef, VisibilityState, flexRender, getCoreRowModel, useReactTable 
 import { CheckCircle2Icon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ColumnsIcon } from 'lucide-react';
 import { useState } from 'react';
 
+import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/utils';
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { Badge } from './ui/badge';
 dayjs.extend(relativeTime);
 dayjs.locale('id');
 
